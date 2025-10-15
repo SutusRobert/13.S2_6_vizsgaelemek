@@ -1,0 +1,83 @@
++-------------------+               +---------------------+
+|    Household      |1 ----------- N|        User         |
+|-------------------|               |---------------------|
+| HouseholdID (PK)  |               | UserID (PK)         |
+| HouseholdName     |               | Email               |
++-------------------+               | PasswordHash        |
+                                    | Name                |
+                                    | Role                |
+                                    | HouseholdID (FK)    |
+                                    +---------------------+
+
+       |1
+       |                            +---------------------+
+       |                            |    InventoryItem     |
+       |                            |---------------------|
+       |                            | InventoryItemID (PK) |
+       |                            | ProductID (FK)       |
+       |                            | Quantity             |
+       |                            | ExpiryDate           |
+       |                            | Location             |
+       |                            | HouseholdID (FK)     |
+       |                            | AddedDate            |
+       |                            +---------------------+
+       |N
++-------------------+          N
+|     ShoppingList   |1---------------------------+
+|-------------------|                            |
+| ShoppingListID(PK) |                            |
+| HouseholdID (FK)   |                            |
+| CreatedDate        |                            |
+| Name               |                            |
++-------------------+                            |
+                                                 |1
+                                                 |
+                                        +---------------------+
+                                        |  ShoppingListItem   |
+                                        |---------------------|
+                                        | ShoppingListItemID (PK) |
+                                        | ShoppingListID (FK)     |
+                                        | ProductID (FK)          |
+                                        | Quantity                |
+                                        | IsChecked               |
+                                        +---------------------+
+
++-----------------------+           +----------------------+
+|   ProductCategory      |1 ------- N|       Product        |
+|-----------------------|           |----------------------|
+| CategoryID (PK)       |           | ProductID (PK)       |
+| CategoryName          |           | Name                 |
++-----------------------+           | CategoryID (FK)      |
+                                    | Barcode              |
+                                    +----------------------+
+                                           |1
+                                           |N
+                                    +---------------------+
+                                    |   RecipeIngredient  |
+                                    |---------------------|
+                                    | RecipeIngredientID(PK)|
+                                    | RecipeID (FK)        |
+                                    | ProductID (FK)       |
+                                    | Quantity             |
+                                    | Unit                 |
+                                    +---------------------+
+
++---------------------+1                 +----------------------+
+|       Recipe        |-------------------|   Notification       |
+|---------------------|                   |----------------------|
+| RecipeID (PK)       |                   | NotificationID (PK)   |
+| Title               |                   | UserID (FK)           |
+| SourceURL           |                   | Message               |
+| Calories            |                   | Date                  |
+| DietaryInfo         |                   | IsRead                |
++---------------------+                   +----------------------+
+
+User 1 --- N Notification
+Recipe 1 --- N RecipeIngredient
+ProductCategory 1 --- N Product
+Product 1 --- N InventoryItem
+Household 1 --- N User
+Household 1 --- N InventoryItem
+Household 1 --- N ShoppingList
+ShoppingList 1 --- N ShoppingListItem
+	
