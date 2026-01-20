@@ -1,0 +1,316 @@
+/* GLOBAL ------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: radial-gradient(circle at top right, #6366f1 0%, #0f172a 70%, #020617 100%);
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+/* NAVBAR -------------------------------------------------------- */
+
+.navbar {
+    width: 100%;
+    padding: 16px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(20px);
+    background: rgba(15, 23, 42, 0.45);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.nav-logo {
+    width: 46px;
+    height: 46px;
+}
+
+.nav-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.nav-links a {
+    text-decoration: none;
+    margin-left: 16px;
+    color: #cad3e0;
+    font-size: 15px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.nav-links a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 12px rgba(255,255,255,0.25);
+}
+
+.nav-links .danger {
+    background: rgba(239, 68, 68, 0.85);
+    color: #fff;
+}
+
+.nav-links .danger:hover {
+    background: rgba(220, 38, 38, 1);
+}
+
+/* MAIN WRAPPER -------------------------------------------------- */
+
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* CARD ---------------------------------------------------------- */
+
+.card {
+    width: 100%;
+    max-width: 900px;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(25px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 0 30px rgba(0,0,0,0.4);
+}
+
+.card-narrow {
+    max-width: 420px;
+}
+
+/* HEADERS ------------------------------------------------------- */
+
+.card h1,
+.card h2,
+.card h3 {
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+/* TEXT ---------------------------------------------------------- */
+
+.card p {
+    color: #cbd5e1;
+}
+
+/* FORM INPUTS --------------------------------------------------- */
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 13px 16px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    color: #fff;
+    margin-top: 6px;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 16px rgba(96,165,250,0.6);
+}
+
+/* BUTTONS ------------------------------------------------------- */
+
+button,
+.btn {
+    display: inline-block;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #6366f1, #2563eb);
+    color: #fff;
+    transition: 0.2s;
+}
+
+button:hover,
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(96,165,250,0.7);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.45);
+}
+
+/* LIST ---------------------------------------------------------- */
+
+.list {
+    list-style: none;
+    margin-top: 10px;
+}
+
+.list li {
+    background: rgba(255,255,255,0.12);
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* BADGES -------------------------------------------------------- */
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.25);
+}
+
+.badge-primary {
+    background: linear-gradient(135deg,#60a5fa,#2563eb);
+    color: #fff;
+}
+
+/* ERRORS & SUCCESS ---------------------------------------------- */
+
+.error {
+    background: rgba(239,68,68,0.3);
+    border: 1px solid rgba(239,68,68,0.6);
+    color: #fecaca;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.success {
+    background: rgba(34,197,94,0.3);
+    border: 1px solid rgba(34,197,94,0.6);
+    color: #bbf7d0;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+/* UTILITY -------------------------------------------------------- */
+
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mt-5 { margin-top: 20px; }
+.flex { display: flex; gap: 12px; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+/* ===== MESSAGES / ÜZENETFAL ===== */
+
+.message-wall{
+    width: 100%;
+    max-width: 900px;      /* nagy, középen */
+    margin: 0 auto;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.55);
+}
+
+.message-empty{
+    padding: 18px;
+    opacity: .75;
+    text-align: center;
+}
+
+.message-item{
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.06);
+    background: rgba(255,255,255,.9);
+    margin-bottom: 10px;
+}
+
+.message-top{
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+}
+
+.message-title{
+    font-weight: 700;
+}
+
+.message-time{
+    font-size: 12px;
+    opacity: .65;
+    white-space: nowrap;
+}
+
+.message-text{
+    margin-top: 6px;
+    font-size: 14px;
+    opacity: .9;
+    line-height: 1.35;
+}
+
+/* típus színezés (finom, nem agresszív) */
+.message-warning{
+    border-left: 6px solid rgba(255, 165, 0, .75);
+}
+.message-info{
+    border-left: 6px solid rgba(0, 120, 255, .55);
+}
+.message-ok{
+    border-left: 6px solid rgba(0, 170, 90, .55);
+}
+
+.message-actions{
+    margin-top: 10px;
+    display:flex;
+    justify-content:flex-end;
+}
+
+.message-btn{
+    border: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(0,0,0,.08);
+}
+
+.message-btn:hover{
+    background: rgba(0,0,0,.12);
+}
+
+.message-unread{
+    box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+
+.message-read{
+    opacity: .75;
+}
