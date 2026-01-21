@@ -1,148 +1,149 @@
 <?php
 session_start();
 require 'config.php';
-require 'api/spoonacular.php';   // TheMealDB wrapper
-require 'api/translate.php';
+require 'api/spoonacular.php';   // TheMealDB wrapper, csak a név régi
+require 'api/translate.php';     // Ebben van: translateToHungarian + translateLongTextToHungarian
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$userId = (int)$_SESSION['user_id'];
-
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-
-/* ---------- household kiválasztás (ugyanaz a logika mint máshol) ---------- */
-$stmt = $pdo->prepare("
-    SELECT id AS household_id, name FROM households WHERE owner_id = ?
-    UNION
-    SELECT h.id AS household_id, h.name
-    FROM household_members hm
-    JOIN households h ON h.id = hm.household_id
-    WHERE hm.member_id = ?
-    ORDER BY household_id ASC
-");
-$stmt->execute([$userId, $userId]);
-$households = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-if (!$households) {
-    header("Location: households.php");
-    exit;
-}
-
-$map = [];
-foreach ($households as $hh) $map[(int)$hh['household_id']] = $hh['name'];
-
-$householdId = isset($_GET['hid']) ? (int)$_GET['hid'] : (int)$households[0]['household_id'];
-if (!isset($map[$householdId])) $householdId = (int)$households[0]['household_id'];
-$householdName = $map[$householdId];
-
-/* ---------- inventory névlista (egyszerű “van/nincs” checkhez) ---------- */
-$stmt = $pdo->prepare("
-    SELECT LOWER(TRIM(name)) AS n
-    FROM inventory_items
-    WHERE household_id = ?
-    GROUP BY LOWER(TRIM(name))
-");
-$stmt->execute([$householdId]);
-$invNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-function invContains(array $invNames, string $needle): bool {
-    $needle = mb_strtolower(trim($needle), 'UTF-8');
-    if ($needle === '') return false;
-    foreach ($invNames as $n) {
-        if (mb_stripos($n, $needle, 0, 'UTF-8') !== false || mb_stripos($needle, $n, 0, 'UTF-8') !== false) {
-            return true;
-        }
-    }
-    return false;
-}
-function guessLocationForItem(string $name): string {
-    $n = mb_strtolower(trim($name), 'UTF-8');
-
-    $freezer = ['fagyaszt', 'mirelit', 'jég', 'jeg', 'fagyasztott', 'pizza', 'nugget', 'spenót', 'spenot', 'borsó', 'borso'];
-    $fridge  = ['tej', 'joghurt', 'sajt', 'tejszín', 'tejszin', 'vaj', 'tojás', 'tojas', 'csirke', 'pulyka', 'marha', 'sertés', 'sertes', 'hal', 'sonka', 'kolbász', 'kolbasz'];
-
-    foreach ($freezer as $k) if (mb_stripos($n, $k, 0, 'UTF-8') !== false) return 'freezer';
-    foreach ($fridge as $k)  if (mb_stripos($n, $k, 0, 'UTF-8') !== false) return 'fridge';
-
-    return 'pantry';
-}
-
-
-/* ---------- recept id ---------- */
 $id = intval($_GET['id'] ?? 0);
-if ($id <= 0) die("Érvénytelen recept ID.");
+if ($id <= 0) {
+    die("Érvénytelen recept ID.");
+}
 
-/* ---------- API recept ---------- */
+// 1) Recept lekérése az API-ból (TheMealDB)
 $meal = fetchRecipeDetails($id);
-if (!$meal) die("Nem sikerült lekérni a recept részleteit.");
 
-$titleEn        = $meal['strMeal'] ?? '';
-$image          = $meal['strMealThumb'] ?? '';
+if (!$meal) {
+    die("Nem sikerült lekérni a recept részleteit.");
+}
+
+// Angol mezők TheMealDB-ből
+$titleEn        = $meal['strMeal']         ?? '';
+$image          = $meal['strMealThumb']    ?? '';
 $instructionsEn = $meal['strInstructions'] ?? '';
+$category       = $meal['strCategory']     ?? '';
+$area           = $meal['strArea']         ?? '';
+$tags           = $meal['strTags']         ?? '';
 
-/* ---------- fordítás cache ---------- */
-$stmt = $pdo->prepare("SELECT hu_title, hu_instructions FROM api_recipe_translations WHERE meal_id = ? LIMIT 1");
+// 2) Magyar cím + magyar elkészítés CACHE-ELÉSE
+$stmt = $pdo->prepare("
+    SELECT hu_title, hu_instructions
+    FROM api_recipe_translations
+    WHERE meal_id = ?
+    LIMIT 1
+");
 $stmt->execute([$id]);
 $translation = $stmt->fetch();
 
 if ($translation) {
-    $huTitle = $translation['hu_title'];
+    // Van már fordítás -> nem fordítunk újra
+    $huTitle        = $translation['hu_title'];
     $huInstructions = $translation['hu_instructions'];
 } else {
+    // Nincs még fordítás -> most készítjük és elmentjük
+
+    // Rövid szöveg: egyszerű fordítás
     $huTitle = translateToHungarian($titleEn);
+
+    // Hosszú szöveg: darabolós fordító (500 karakternél hosszabb szövegre)
     $huInstructions = translateLongTextToHungarian($instructionsEn);
 
-    $stmt = $pdo->prepare("INSERT INTO api_recipe_translations (meal_id, hu_title, hu_instructions) VALUES (?, ?, ?)");
+    // Mentés az adatbázisba, hogy legközelebb villámgyors legyen
+    $stmt = $pdo->prepare("
+        INSERT INTO api_recipe_translations (meal_id, hu_title, hu_instructions)
+        VALUES (?, ?, ?)
+    ");
     $stmt->execute([$id, $huTitle, $huInstructions]);
 }
 
-/* ---------- hozzávalók összeszedése + fordítás ---------- */
-$ingredientsHu = [];
+// 3) Hozzávalók összerakása: strIngredient1..20 + strMeasure1..20
+$ingredients = [];
 for ($i = 1; $i <= 20; $i++) {
     $ingName = trim($meal["strIngredient{$i}"] ?? '');
     $measure = trim($meal["strMeasure{$i}"] ?? '');
-    if ($ingName === '') continue;
 
-    $huName = translateToHungarian($ingName);
+    if ($ingName !== '') {
+        $ingredients[] = [
+            'name_en'  => $ingName,
+            'measure'  => $measure,
+        ];
+    }
+}
 
-    $hasIt = invContains($invNames, $huName) || invContains($invNames, $ingName);
-
+// 4) Hozzávalók magyar fordítása (rövid szöveg, maradhat direkt hívás)
+$ingredientsHu = [];
+foreach ($ingredients as $ing) {
+    $huName = translateToHungarian($ing['name_en']);
     $ingredientsHu[] = [
         'name_hu' => $huName,
-        'name_en' => $ingName,
-        'measure' => $measure,
-        'has' => $hasIt
+        'name_en' => $ing['name_en'],
+        'measure' => $ing['measure'],
     ];
 }
+foreach ($ingredients as $ing):
+    $name = strtolower($ing['ingredient_name']);
+    $need = (float)$ing['quantity'];
+    $have = $inventory[$name] ?? 0;
+
+    $ok = $have >= $need;
+?>
+<div class="<?= $ok ? 'ingredient-ok' : 'ingredient-missing' ?>">
+    <?= htmlspecialchars($ing['ingredient_name']) ?>
+    (<?= $need ?> <?= $ing['unit'] ?>)
+    <?php if ($ok): ?>
+        <span class="small">✔ van (<?= $have ?>)</span>
+    <?php else: ?>
+        <span class="small">✖ hiányzik (<?= $need - $have ?>)</span>
+    <?php endif; ?>
+</div>
+<?php endforeach; ?>
+
 ?>
 <!DOCTYPE html>
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <title><?= h($huTitle) ?> – MagicFridge</title>
+    <title><?= htmlspecialchars($huTitle) ?> – MagicFridge</title>
     <link rel="stylesheet" href="assets/style.css">
     <style>
-        .recipe-img-big{ width:100%; border-radius:14px; margin-bottom:16px; box-shadow:0 6px 20px rgba(0,0,0,.25); }
-        .ing-row{
-            display:flex; justify-content:space-between; gap:12px; align-items:center;
-            padding:10px 12px; border-radius:12px; margin-bottom:8px;
-            border:1px solid rgba(255,255,255,.14);
-            background: rgba(255,255,255,.06);
+        .recipe-img-big {
+            width: 100%;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
-        .ing-ok{ border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.12); }
-        .ing-miss{ border-color: rgba(239,68,68,.45); background: rgba(239,68,68,.12); }
-        .ing-left{ display:flex; flex-direction:column; gap:4px; min-width:0; }
-        .ing-left small{ opacity:.75; }
-        .badge{
-            padding:4px 10px; border-radius:999px; font-size:12px; font-weight:800;
-            border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.10);
+        .ingredient {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
         }
-        .badge-ok{ border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.18); }
-        .badge-bad{ border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.18); }
-        .topbar{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
+        .ingredient-names {
+            flex: 1;
+        }
+        .ingredient-names small {
+            display: block;
+            opacity: 0.7;
+            font-size: 12px;
+        }
+        .ingredient-measure {
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        .meta {
+            font-size: 14px;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -150,87 +151,57 @@ for ($i = 1; $i <= 20; $i++) {
 <div class="navbar">
     <div class="nav-left">
         <img src="assets/Logo.png" class="nav-logo" alt="Logo">
-        <span class="nav-title"><a href="dashboard.php" class="brand-back">MagicFridge</a></span>
+        <span class="nav-title">MagicFridge</span>
     </div>
     <div class="nav-links">
-        <a href="recipes.php?hid=<?= (int)$householdId ?>">Vissza a receptekhez</a>
-        <a href="shopping_list.php?hid=<?= (int)$householdId ?>">Bevásárlólista</a>
+        <a href="recipes.php">Vissza a receptekhez</a>
         <a href="logout.php" class="danger">Kijelentkezés</a>
     </div>
 </div>
 
 <div class="main-wrapper">
-    <div class="card" style="max-width: 900px; width:100%;">
+    <div class="card">
 
-        <div class="topbar">
-            <div>
-                <h1 style="margin-bottom:6px;"><?= h($huTitle) ?></h1>
-                <div class="small">Háztartás: <strong><?= h($householdName) ?></strong></div>
-            </div>
+        <h1><?= htmlspecialchars($huTitle) ?></h1>
 
-            <form method="get" style="margin:0; display:flex; gap:10px; align-items:center;">
-                <input type="hidden" name="id" value="<?= (int)$id ?>">
-                <label class="small" style="opacity:.8;">Háztartás</label>
-                <select name="hid" onchange="this.form.submit()">
-                    <?php foreach ($households as $hh): $hidOpt = (int)$hh['household_id']; ?>
-                        <option value="<?= $hidOpt ?>" <?= $hidOpt === (int)$householdId ? 'selected' : '' ?>>
-                            <?= h($hh['name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </form>
-        </div>
+        <p class="meta">
+            <?php if ($category): ?>
+                Kategória: <strong><?= htmlspecialchars($category) ?></strong>
+            <?php endif; ?>
+            <?php if ($area): ?>
+                &nbsp;•&nbsp; Eredet: <strong><?= htmlspecialchars($area) ?></strong>
+            <?php endif; ?>
+            <?php if ($tags): ?>
+                &nbsp;•&nbsp; Címkék: <strong><?= htmlspecialchars($tags) ?></strong>
+            <?php endif; ?>
+        </p>
 
         <?php if (!empty($image)): ?>
-            <img src="<?= h($image) ?>" class="recipe-img-big" alt="Recipe image">
+            <img src="<?= htmlspecialchars($image) ?>" class="recipe-img-big" alt="Recipe image">
         <?php endif; ?>
 
-        <h2>Hozzávalók (raktár ellenőrzéssel)</h2>
-
-        <!-- HIÁNYZÓK BEVÁSÁRLÓLISTÁRA – 1 FORM, ezért az ÖSSZES bekerül -->
-        <form method="post" action="shopping_list.php" style="margin-top:10px;">
-            <input type="hidden" name="action" value="add_missing_api">
-            <input type="hidden" name="hid" value="<?= (int)$householdId ?>">
-            <input type="hidden" name="recipe_title" value="<?= h($huTitle) ?>">
-
-            <?php
-            $missingCount = 0;
-            foreach ($ingredientsHu as $ing):
-                $rowClass = $ing['has'] ? 'ing-row ing-ok' : 'ing-row ing-miss';
-            ?>
-                <div class="<?= $rowClass ?>">
-                    <div class="ing-left">
-                        <div style="font-weight:900;"><?= h($ing['name_hu']) ?></div>
-                        <small>(<?= h($ing['name_en']) ?>)</small>
+        <h2>Hozzávalók</h2>
+        <?php if (empty($ingredientsHu)): ?>
+            <p>Nincsenek hozzávalók megadva.</p>
+        <?php else: ?>
+            <?php foreach ($ingredientsHu as $ing): ?>
+                <div class="ingredient">
+                    <div class="ingredient-names">
+                        <span><?= htmlspecialchars($ing['name_hu']) ?></span>
+                        <small>(<?= htmlspecialchars($ing['name_en']) ?>)</small>
                     </div>
-
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <div class="small" style="white-space:nowrap; opacity:.85;"><?= h($ing['measure']) ?></div>
-
-                        <?php if ($ing['has']): ?>
-                            <span class="badge badge-ok">Van</span>
-                        <?php else: ?>
-                            <span class="badge badge-bad">Hiányzik</span>
-                            <!-- EZ a lényeg: [] tömb, így mind bekerül -->
-                            <input type="checkbox" name="missing_name[]" value="<?= h($ing['name_hu']) ?>" checked>
-                            <?php $missingCount++; ?>
-                        <?php endif; ?>
-                    </div>
+                    <span class="ingredient-measure">
+                        <?= htmlspecialchars($ing['measure']) ?>
+                    </span>
                 </div>
             <?php endforeach; ?>
-
-            <div style="display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap;">
-                <button type="submit" class="btn" <?= $missingCount===0 ? 'disabled' : '' ?>>
-                    Hiányzók bevásárlólistára (<?= (int)$missingCount ?>)
-                </button>
-                <span class="small" style="opacity:.75;">
-                    Tipp: a helyet (Kamra/Hűtő/Fagyasztó) a bevásárlólista automatikusan tippeli.
-                </span>
-            </div>
-        </form>
+        <?php endif; ?>
 
         <h2 class="mt-4">Elkészítés (magyarul)</h2>
-        <p><?= nl2br(h($huInstructions)) ?></p>
+        <p><?= nl2br(htmlspecialchars($huInstructions)) ?></p>
+
+        <h3 class="mt-4">Eredeti angol leírás</h3>
+        <p><?= nl2br(htmlspecialchars($instructionsEn)) ?></p>
 
     </div>
 </div>
