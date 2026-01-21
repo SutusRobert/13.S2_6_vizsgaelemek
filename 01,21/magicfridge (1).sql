@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: localhost
--- Létrehozás ideje: 2026. Jan 21. 09:15
+-- Létrehozás ideje: 2026. Jan 21. 11:24
 -- Kiszolgáló verziója: 8.0.42
 -- PHP verzió: 8.2.29
 
@@ -49,7 +49,10 @@ INSERT INTO `api_recipe_translations` (`id`, `meal_id`, `hu_title`, `hu_instruct
 (7, '52777', 'Mediterrán tésztasaláta', 'Forraljon fel egy nagy serpenyőnyi sós vizet\r\nAdja hozzá a tésztát, keverje össze egyszer, és főzze kb. 10 percig, vagy a csomag utasításai szerint.\r\nKözben mossa meg a paradicsomot, és vágja negyedekre. Szeletelje fel az olajbogyót. Mossa meg a bazsalikom\r\nTedd a paradicsomot egy salátástálba, és tépd szét a bazsalikom leveleit. Adjon hozzá egy evőkanál olívaolajat, és keverje össze.\n\nAmikor a tészta elkészült, engedje le egy szűrőedénybe, és öntsön rá hideg vizet, hogy gyorsan lehűljön.\r\nDobja a tésztát a salátástálba a paradicsommal és a bazsalikommal.\r\nAdja hozzá a szeletelt olajbogyót, a lecsapolt mozzarellagolyókat és a tonhalat. Keverje jól össze, és hagyja a salátát legalább fél órán át pihenni, hogy az ízek összekeveredjenek.\n\nSzórja meg a tésztát bőségesen őrölt fekete borssal, és tálalás előtt szórja meg a maradék olívaolajjal.', '2025-12-12 07:37:00'),
 (8, '53080', 'Blini palacsinta', 'Egy nagy tálban keverje össze 1/2 csésze hajdina lisztet, 2/3 csésze univerzális lisztet, 1/2 teáskanál sót és 1 teáskanál élesztőt.\r\n\r\nKészítsen egy kutat a közepén, és öntsön 1 csésze meleg tejet, addig habosítva, amíg a tészta sima nem lesz.\r\n\r\nFedje le a tálat, és hagyja, hogy a tészta felemelkedjen, amíg megduplázódik, kb. 1 óra.\r\n\r\nDúsítsa és pihentesse az akkumulátort\r\nKeverjen bele 2 evőkanál olvasztott vajat és 1 tojássárgáját a tésztába.\n\nKülön tálban habosítson fel 1 tojásfehérjét, amíg meg nem keményedik, de ne szárítsa meg.\r\n\r\nHajtsa a felvert tojásfehérjét a tésztába.\r\n\r\nFedje le a tálat, és hagyja állni a tésztát 20 percig.\r\n\r\nPan-Fry the Blini\r\nMelegítse fel a vajat egy nagy tapadásmentes serpenyőben közepes hőfokon.\r\n\r\nDobja a negyed méretű tésztát a serpenyőbe, ügyelve arra, hogy ne zsúfolja túl a serpenyőt. Főzze kb. 1 percig, vagy amíg buborékok képződnek.\n\nForduljon meg és főzze kb. 30 másodpercig.\r\n\r\nTávolítsa el a kész blinit egy tányérra, és fedje le egy tiszta konyharuhával, hogy melegen tartsa. Adjon még vajat a serpenyőbe, és ismételje meg a sütési folyamatot a maradék tésztával.', '2026-01-20 08:33:53'),
 (9, '53316', 'Céklás palacsinta', '1. lépés\r\nHelyezze a céklát egy kancsóba a tejjel, és keverje össze egy botmixerrel, amíg sima nem lesz. Öntse egy tálba a palacsinta többi hozzávalójával együtt, és addig habosítsa, amíg sima és élénk lila nem lesz.\r\n\r\n2. lépés\r\nTegyen egy kis vajgombot egy nagy tapadásmentes serpenyőbe, és melegítse közepesen alacsony hőfokon, amíg megolvad és habzik. Most készítsen 3 vagy 4 palacsintát egyenként 2 evőkanálnyi tésztából.\n\nFőzze 2-3 percig, majd fordítsa meg, és főzze még egy percig, amíg át nem főzi. Ismételje meg a fennmaradó tésztával. Melegítse a sütőt a legalacsonyabb beállításig, és tartsa melegen a palacsintákat, amíg szükséges.\r\n\r\n3. lépés\r\nTálalja kedvenc palacsintaönteteivel, vagy készítsen egy egyszerű kompótot fagyasztott bogyók főzésével 1 evőkanál feketeribizli lekvárral, amíg buborékos és szirupos nem lesz (kb. 5-10 perc).\n\nEgy kis tálban keverje össze a maradék lekvárt és a joghurtot. Rakja egymásra a főtt palacsintát a joghurttal, és öntse a meleg bogyós kompótot a tetejére.', '2026-01-20 08:34:15'),
-(10, '52934', 'Chicken Basquaise', 'Melegítse elő a sütőt 180°C-ra/Gázjelölés 4. Készítse elő a csirkeízületeket főzésre. Melegítse fel a vajat és 3 evőkanál olívaolajat tűzálló edényben vagy nagy serpenyőben. Pirítsa meg a csirke darabokat kötegekben mindkét oldalon, és fűszerezze meg őket sóval és borssal menet közben. Ne zsúfolja össze a serpenyőt - kis tételekben süsse meg a csirkét, és vegye ki a darabokat a konyhai papírból.\n\nAdjon hozzá egy kicsit több olívaolajat a raguhoz, és süsse a hagymát közepes lángon 10 percig, gyakran kevergetve, amíg megpuhul, de nem pirul meg. Adja hozzá a maradék olajat, majd a paprikát, és főzze további 5 percig.\r\n\r\nAdja hozzá a chorizót, a napon szárított paradicsomot és a fokhagymát, és főzze 2-3 percig. Adja hozzá a rizst, kevergetve, hogy megbizonyosodjon arról, hogy jól be van vonva az olajjal.\n\nKeverje bele a paradicsompürét, a paprikát, a babérlevelet és az apróra vágott kakukkfüvet. Öntse bele a készletet és a bort. Amikor a folyadék buborékolni kezd, tekerje lejjebb a hőt egy enyhe párolásra. Nyomja bele a rizst a folyadékba, ha még nincs alámerülve, és helyezze a csirkét a tetejére. Helyezze a citromos éket és az olajbogyót a csirke köré.\r\n\r\nFedje le és főzze a sütőben 50 percig.\n\nA rizst meg kell főzni, de még mindig van benne egy kis harapás, és a csirkének olyan gyümölcslevekkel kell rendelkeznie, amelyek a legvastagabb részbe késsel átszúrva tiszták. Ha nem, főzze további 5 percig, és ellenőrizze újra.', '2026-01-21 07:40:58');
+(10, '52934', 'Chicken Basquaise', 'Melegítse elő a sütőt 180°C-ra/Gázjelölés 4. Készítse elő a csirkeízületeket főzésre. Melegítse fel a vajat és 3 evőkanál olívaolajat tűzálló edényben vagy nagy serpenyőben. Pirítsa meg a csirke darabokat kötegekben mindkét oldalon, és fűszerezze meg őket sóval és borssal menet közben. Ne zsúfolja össze a serpenyőt - kis tételekben süsse meg a csirkét, és vegye ki a darabokat a konyhai papírból.\n\nAdjon hozzá egy kicsit több olívaolajat a raguhoz, és süsse a hagymát közepes lángon 10 percig, gyakran kevergetve, amíg megpuhul, de nem pirul meg. Adja hozzá a maradék olajat, majd a paprikát, és főzze további 5 percig.\r\n\r\nAdja hozzá a chorizót, a napon szárított paradicsomot és a fokhagymát, és főzze 2-3 percig. Adja hozzá a rizst, kevergetve, hogy megbizonyosodjon arról, hogy jól be van vonva az olajjal.\n\nKeverje bele a paradicsompürét, a paprikát, a babérlevelet és az apróra vágott kakukkfüvet. Öntse bele a készletet és a bort. Amikor a folyadék buborékolni kezd, tekerje lejjebb a hőt egy enyhe párolásra. Nyomja bele a rizst a folyadékba, ha még nincs alámerülve, és helyezze a csirkét a tetejére. Helyezze a citromos éket és az olajbogyót a csirke köré.\r\n\r\nFedje le és főzze a sütőben 50 percig.\n\nA rizst meg kell főzni, de még mindig van benne egy kis harapás, és a csirkének olyan gyümölcslevekkel kell rendelkeznie, amelyek a legvastagabb részbe késsel átszúrva tiszták. Ha nem, főzze további 5 percig, és ellenőrizze újra.', '2026-01-21 07:40:58'),
+(11, '52831', 'Csirke karaage', 'Adja hozzá a gyömbért, a fokhagymát, a szójaszószt, a szakét és a cukrot egy tálhoz, és habverővel keverje össze. Adja hozzá a csirkét, majd keverje el egyenletesen a bevonathoz. Fedjük le és hűtsük legalább 1 órán keresztül.\r\n\r\nAdjon 1 hüvelyknyi növényi olajat egy nehéz aljú edényhez, és melegítse fel, amíg az olaj el nem éri a 360 fokot. Soroljon fel egy dróttartót 2 papírtörlővel, és vegye ki a fogóit.\n\nTegye a burgonyakeményítőt egy tálba\r\n\r\nAdjon egy marék csirkét a burgonyakeményítőhöz, és dobja el, hogy minden egyes darabot egyenletesen bevonjon.\r\n\r\nSüsse meg a karaage-t adagokban, amíg a külseje közepesen barna nem lesz, és a csirkét átsütik. Helyezze át a sült csirkét a papírtörlővel bélelt állványra.\n\nHa azt szeretné, hogy a karaage hosszabb ideig ropogós maradjon, másodszor is megsütheti a csirkét, amíg sötétebb színű nem lesz, miután egyszer lehűlt. Citromkarikákkal tálaljuk.', '2026-01-21 10:41:47'),
+(12, '52956', 'Kongói csirke', '1. LÉPÉS - A CSIRKE PÁCOLÁSA\r\nEgy tálban adjon hozzá csirkét, sót, fehér borsot, gyömbérlevet, majd jól keverje össze.\r\nTegye félre a csirkét.\r\n2. LÉPÉS - ÖBLÍTSE LE A FEHÉR RIZST\r\nÖblítse ki a rizst néhányszor egy fémedényben vagy fazékban, majd engedje le a vizet.\r\n2. LÉPÉS - A FEHÉR RIZS FORRALÁSA\r\nEzután adjon hozzá 8 csésze vizet, majd állítsa a tűzhelyet magas hőfokra, amíg fel nem forr.\n\nMiután a rizskása forrni kezd, állítsa a tűzhelyet alacsony hőfokra, majd 8-10 percenként egyszer keverje kb. 20-25 percig.\r\n25 perc elteltével ez opcionális, de hozzáadhat egy kicsit több vizet a rizskása elkészítéséhez, hogy kevésbé sűrű legyen, vagy tetszése szerint.\r\nEzután adja hozzá a pácolt csirkét a rizskásához, és hagyja a tűzhelyet még 10 percig alacsony hőmérsékleten.\n\nTovábbi 10 perc elteltével adja hozzá a zöldhagymát, a szeletelt gyömbért, 1 csipet sót, 1 csipet fehér borsot, és keverje 10 másodpercig.\r\nA rizskása tálban tálalva\r\nOpcionális: adjon koriandert a rizskása tetejére.', '2026-01-21 10:45:15'),
+(13, '52920', 'Csirke Marengo', 'Melegítse fel az olajat egy nagy lángbiztos edényben, és addig süsse a gombákat, amíg meg nem lágyulnak. Adja hozzá a csirkelábakat, és főzze rövid ideig mindkét oldalon, hogy egy kicsit színezze őket.\r\nÖntsük bele a passatát, morzsoljuk bele az alapkockába, és keverjük bele az olajbogyót. Fűszerezze fekete borssal – nincs szüksége sóra. Fedje le és főzze 40 percig, amíg a csirke megpuhul.\n\nSzórja meg petrezselyemmel, és tálalja tésztával és salátával, vagy pürével és zöld zöld zöldséggel, ha úgy tetszik.', '2026-01-21 10:45:38');
 
 -- --------------------------------------------------------
 
@@ -144,13 +147,13 @@ INSERT INTO `household_members` (`id`, `household_id`, `member_id`, `role`, `cre
 CREATE TABLE `inventory_items` (
   `id` int NOT NULL,
   `household_id` int NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `category` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `location` enum('fridge','pantry','freezer') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pantry',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `category` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `location` enum('fridge','pantry','freezer') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pantry',
   `quantity` decimal(10,2) NOT NULL DEFAULT '1.00',
-  `unit` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `expires_at` date DEFAULT NULL,
-  `note` text COLLATE utf8mb4_general_ci,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expired_notified` tinyint(1) NOT NULL DEFAULT '0'
@@ -161,13 +164,53 @@ CREATE TABLE `inventory_items` (
 --
 
 INSERT INTO `inventory_items` (`id`, `household_id`, `name`, `category`, `location`, `quantity`, `unit`, `expires_at`, `note`, `created_at`, `updated_at`, `expired_notified`) VALUES
-(3, 8, 'zsír', NULL, 'pantry', 3.00, 'kg', '2026-01-20', NULL, '2026-01-21 08:22:57', '2026-01-21 08:31:09', 1),
-(5, 8, 'krumpli', NULL, 'freezer', 2.00, 'kg', '2026-01-22', NULL, '2026-01-21 08:29:06', '2026-01-21 08:31:01', 0),
-(6, 8, 'kifli', NULL, 'pantry', 3.00, 'db', '2026-01-20', NULL, '2026-01-21 08:29:08', '2026-01-21 08:31:09', 1),
-(8, 8, 'vaj', NULL, 'pantry', 1.00, 'db', '2026-01-22', NULL, '2026-01-21 08:29:10', '2026-01-21 08:30:36', 0),
 (9, 9, 'banán', NULL, 'pantry', 1.00, NULL, '2026-01-25', NULL, '2026-01-21 08:34:04', '2026-01-21 08:34:22', 0),
 (10, 9, 'alma', NULL, 'pantry', 1.00, NULL, '2026-01-25', NULL, '2026-01-21 08:34:05', '2026-01-21 08:34:20', 0),
-(11, 9, 'kenyér', NULL, 'pantry', 1.00, NULL, '2026-01-25', NULL, '2026-01-21 08:34:06', '2026-01-21 08:34:17', 0);
+(11, 9, 'kenyér', NULL, 'pantry', 1.00, NULL, '2026-01-25', NULL, '2026-01-21 08:34:06', '2026-01-21 08:34:17', 0),
+(28, 8, 'Házityúk', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(29, 8, 'Basmati rizs', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(30, 8, 'Víz', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(31, 8, 'Hagymás', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(32, 8, 'Fokhagyma', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(33, 8, 'Zöld chili', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(34, 8, 'Só', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(35, 8, 'Olaj', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(36, 8, 'Kurkuma por', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(37, 8, 'Koriander', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(38, 8, 'Kardamom', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(39, 8, 'Szegfűszeg', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(40, 8, 'Fahéj', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(41, 8, 'Bors', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(42, 8, 'Bay Leaf', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke mandi', '2026-01-21 10:37:07', '2026-01-21 10:37:07', 0),
+(43, 8, 'Paradicsom', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(44, 8, 'Gyömbérpaszta', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(45, 8, 'Köménymag', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(46, 8, 'Csilipor', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(47, 8, 'Joghurt', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(48, 8, 'Krémszínű', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(49, 8, 'görögszéna', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(50, 8, 'Garam masala', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke handi', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(51, 8, 'Csirkecomb', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Ragacsos csirke', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(52, 8, 'szójaszósz', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Ragacsos csirke', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(53, 8, 'Méz', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Ragacsos csirke', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(54, 8, 'paradicsompüré', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Ragacsos csirke', '2026-01-21 10:44:09', '2026-01-21 10:44:09', 0),
+(56, 8, 'Mustármag', NULL, 'pantry', 6.00, NULL, NULL, 'Recept: Ragacsos csirke', '2026-01-21 11:08:59', '2026-01-21 11:09:06', 0),
+(57, 8, 'Petrezselyem', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke Marengo', '2026-01-21 11:09:00', '2026-01-21 11:09:00', 0),
+(58, 8, 'Csirkeállomány kocka', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke Marengo', '2026-01-21 11:09:01', '2026-01-21 11:09:01', 0),
+(59, 8, 'Passata', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke Marengo', '2026-01-21 11:09:02', '2026-01-21 11:09:02', 0),
+(60, 8, 'Ehető gomba', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Csirke Marengo', '2026-01-21 11:09:02', '2026-01-21 11:09:02', 0),
+(61, 8, 'Újhagyma', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Kongói csirke', '2026-01-21 11:09:02', '2026-01-21 11:09:02', 0),
+(62, 8, 'Gyömbéres szíverősítő', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Kongói csirke', '2026-01-21 11:09:02', '2026-01-21 11:09:02', 0),
+(63, 8, 'Citrom', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:03', '2026-01-21 11:09:03', 0),
+(64, 8, 'Fehérbor', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:03', '2026-01-21 11:09:03', 0),
+(65, 8, 'Csirkeállomány', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:03', '2026-01-21 11:09:03', 0),
+(66, 8, 'Kakukkfű', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:03', '2026-01-21 11:09:03', 0),
+(67, 8, 'Babérlevél', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:03', '2026-01-21 11:09:03', 0),
+(68, 8, 'Paprika', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:03', '2026-01-21 11:09:03', 0),
+(69, 8, 'Chorizo ///Mi lesz a következő? Abált szalonna? Rántott velő?///', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:04', '2026-01-21 11:09:04', 0),
+(70, 8, 'Pirospaprika', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:04', '2026-01-21 11:09:04', 0),
+(71, 8, 'lila hagyma', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:04', '2026-01-21 11:09:04', 0),
+(72, 8, 'Vaj', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Basquaise', '2026-01-21 11:09:04', '2026-01-21 11:09:04', 0);
 
 -- --------------------------------------------------------
 
@@ -274,18 +317,55 @@ INSERT INTO `recipe_ingredients` (`id`, `recipe_id`, `ingredient`) VALUES
 CREATE TABLE `shopping_list_items` (
   `id` int NOT NULL,
   `household_id` int NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `quantity` decimal(10,2) NOT NULL DEFAULT '1.00',
-  `unit` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `note` text COLLATE utf8mb4_general_ci,
+  `unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `is_bought` tinyint(1) NOT NULL DEFAULT '0',
   `bought_at` datetime DEFAULT NULL,
   `bought_by` int DEFAULT NULL,
   `created_by` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `location` enum('fridge','freezer','pantry') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pantry'
+  `location` enum('fridge','freezer','pantry') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pantry'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `shopping_list_items`
+--
+
+INSERT INTO `shopping_list_items` (`id`, `household_id`, `name`, `quantity`, `unit`, `note`, `is_bought`, `bought_at`, `bought_by`, `created_by`, `created_at`, `updated_at`, `location`) VALUES
+(58, 8, 'Vaj', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:04', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:04', 'pantry'),
+(59, 8, 'lila hagyma', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:04', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:04', 'pantry'),
+(60, 8, 'Pirospaprika', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:04', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:04', 'pantry'),
+(61, 8, 'Chorizo ///Mi lesz a következő? Abált szalonna? Rántott velő?///', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:04', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:04', 'pantry'),
+(62, 8, 'Paprika', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:03', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:03', 'pantry'),
+(63, 8, 'Babérlevél', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:03', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:03', 'pantry'),
+(64, 8, 'Kakukkfű', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:03', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:03', 'pantry'),
+(65, 8, 'Csirkeállomány', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:03', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:03', 'pantry'),
+(66, 8, 'Fehérbor', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:03', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:03', 'pantry'),
+(67, 8, 'Citrom', 1.00, NULL, 'Recept: Chicken Basquaise', 1, '2026-01-21 12:09:03', 8, 8, '2026-01-21 10:45:05', '2026-01-21 11:09:03', 'pantry'),
+(68, 8, 'Gyömbéres szíverősítő', 1.00, NULL, 'Recept: Kongói csirke', 1, '2026-01-21 12:09:02', 8, 8, '2026-01-21 10:45:21', '2026-01-21 11:09:02', 'pantry'),
+(69, 8, 'Újhagyma', 1.00, NULL, 'Recept: Kongói csirke', 1, '2026-01-21 12:09:02', 8, 8, '2026-01-21 10:45:21', '2026-01-21 11:09:02', 'pantry'),
+(70, 8, 'Ehető gomba', 1.00, NULL, 'Recept: Csirke Marengo', 1, '2026-01-21 12:09:02', 8, 8, '2026-01-21 10:45:42', '2026-01-21 11:09:02', 'pantry'),
+(71, 8, 'Passata', 1.00, NULL, 'Recept: Csirke Marengo', 1, '2026-01-21 12:09:02', 8, 8, '2026-01-21 10:45:42', '2026-01-21 11:09:02', 'pantry'),
+(72, 8, 'Csirkeállomány kocka', 1.00, NULL, 'Recept: Csirke Marengo', 1, '2026-01-21 12:09:01', 8, 8, '2026-01-21 10:45:42', '2026-01-21 11:09:01', 'pantry'),
+(73, 8, 'Petrezselyem', 1.00, NULL, 'Recept: Csirke Marengo', 1, '2026-01-21 12:09:00', 8, 8, '2026-01-21 10:45:42', '2026-01-21 11:09:00', 'pantry'),
+(75, 9, 'Hagymás', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(76, 9, 'Paradicsom', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(77, 9, 'Fokhagyma', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(78, 9, 'Gyömbérpaszta', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(79, 9, 'Növényi olaj', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(80, 9, 'Köménymag', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(81, 9, 'Koriandermag', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(82, 9, 'Kurkuma por', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(83, 9, 'Csilipor', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(84, 9, 'Zöld chili', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(85, 9, 'Joghurt', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'fridge'),
+(86, 9, 'Krémszínű', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(87, 9, 'görögszéna', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(88, 9, 'Garam masala', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry'),
+(89, 9, 'Só', 1.00, NULL, 'Recept: Csirke handi', 0, NULL, NULL, 8, '2026-01-21 11:13:38', '2026-01-21 11:13:38', 'pantry');
 
 -- --------------------------------------------------------
 
@@ -410,7 +490,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `api_recipe_translations`
 --
 ALTER TABLE `api_recipe_translations`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT a táblához `households`
@@ -434,7 +514,7 @@ ALTER TABLE `household_members`
 -- AUTO_INCREMENT a táblához `inventory_items`
 --
 ALTER TABLE `inventory_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT a táblához `messages`
@@ -458,7 +538,7 @@ ALTER TABLE `recipe_ingredients`
 -- AUTO_INCREMENT a táblához `shopping_list_items`
 --
 ALTER TABLE `shopping_list_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT a táblához `users`
