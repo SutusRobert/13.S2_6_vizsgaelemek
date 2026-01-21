@@ -84,6 +84,24 @@ foreach ($ingredients as $ing) {
         'measure' => $ing['measure'],
     ];
 }
+foreach ($ingredients as $ing):
+    $name = strtolower($ing['ingredient_name']);
+    $need = (float)$ing['quantity'];
+    $have = $inventory[$name] ?? 0;
+
+    $ok = $have >= $need;
+?>
+<div class="<?= $ok ? 'ingredient-ok' : 'ingredient-missing' ?>">
+    <?= htmlspecialchars($ing['ingredient_name']) ?>
+    (<?= $need ?> <?= $ing['unit'] ?>)
+    <?php if ($ok): ?>
+        <span class="small">✔ van (<?= $have ?>)</span>
+    <?php else: ?>
+        <span class="small">✖ hiányzik (<?= $need - $have ?>)</span>
+    <?php endif; ?>
+</div>
+<?php endforeach; ?>
+
 ?>
 <!DOCTYPE html>
 <html lang="hu">

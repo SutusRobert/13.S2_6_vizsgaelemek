@@ -76,10 +76,14 @@ $error = $_GET['error'] ?? '';
 
 <div class="navbar">
     <div class="nav-left">
+    <a href="dashboard.php" class="brand-back" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
         <img src="assets/Logo.png" class="nav-logo" alt="Logo">
         <span class="nav-title">MagicFridge</span>
+    </a>
     </div>
+
     <div class="nav-links">
+        
         <a href="dashboard.php">Főoldal</a>
         <a href="recipes.php">Receptek</a>
         <a href="logout.php" class="danger">Kijelentkezés</a>

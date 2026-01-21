@@ -16,6 +16,15 @@ if ($searchQuery === '') {
 
 // API receptek lekérése (TheMealDB)
 $apiRecipes = fetchSpoonacularRecipes($searchQuery, 50);
+// Raktár lekérése (aktuális household)
+$stmt = $pdo->prepare("
+    SELECT name, SUM(quantity) as qty
+    FROM inventory_items
+    WHERE household_id = ?
+    GROUP BY name
+");
+$stmt->execute([$householdId]);
+$inventory = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
 // Saját receptek lekérése
 $stmt = $pdo->prepare("SELECT * FROM recipes WHERE user_id = ?");

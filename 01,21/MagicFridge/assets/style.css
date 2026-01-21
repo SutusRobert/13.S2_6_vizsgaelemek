@@ -443,3 +443,221 @@ select:focus{
 
 .message-unread{ box-shadow: 0 10px 22px rgba(0,0,0,.18); }
 .message-read{ opacity: .75; }
+/* INVENTORY ---------------------------------------------------- */
+
+.inv-grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:14px;
+}
+
+.inv-filters{
+    display:grid;
+    grid-template-columns: 1fr 220px auto;
+    gap:12px;
+    align-items:end;
+}
+
+@media (max-width: 760px){
+    .inv-filters{ grid-template-columns: 1fr; }
+}
+
+.inv-table{
+    width:100%;
+    border-collapse: collapse;
+    overflow:hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(2, 6, 23, 0.18);
+}
+
+.inv-table th,
+.inv-table td{
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    text-align:left;
+    vertical-align: middle;
+    color:#e2e8f0;
+}
+
+.inv-table th{
+    font-size: 13px;
+    letter-spacing: .2px;
+    color: rgba(226,232,240,.9);
+    background: rgba(255,255,255,0.06);
+}
+
+.inv-table tr:hover td{
+    background: rgba(255,255,255,0.06);
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.10);
+}
+
+.badge-danger{ border-color: rgba(239,68,68,.45); background: rgba(239,68,68,.12); }
+.badge-warn{ border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.14); }
+.badge-ok{ border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); }
+
+.btn-mini{
+    padding: 8px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.inv-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.inv-muted{
+    font-size: 12px;
+    opacity: .75;
+}
+/* ============================= */
+/* BEVÁSÁRLÓLISTA (Shopping List) */
+/* ============================= */
+
+.sl-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:end;
+}
+
+.sl-row .form-group{
+    margin-top:0;
+}
+
+.sl-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px;
+    border-radius:16px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+}
+
+.sl-left{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+}
+
+.sl-name{
+    font-weight:800;
+    font-size:15px;
+}
+
+.sl-meta{
+    opacity:.75;
+    font-size:12px;
+    margin-top:2px;
+}
+
+.sl-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.sl-done{
+    opacity:.55;
+    text-decoration: line-through;
+}
+
+.btn-mini{
+    padding:8px 10px;
+    border-radius:12px;
+    font-size:12px;
+}
+
+/* Dashboard ikon kártyák */
+.dashboard-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:20px;
+}
+
+.dashboard-card{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    padding:18px;
+    border-radius:18px;
+    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    border:1px solid rgba(255,255,255,.14);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.dashboard-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+.dashboard-icon{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    background: rgba(99,102,241,.25);
+}
+
+.dashboard-card h3{
+    margin:0;
+    font-size:18px;
+}
+
+.dashboard-card p{
+    margin:4px 0 0;
+    font-size:13px;
+    opacity:.75;
+}
+
+
+/* Shopping list extra */
+.sl-printbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+/* Nyomtatás: csak a lista látszódjon */
+@media print {
+  .navbar, .sl-printbar, form, button, a.btn, .btn, .btn-secondary { display:none !important; }
+  body { background: #fff !important; }
+  .main-wrapper { padding: 0 !important; }
+  .card { box-shadow: none !important; border: none !important; max-width: none !important; }
+  .sl-item { border: 1px solid #ddd !important; background: #fff !important; color:#000 !important; }
+  .sl-meta, .small { color:#111 !important; opacity: 1 !important; }
+}
+.ingredient-ok{
+  background: rgba(34,197,94,.15);
+  border:1px solid rgba(34,197,94,.4);
+  padding:10px;
+  border-radius:12px;
+}
+
+.ingredient-missing{
+  background: rgba(239,68,68,.15);
+  border:1px solid rgba(239,68,68,.4);
+  padding:10px;
+  border-radius:12px;
+}

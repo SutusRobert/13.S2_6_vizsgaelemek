@@ -9,6 +9,70 @@ require_once __DIR__ . '/config.php';
 
 $userId = (int)$_SESSION['user_id'];
 
+
+// DEBUG-hoz érdemes ideiglenesen bekapcsolni (később kiveheted)
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+/* User háztartásai (owner + member) */
+$stmt = $pdo->prepare("
+    SELECT id AS household_id FROM households WHERE owner_id = ?
+    UNION
+    SELECT household_id FROM household_members WHERE member_id = ?
+");
+$stmt->execute([$userId, $userId]);
+$householdIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+/* Lejárt termék értesítések generálása (csak egyszer / tétel) */
+if (!empty($householdIds)) {
+    $placeholders = implode(',', array_fill(0, count($householdIds), '?'));
+
+    $stmt = $pdo->prepare("
+        SELECT id, household_id, name, expires_at
+        FROM inventory_items
+        WHERE household_id IN ($placeholders)
+          AND expires_at IS NOT NULL
+          AND expires_at < CURDATE()
+          AND expired_notified = 0
+        ORDER BY expires_at ASC
+        LIMIT 200
+    ");
+    $stmt->execute($householdIds);
+    $expiredItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($expiredItems)) {
+        $insertMsg = $pdo->prepare("
+            INSERT INTO messages (household_id, user_id, type, title, body, link_url, is_read, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, 0, NOW())
+        ");
+
+        $markNotified = $pdo->prepare("
+            UPDATE inventory_items
+            SET expired_notified = 1
+            WHERE id = ? AND household_id = ?
+        ");
+
+        foreach ($expiredItems as $it) {
+            $hid = (int)$it['household_id'];
+            $iid = (int)$it['id'];
+
+            $name = (string)$it['name'];
+            $exp  = (string)$it['expires_at'];
+
+            $insertMsg->execute([
+                $hid,
+                $userId,
+                "danger",
+                "Lejárt termék a raktárban",
+                "Lejárt: {$name} (lejárat: {$exp}). Nézd meg a raktárban.",
+                "inventory.php"
+            ]);
+
+            $markNotified->execute([$iid, $hid]);
+        }
+    }
+}
+
+
 /* 1) User háztartásai */
 $stmt = $pdo->prepare("SELECT household_id FROM household_members WHERE member_id = ?");
 $stmt->execute([$userId]);

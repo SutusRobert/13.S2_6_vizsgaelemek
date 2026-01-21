@@ -79,6 +79,13 @@ $firstName = end($parts);
                             <div class="menu-desc">Készlet, mennyiség, lejárati dátumok.</div>
                             <div class="menu-go">Megnyitás →</div>
                         </a>
+                        <a href="shopping_list.php" class="dashboard-card">
+                            <div class="dashboard-icon">🛒</div>
+                            <div>
+                                <h3>Bevásárlólista</h3>
+                                <p>Háztartás közös listája</p>
+                            </div>
+                         </a>
                     </div>
                 </div>
 
