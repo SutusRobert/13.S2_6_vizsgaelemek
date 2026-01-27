@@ -1,5 +1,5 @@
 <?php
-/*session_start();
+session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -8,62 +8,37 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/config.php';
 
 $userId = (int)$_SESSION['user_id'];
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+$action = $_POST['action'] ?? 'read';
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-if ($id <= 0) {
-    header("Location: messages.php");
-    exit;
-}
+$householdId = isset($_POST['household_id']) ? (int)$_POST['household_id'] : 0;
 
-// üzenet betöltése
-$stmt = $pdo->prepare("SELECT id, user_id, household_id FROM messages WHERE id = ? LIMIT 1");
-$stmt->execute([$id]);
-$msg = $stmt->fetch();
+if ($id > 0) {
+    // 1) Accept: beléptetjük a háztartásba (ha van householdId)
+    if ($action === 'accept' && $householdId > 0) {
+        try {
+            $st = $pdo->prepare("INSERT IGNORE INTO household_members (household_id, member_id) VALUES (?, ?)");
+            $st->execute([$householdId, $userId]);
+        } catch (Throwable $e) {
+            // ha nincs IGNORE PDO driveren, akkor sima INSERT + try/catch:
+            try {
+                $st = $pdo->prepare("INSERT INTO household_members (household_id, member_id) VALUES (?, ?)");
+                $st->execute([$householdId, $userId]);
+            } catch (Throwable $e2) { /* no-op */ }
+        }
+    }
 
-if (!$msg) {
-    header("Location: messages.php");
-    exit;
-}
-
-$allowed = false;
-
-// saját üzenet
-if (!empty($msg['user_id']) && (int)$msg['user_id'] === $userId) {
-    $allowed = true;
-}
-
-// háztartás üzenet
-if (!$allowed && !empty($msg['household_id'])) {
-    $hid = (int)$msg['household_id'];
-    $stmt = $pdo->prepare("SELECT 1 FROM household_members WHERE household_id = ? AND member_id = ? LIMIT 1");
-    $stmt->execute([$hid, $userId]);
-    $allowed = (bool)$stmt->fetchColumn();
-}
-
-if ($allowed) {
-    $stmt = $pdo->prepare("UPDATE messages SET is_read = 1 WHERE id = ?");
-    $stmt->execute([$id]);
+    // 2) Mindhárom akció esetén: olvasottá tesszük (userenként, message_reads)
+    try {
+        $st = $pdo->prepare("INSERT IGNORE INTO message_reads (user_id, message_id) VALUES (?, ?)");
+        $st->execute([$userId, $id]);
+    } catch (Throwable $e) {
+        // fallback: ha nincs message_reads, akkor régi közös is_read
+        $st = $pdo->prepare("UPDATE messages SET is_read = 1 WHERE id = ?");
+        $st->execute([$id]);
+    }
 }
 
 header("Location: messages.php");
 exit;
-*/
-
-session_start();
-require 'config.php';
-
-if (!isset($_SESSION['user_id'])) {
-  header("Location: login.php");
-  exit;
-}
-
-$userId = (int)$_SESSION['user_id'];
-$msgId  = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
-if ($msgId > 0) {
-  $st = $pdo->prepare("INSERT IGNORE INTO message_reads (user_id, message_id) VALUES (?, ?)");
-  $st->execute([$userId, $msgId]);
-}
-
-header("Location: messages.php");
-exit;
-

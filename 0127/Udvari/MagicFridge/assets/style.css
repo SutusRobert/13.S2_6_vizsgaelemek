@@ -1581,3 +1581,134 @@ body::before{
   font-size:13px;
   opacity:.85;
 }
+/* Dashboard hero 2 oszlop: hűtő balra, extra panel jobbra */
+.dash-hero{
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.dash-hero-left, .dash-hero-right{ min-width: 0; }
+
+.dash-fridge-actions{
+  display:flex;
+  gap:10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.btn.ghost{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+/* jobb oldali kártyák */
+.dash-sidecard{
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  margin-bottom: 14px;
+}
+
+.dash-sidecard-head{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dash-sidecard-title{
+  font-weight: 700;
+}
+
+.dash-sidecard-badge{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.dash-tip, .dash-mission{
+  line-height: 1.4;
+  opacity: .95;
+}
+
+/* quick grid */
+.dash-quickgrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dash-quick{  
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(0,0,0,.14);
+  border: 1px solid rgba(255,255,255,.10);
+  text-decoration: none;
+}
+
+.dash-quick:hover{
+  transform: translateY(-1px);
+  transition: .15s ease;
+}
+
+.dq-ico{
+  font-size: 22px;
+  width: 34px;
+  text-align:center;
+}
+
+.dq-title{ font-weight: 700; }
+.dq-sub{ font-size: 12px; opacity: .85; }
+
+/* kis “fun” fókusz */
+.dash-sidecard-fun{
+  background: rgba(255,255,255,.10);
+}
+
+/* reszponzív: mobilon egymás alá */
+@media (max-width: 900px){
+  .dash-hero{ grid-template-columns: 1fr; }
+}
+/* ✅ felső rész külön box */
+.dash-topbox{
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+/* ✅ hero: 2 oszlop, bal hűtő, jobb note stack */
+.dash-hero-grid{
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.dash-leftbox{ min-width: 0; }
+.dash-rightbox{ min-width: 0; display: grid; gap: 12px; }
+
+/* gyors gombok 2x2 */
+.dash-quick2{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* mobil: egymás alá */
+@media (max-width: 900px){
+  .dash-hero-grid{ grid-template-columns: 1fr; }
+  .dash-quick2{ grid-template-columns: 1fr; }
+}
+
+
