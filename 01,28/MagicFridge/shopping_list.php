@@ -15,6 +15,17 @@
     $errors = [];
     $success = '';
 
+    // Flash üzenetek (POST-Redirect-GET)
+    if (isset($_SESSION['flash_success'])) {
+        $success = (string)$_SESSION['flash_success'];
+        unset($_SESSION['flash_success']);
+    }
+    if (isset($_SESSION['flash_errors']) && is_array($_SESSION['flash_errors'])) {
+        $errors = array_merge($errors, $_SESSION['flash_errors']);
+        unset($_SESSION['flash_errors']);
+    }
+
+
     /* ================================
     Helper: POST getter
     ================================ */
@@ -500,12 +511,7 @@
             $success = "A megvett tételek törölve.";
         }
 
-        // POST után redirect, hogy frissítésre ne ismételje
-        if (empty($errors)) {
-            header("Location: shopping_list.php?hid=" . urlencode((string)$householdId));
-            exit;
-        }
-            /* 6) Összes tétel törlése a bevásárlólistából */
+        /* 6) Összes tétel törlése a bevásárlólistából */
     if ($action === 'clear_all') {
         $stmt = $pdo->prepare("DELETE FROM shopping_list_items WHERE household_id = ?");
         $stmt->execute([$householdId]);
@@ -603,7 +609,17 @@
         }
     }
 
-    }
+    
+        // POST-Redirect-GET: hogy frissítésre ne ismételje a műveletet
+        if (!empty($success)) {
+            $_SESSION['flash_success'] = $success;
+        }
+        if (!empty($errors)) {
+            $_SESSION['flash_errors'] = $errors;
+        }
+        header("Location: shopping_list.php?hid=" . urlencode((string)$householdId));
+        exit;
+}
 
     /* ================================
     Lista betöltés

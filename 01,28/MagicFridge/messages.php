@@ -13,6 +13,45 @@ $userId = (int)$_SESSION['user_id'];
 // DEBUG-hoz érdemes ideiglenesen bekapcsolni (később kiveheted)
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+// Flash üzenetek (accept/decline redirect után)
+$flash_success = $_SESSION['flash_success'] ?? '';
+$flash_error   = $_SESSION['flash_error'] ?? '';
+unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+/**
+ * Meghívások (ha van household_invitations tábla)
+ * - ezt úgy csináljuk, hogy ha a tábla nem létezik, ne dobjon hibát a teljes oldal.
+ */
+$pendingInvites = [];
+try {
+    // MySQL-ben a tábla létezésének ellenőrzése
+    $chk = $pdo->query("SHOW TABLES LIKE 'household_invitations'")->fetchColumn();
+    if ($chk) {
+        $stmt = $pdo->prepare(
+            "SELECT
+                hi.id,
+                hi.household_id,
+                hi.invited_by,
+                hi.created_at,
+                h.name AS household_name,
+                u.email AS inviter_email
+             FROM household_invitations hi
+             JOIN households h ON h.id = hi.household_id
+            LEFT JOIN users u ON u.id = hi.invited_by
+             WHERE hi.invited_user_id = ?
+               AND hi.status = 'pending'
+             ORDER BY hi.created_at DESC
+             LIMIT 50"
+        );
+        $stmt->execute([$userId]);
+        $pendingInvites = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+} catch (Throwable $e) {
+    // ha nincs jogosultság SHOW TABLES-hoz vagy más gond van,
+    // ne álljon meg az oldal – egyszerűen nem jelenítünk meg meghívásokat.
+    $pendingInvites = [];
+}
+
 /* User háztartásai (owner + member) */
 $stmt = $pdo->prepare("
     SELECT id AS household_id FROM households WHERE owner_id = ?
@@ -105,6 +144,38 @@ if (!empty($householdIds)) {
     $stmt->execute([$userId]);
     $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+// Meghívók kezelése a "messages" táblában lévő háztartás-meghívó üzenetekhez
+$hasHouseholdInvitesTable = false;
+try {
+    $chk2 = $pdo->query("SHOW TABLES LIKE 'household_invites'")->fetchColumn();
+    $hasHouseholdInvitesTable = (bool)$chk2;
+} catch (Throwable $e) {
+    $hasHouseholdInvitesTable = false;
+}
+
+$inviteLookupByHousehold = null;
+$inviteLookupAny = null;
+if ($hasHouseholdInvitesTable) {
+    $inviteLookupByHousehold = $pdo->prepare("
+        SELECT id
+        FROM household_invites
+        WHERE household_id = ?
+          AND invited_user_id = ?
+          AND status = 'pending'
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+    $inviteLookupAny = $pdo->prepare("
+        SELECT id
+        FROM household_invites
+        WHERE invited_user_id = ?
+          AND status = 'pending'
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -195,6 +266,51 @@ if (!empty($householdIds)) {
         <h1>Üzenetfal</h1>
         <p class="mt-3">Háztartásodhoz és a fiókodhoz tartozó rendszerüzenetek.</p>
 
+        <?php if (!empty($flash_success)) : ?>
+            <div class="alert success mt-3"><?= htmlspecialchars($flash_success) ?></div>
+        <?php endif; ?>
+        <?php if (!empty($flash_error)) : ?>
+            <div class="alert danger mt-3"><?= htmlspecialchars($flash_error) ?></div>
+        <?php endif; ?>
+
+        <?php if (!empty($pendingInvites)) : ?>
+            <div class="mt-3">
+                <h2 style="margin-bottom:10px;">Háztartás meghívások</h2>
+                <div class="message-wall">
+                    <?php foreach ($pendingInvites as $inv) : ?>
+                        <?php
+                            $invId = (int)$inv['id'];
+                            $householdName = htmlspecialchars($inv['household_name'] ?? 'Háztartás');
+                            $inviter = $inv['inviter_email'] ?? ('Felhasználó #' . (int)($inv['invited_by'] ?? 0));
+                            $inviter = htmlspecialchars((string)$inviter);
+                            $invTime = htmlspecialchars((string)($inv['created_at'] ?? ''));
+                        ?>
+                        <div class="message-item message-info message-unread">
+                            <div class="message-top">
+                                <div class="message-title">Meghívás: <?= $householdName ?></div>
+                                <div class="message-time"><?= $invTime ?></div>
+                            </div>
+                            <div class="message-text">
+                                <?= $inviter ?> meghívott ebbe a háztartásba: <b><?= $householdName ?></b>.
+                            </div>
+                            <div class="message-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <form method="post" action="invite_action.php" class="message-form">
+                                    <input type="hidden" name="invite_id" value="<?= $invId ?>">
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="message-btn">Elfogadom</button>
+                                </form>
+                                <form method="post" action="invite_action.php" class="message-form">
+                                    <input type="hidden" name="invite_id" value="<?= $invId ?>">
+                                    <input type="hidden" name="action" value="decline">
+                                    <button type="submit" class="message-btn danger">Elutasítom</button>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="message-wall mt-3">
             <?php if (empty($messages)) : ?>
                 <div class="message-empty">Nincs új üzenet. 🎉</div>
@@ -216,7 +332,47 @@ if (!empty($householdIds)) {
                         <div class="message-text"><?= $body ?></div>
 
                         <div class="message-actions">
-                            <?php if (!$isRead) : ?>
+                            <?php
+                                // Meghívó üzenet felismerés: type vagy title alapján
+                                $isInviteMsg = false;
+                                if (!empty($type) && in_array($type, ['household_invite','invitation','invite'], true)) {
+                                    $isInviteMsg = true;
+                                }
+                                if (!$isInviteMsg && !empty($title)) {
+                                    $t = mb_strtolower(strip_tags((string)$title));
+                                    if (strpos($t, 'háztartás meghív') !== false || strpos($t, 'meghívó') !== false) {
+                                        $isInviteMsg = true;
+                                    }
+                                }
+
+                                $pendingInviteId = 0;
+                                if ($isInviteMsg && !$isRead && $hasHouseholdInvitesTable) {
+                                    if (!empty($householdId)) {
+                                        $inviteLookupByHousehold->execute([(int)$householdId, $userId]);
+                                        $pendingInviteId = (int)$inviteLookupByHousehold->fetchColumn();
+                                    } else {
+                                        $inviteLookupAny->execute([$userId]);
+                                        $pendingInviteId = (int)$inviteLookupAny->fetchColumn();
+                                    }
+                                }
+                            ?>
+
+                            <?php if (!$isRead && $isInviteMsg && $pendingInviteId > 0) : ?>
+                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                    <form method="post" action="invite_respond.php" class="message-form">
+                                        <input type="hidden" name="invite_id" value="<?= $pendingInviteId ?>">
+                                        <input type="hidden" name="message_id" value="<?= $id ?>">
+                                        <input type="hidden" name="action" value="accept">
+                                        <button type="submit" class="message-btn">Elfogadom</button>
+                                    </form>
+                                    <form method="post" action="invite_respond.php" class="message-form">
+                                        <input type="hidden" name="invite_id" value="<?= $pendingInviteId ?>">
+                                        <input type="hidden" name="message_id" value="<?= $id ?>">
+                                        <input type="hidden" name="action" value="decline">
+                                        <button type="submit" class="message-btn danger">Elutasítom</button>
+                                    </form>
+                                </div>
+                            <?php elseif (!$isRead) : ?>
                                 <form method="post" action="message_read.php" class="message-form">
                                     <input type="hidden" name="id" value="<?= $id ?>">
                                     <button type="submit" class="message-btn">Megjelölés olvasottnak</button>
