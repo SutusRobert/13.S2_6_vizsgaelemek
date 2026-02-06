@@ -1,21 +1,38 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
 
 Route::get('/', function () {
     return view('welcome');
 });
-=======
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Middleware\EnsureLoggedIn;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\HouseholdController;
 
-// Raktár
+
+
+Route::middleware('logged')->group(function () {
+
+    Route::get('/inventory', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('/inventory/store', [InventoryController::class, 'store'])->name('inventory.store');
+
+    Route::get('/inventory/list', [InventoryController::class, 'list'])->name('inventory.list');
+    Route::post('/inventory/list', [InventoryController::class, 'listPost'])->name('inventory.list.post');
+    
+});
+
+Route::middleware('logged')->group(function () {
+    Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
+    Route::post('/households/invite', [HouseholdController::class, 'invite'])->name('households.invite');
+    Route::post('/households/toggle-role', [HouseholdController::class, 'toggleRole'])->name('households.toggleRole');
+});
+
+
 Route::get('/inventory', [InventoryController::class, 'create'])->name('inventory.create');
 Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
-
 Route::get('/inventory/list', [InventoryController::class, 'list'])->name('inventory.list');
 Route::post('/inventory/list', [InventoryController::class, 'listPost'])->name('inventory.list.post');
 
@@ -51,4 +68,4 @@ Route::middleware(EnsureLoggedIn::class)->group(function () {
 Route::middleware(EnsureLoggedIn::class)->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
->>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+

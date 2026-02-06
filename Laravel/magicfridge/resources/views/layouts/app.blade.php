@@ -20,8 +20,7 @@
     <div class="nav-left">
       <img src="{{ asset('assets/Logo.png') }}" class="nav-logo" alt="Logo">
       <span class="nav-title"><a href="{{ route('dashboard') }}">MagicFridge</a></span>
-        <a href="{{ route('inventory.create') }}">Raktár</a>
-        <a href="{{ route('inventory.list') }}">Készlet</a>
+        
 
 
     </div>

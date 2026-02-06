@@ -82,14 +82,14 @@
             <div class="menu-go">Megnyitás →</div>
           </a>
 
-          <a href="#" class="menu-tile">
+         <a href="{{ route('messages.index') }}" class="menu-tile">
             <div class="menu-icon">🔔</div>
             <div class="menu-title">Üzenetek</div>
             <div class="menu-desc">Lejáratok, figyelmeztetések, értesítések.</div>
             <div class="menu-go">Megnyitás →</div>
           </a>
 
-          <a href="#" class="menu-tile">
+          <a href="{{ route('households.index') }}" class="menu-tile">
             <div class="menu-icon">🧺</div>
             <div class="menu-title">Háztartás</div>
             <div class="menu-desc">Tagok kezelése, rangok, hozzáférés.</div>
