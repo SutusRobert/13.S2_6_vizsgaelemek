@@ -1,15 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+<<<<<<< HEAD
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Middleware\EnsureLoggedIn;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
+<<<<<<< HEAD
 use App\Http\Controllers\HouseholdController;
 
 
@@ -33,6 +37,13 @@ Route::middleware('logged')->group(function () {
 
 Route::get('/inventory', [InventoryController::class, 'create'])->name('inventory.create');
 Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+=======
+
+// Raktár
+Route::get('/inventory', [InventoryController::class, 'create'])->name('inventory.create');
+Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 Route::get('/inventory/list', [InventoryController::class, 'list'])->name('inventory.list');
 Route::post('/inventory/list', [InventoryController::class, 'listPost'])->name('inventory.list.post');
 
@@ -67,5 +78,9 @@ Route::middleware(EnsureLoggedIn::class)->group(function () {
 });
 Route::middleware(EnsureLoggedIn::class)->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+<<<<<<< HEAD
 });
 
+=======
+});
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7

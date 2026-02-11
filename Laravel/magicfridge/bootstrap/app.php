@@ -3,8 +3,12 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+<<<<<<< HEAD
 use App\Http\Controllers\Middleware\EnsureLoggedIn;
 
+=======
+use App\Http\Middleware\EnsureLoggedIn;
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -13,12 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+<<<<<<< HEAD
 
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'logged' => EnsureLoggedIn::class,
         ]);
     })
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'logged' => EnsureLoggedIn::class,
@@ -38,7 +45,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'logged' => EnsureLoggedIn::class,
         ]);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

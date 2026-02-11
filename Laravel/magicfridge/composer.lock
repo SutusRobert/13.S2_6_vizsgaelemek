@@ -9,6 +9,7 @@
         {
             "name": "brick/math",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "0.14.4",
             "source": {
                 "type": "git",
@@ -20,6 +21,8 @@
                 "url": "https://api.github.com/repos/brick/math/zipball/a8b53e6cc4d3a336543f042a4dfa0e3f2f2356a4",
                 "reference": "a8b53e6cc4d3a336543f042a4dfa0e3f2f2356a4",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             "version": "0.14.6",
             "source": {
                 "type": "git",
@@ -30,6 +33,9 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/brick/math/zipball/32498d5e1897e7642c0b961ace2df6d7dc9a3bc3",
                 "reference": "32498d5e1897e7642c0b961ace2df6d7dc9a3bc3",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
@@ -70,7 +76,11 @@
             "support": {
                 "issues": "https://github.com/brick/math/issues",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "source": "https://github.com/brick/math/tree/0.14.4"
+=======
+                "source": "https://github.com/brick/math/tree/0.14.6"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "source": "https://github.com/brick/math/tree/0.14.6"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -82,7 +92,11 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2026-02-02T16:57:31+00:00"
+=======
+            "time": "2026-02-05T07:59:58+00:00"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
             "time": "2026-02-05T07:59:58+00:00"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -1076,6 +1090,7 @@
         {
             "name": "laravel/framework",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v12.49.0",
             "source": {
                 "type": "git",
@@ -1087,6 +1102,8 @@
                 "url": "https://api.github.com/repos/laravel/framework/zipball/4bde4530545111d8bdd1de6f545fa8824039fcb5",
                 "reference": "4bde4530545111d8bdd1de6f545fa8824039fcb5",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             "version": "v12.50.0",
             "source": {
                 "type": "git",
@@ -1097,6 +1114,9 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/174ffed91d794a35a541a5eb7c3785a02a34aaba",
                 "reference": "174ffed91d794a35a541a5eb7c3785a02a34aaba",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
@@ -1307,6 +1327,7 @@
                 "source": "https://github.com/laravel/framework"
             },
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2026-01-28T03:40:49+00:00"
         },
         {
@@ -1322,6 +1343,8 @@
                 "url": "https://api.github.com/repos/laravel/prompts/zipball/dd2a2ed95acacbcccd32fd98dee4c946ae7a7217",
                 "reference": "dd2a2ed95acacbcccd32fd98dee4c946ae7a7217",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             "time": "2026-02-04T18:34:13+00:00"
         },
         {
@@ -1336,6 +1359,9 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/prompts/zipball/4861ded9003b7f8a158176a0b7666f74ee761be8",
                 "reference": "4861ded9003b7f8a158176a0b7666f74ee761be8",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
@@ -1344,7 +1370,11 @@
                 "ext-mbstring": "*",
                 "php": "^8.1",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "symfony/console": "^6.2|^7.0"
+=======
+                "symfony/console": "^6.2|^7.0|^8.0"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "symfony/console": "^6.2|^7.0|^8.0"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -1355,7 +1385,11 @@
             },
             "require-dev": {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "illuminate/collections": "^10.0|^11.0|^12.0",
+=======
+                "illuminate/collections": "^10.0|^11.0|^12.0|^13.0",
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "illuminate/collections": "^10.0|^11.0|^12.0|^13.0",
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -1389,6 +1423,7 @@
             "support": {
                 "issues": "https://github.com/laravel/prompts/issues",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "source": "https://github.com/laravel/prompts/tree/v0.3.11"
             },
             "time": "2026-01-27T02:55:06+00:00"
@@ -1406,6 +1441,8 @@
                 "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/7581a4407012f5f53365e11bafc520fd7f36bc9b",
                 "reference": "7581a4407012f5f53365e11bafc520fd7f36bc9b",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "source": "https://github.com/laravel/prompts/tree/v0.3.12"
             },
             "time": "2026-02-03T06:57:26+00:00"
@@ -1422,6 +1459,9 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/8f631589ab07b7b52fead814965f5a800459cb3e",
                 "reference": "8f631589ab07b7b52fead814965f5a800459cb3e",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
@@ -1430,17 +1470,23 @@
             },
             "require-dev": {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "illuminate/support": "^10.0|^11.0|^12.0",
                 "nesbot/carbon": "^2.67|^3.0",
                 "pestphp/pest": "^2.36|^3.0|^4.0",
                 "phpstan/phpstan": "^2.0",
                 "symfony/var-dumper": "^6.2.0|^7.0.0"
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
                 "nesbot/carbon": "^2.67|^3.0",
                 "pestphp/pest": "^2.36|^3.0|^4.0",
                 "phpstan/phpstan": "^2.0",
                 "symfony/var-dumper": "^6.2.0|^7.0.0|^8.0.0"
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             },
             "type": "library",
@@ -1479,7 +1525,11 @@
                 "source": "https://github.com/laravel/serializable-closure"
             },
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2026-01-08T16:22:46+00:00"
+=======
+            "time": "2026-02-03T06:55:34+00:00"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
             "time": "2026-02-03T06:55:34+00:00"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -2385,6 +2435,7 @@
         {
             "name": "nette/utils",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.1.1",
             "source": {
                 "type": "git",
@@ -2396,6 +2447,8 @@
                 "url": "https://api.github.com/repos/nette/utils/zipball/c99059c0315591f1a0db7ad6002000288ab8dc72",
                 "reference": "c99059c0315591f1a0db7ad6002000288ab8dc72",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             "version": "v4.1.2",
             "source": {
                 "type": "git",
@@ -2406,6 +2459,9 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/nette/utils/zipball/f76b5dc3d6c6d3043c8d937df2698515b99cbaf5",
                 "reference": "f76b5dc3d6c6d3043c8d937df2698515b99cbaf5",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
@@ -2420,7 +2476,11 @@
                 "jetbrains/phpstorm-attributes": "^1.2",
                 "nette/tester": "^2.5",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "phpstan/phpstan-nette": "^2.0@stable",
+=======
+                "phpstan/phpstan": "^2.0@stable",
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "phpstan/phpstan": "^2.0@stable",
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -2485,9 +2545,15 @@
             "support": {
                 "issues": "https://github.com/nette/utils/issues",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "source": "https://github.com/nette/utils/tree/v4.1.1"
             },
             "time": "2025-12-22T12:14:32+00:00"
+=======
+                "source": "https://github.com/nette/utils/tree/v4.1.2"
+            },
+            "time": "2026-02-03T17:21:09+00:00"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "source": "https://github.com/nette/utils/tree/v4.1.2"
             },
@@ -6307,6 +6373,7 @@
         {
             "name": "laravel/pail",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v1.2.4",
             "source": {
                 "type": "git",
@@ -6318,6 +6385,8 @@
                 "url": "https://api.github.com/repos/laravel/pail/zipball/49f92285ff5d6fc09816e976a004f8dec6a0ea30",
                 "reference": "49f92285ff5d6fc09816e976a004f8dec6a0ea30",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             "version": "v1.2.5",
             "source": {
                 "type": "git",
@@ -6328,11 +6397,15 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/pail/zipball/fdb73f5eacf03db576c710d5a00101ba185f2254",
                 "reference": "fdb73f5eacf03db576c710d5a00101ba185f2254",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
+<<<<<<< HEAD
 <<<<<<< HEAD
                 "illuminate/console": "^10.24|^11.0|^12.0",
                 "illuminate/contracts": "^10.24|^11.0|^12.0",
@@ -6352,6 +6425,8 @@
                 "phpstan/phpstan": "^1.12.27",
                 "symfony/var-dumper": "^6.3|^7.0"
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "illuminate/console": "^10.24|^11.0|^12.0|^13.0",
                 "illuminate/contracts": "^10.24|^11.0|^12.0|^13.0",
                 "illuminate/log": "^10.24|^11.0|^12.0|^13.0",
@@ -6370,6 +6445,9 @@
                 "phpstan/phpstan": "^1.12.27",
                 "symfony/var-dumper": "^6.3|^7.0|^8.0",
                 "symfony/yaml": "^6.3|^7.0|^8.0"
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             },
             "type": "library",
@@ -6416,7 +6494,11 @@
                 "source": "https://github.com/laravel/pail"
             },
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2025-11-20T16:29:35+00:00"
+=======
+            "time": "2026-02-04T15:10:32+00:00"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
             "time": "2026-02-04T15:10:32+00:00"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -7261,6 +7343,7 @@
         {
             "name": "phpunit/phpunit",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "11.5.50",
             "source": {
                 "type": "git",
@@ -7272,6 +7355,8 @@
                 "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fdfc727f0fcacfeb8fcb30c7e5da173125b58be3",
                 "reference": "fdfc727f0fcacfeb8fcb30c7e5da173125b58be3",
 =======
+=======
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
             "version": "11.5.51",
             "source": {
                 "type": "git",
@@ -7282,6 +7367,9 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ad14159f92910b0f0e3928c13e9b2077529de091",
                 "reference": "ad14159f92910b0f0e3928c13e9b2077529de091",
+<<<<<<< HEAD
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
+=======
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
                 "shasum": ""
             },
@@ -7298,7 +7386,11 @@
                 "php": ">=8.2",
                 "phpunit/php-code-coverage": "^11.0.12",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "phpunit/php-file-iterator": "^5.1.0",
+=======
+                "phpunit/php-file-iterator": "^5.1.1",
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "phpunit/php-file-iterator": "^5.1.1",
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -7314,6 +7406,10 @@
                 "sebastian/global-state": "^7.0.2",
                 "sebastian/object-enumerator": "^6.0.1",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                "sebastian/recursion-context": "^6.0.3",
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "sebastian/recursion-context": "^6.0.3",
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -7363,7 +7459,11 @@
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.50"
+=======
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.51"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.51"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -7391,7 +7491,11 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2026-01-27T05:59:18+00:00"
+=======
+            "time": "2026-02-05T07:59:30+00:00"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
             "time": "2026-02-05T07:59:30+00:00"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
@@ -8571,7 +8675,11 @@
     },
     "platform-dev": {},
 <<<<<<< HEAD
+<<<<<<< HEAD
     "plugin-api-version": "2.6.0"
+=======
+    "plugin-api-version": "2.9.0"
+>>>>>>> 81242963927eb215250866a44ca43f844f7085d7
 =======
     "plugin-api-version": "2.9.0"
 >>>>>>> 81242963927eb215250866a44ca43f844f7085d7
