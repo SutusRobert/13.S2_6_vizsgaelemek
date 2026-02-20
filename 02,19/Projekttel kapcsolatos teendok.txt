@@ -1,0 +1,16 @@
+Projekttel kapcsolatos teendok:
+
+
+Bejelentkezesnel legyen emlekezz ram.
+Dashboardon legyen a kep helyett masik kep.
+Recepteknel ne kereso menu legyen hanem legordulo menu.
+Legyen az uzeneteknek egy megjeleno cucca, hogy lassuk hogy ertesites erkezett.
+Designt rendezzük, legyenek kitoltve az ures reszek.
+REgisztracional jelenjen meg a zold pipa meg a piros x.
+Dashboardra az 5 gomb mellé egy 6. ami a qr kodot rendszer lesz összekötve a receptekkel illetve a raktárral.
+Rólunk feliratot csak a regisztráció/bejelentkezés oldalon megjeleníteni.
+Üzenet oldalt rendbe rakni.
+Teszteléseket rendbe hozni. ledokumentálni.
+
+
+
