@@ -11,6 +11,8 @@ Dashboardra az 5 gomb mellé egy 6. ami a qr kodot rendszer lesz összekötve a 
 Rólunk feliratot csak a regisztráció/bejelentkezés oldalon megjeleníteni.
 Üzenet oldalt rendbe rakni.
 Teszteléseket rendbe hozni. ledokumentálni.
+Dashboardon ne működjön a visszalépési gomb, ekkor ne töltse újra az oldalt.
+
 
 
 
