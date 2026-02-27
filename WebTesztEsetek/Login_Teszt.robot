@@ -3,7 +3,7 @@ Library           SeleniumLibrary
 
 *** Test Cases ***
 Login sikeres
-    Open Browser    http://127.0.0.1:8000/login    chrome
+    Open Browser    http://127.0.0.1:8000/login    edge
     Maximize Browser Window
     Input Text    name=email    aaa2@gmail.com
     Input Text    name=password    aaa2
@@ -12,7 +12,7 @@ Login sikeres
     Close Browser
 
 Login sikertelen
-    Open Browser    http://127.0.0.1:8000/login    chrome
+    Open Browser    http://127.0.0.1:8000/login    edge
     Maximize Browser Window
     Input Text    name=email    aaa2@gmail.com
     Input Text    name=password    aaa
