@@ -9,7 +9,7 @@ class RecipeController extends Controller
 {
     private ?string $lastCurlError = null;
 
-    // fordítás cache (csak erre a requestre)
+    // fordĂ­tĂˇs cache (csak erre a requestre)
     private array $trCache = [];
 
     /* =========================
@@ -35,7 +35,7 @@ class RecipeController extends Controller
             LIMIT 1
         ", [$userId, $hid]);
 
-        if (!$ok) abort(403, 'Nincs jogosultság ehhez a háztartáshoz.');
+        if (!$ok) abort(403, 'Nincs jogosultsĂˇg ehhez a hĂˇztartĂˇshoz.');
     }
 
     /* =========================
@@ -48,19 +48,19 @@ class RecipeController extends Controller
 
         $raw = $this->curlGet($url);
         if ($raw === null) {
-            return ['_error' => $this->lastCurlError ?? 'Nem sikerült kapcsolódni a TheMealDB-hez.'];
+            return ['_error' => $this->lastCurlError ?? 'Nem sikerĂĽlt kapcsolĂłdni a TheMealDB-hez.'];
         }
 
         $decoded = json_decode($raw, true);
 
         if (!is_array($decoded) || !array_key_exists('meals', $decoded)) {
-            return ['_error' => 'Hibás válasz a TheMealDB-től.'];
+            return ['_error' => 'HibĂˇs vĂˇlasz a TheMealDB-tĹ‘l.'];
         }
 
         if ($decoded['meals'] === null) return [];
 
         if (!is_array($decoded['meals'])) {
-            return ['_error' => 'Hibás találati lista a TheMealDB-től.'];
+            return ['_error' => 'HibĂˇs talĂˇlati lista a TheMealDB-tĹ‘l.'];
         }
 
         $meals = array_slice($decoded['meals'], 0, $limit);
@@ -69,7 +69,7 @@ class RecipeController extends Controller
         foreach ($meals as $m) {
             $titleEn = (string)($m['strMeal'] ?? '');
 
-            // listában ne fordítson remote-ot (gyors)
+            // listĂˇban ne fordĂ­tson remote-ot (gyors)
             $titleHuOrEn = $this->huTitle($titleEn, false);
 
             $results[] = [
@@ -103,7 +103,7 @@ class RecipeController extends Controller
         $this->lastCurlError = null;
 
         if (!function_exists('curl_init')) {
-            $this->lastCurlError = 'A PHP cURL extension nincs engedélyezve.';
+            $this->lastCurlError = 'A PHP cURL extension nincs engedĂ©lyezve.';
             return null;
         }
 
@@ -134,7 +134,7 @@ class RecipeController extends Controller
         curl_close($ch);
 
         if ($code >= 400) {
-            $this->lastCurlError = "HTTP $code hiba a távoli API-tól ($url)";
+            $this->lastCurlError = "HTTP $code hiba a tĂˇvoli API-tĂłl ($url)";
             return null;
         }
 
@@ -147,7 +147,7 @@ class RecipeController extends Controller
     private function normalizeForMatch(string $s): string
     {
         $s = mb_strtolower(trim($s), 'UTF-8');
-        $s = str_replace(['á','é','í','ó','ö','ő','ú','ü','ű'], ['a','e','i','o','o','o','u','u','u'], $s);
+        $s = str_replace(['Ăˇ','Ă©','Ă­','Ăł','Ă¶','Ĺ‘','Ăş','ĂĽ','Ĺ±'], ['a','e','i','o','o','o','u','u','u'], $s);
         return $s;
     }
 
@@ -281,7 +281,7 @@ class RecipeController extends Controller
         $households = $this->householdsForUser($userId);
         if (empty($households)) {
             return redirect()->route('households.index')
-                ->withErrors(['Előbb csatlakozz egy háztartáshoz.']);
+                ->withErrors(['ElĹ‘bb csatlakozz egy hĂˇztartĂˇshoz.']);
         }
 
         $hid = (int)($request->query('hid') ?? 0);
@@ -315,7 +315,7 @@ class RecipeController extends Controller
 
         $households = $this->householdsForUser($userId);
         if (empty($households)) {
-            return redirect()->route('households.index')->withErrors(['Előbb csatlakozz egy háztartáshoz.']);
+            return redirect()->route('households.index')->withErrors(['ElĹ‘bb csatlakozz egy hĂˇztartĂˇshoz.']);
         }
 
         $hid = (int)($request->query('hid') ?? 0);
@@ -325,10 +325,10 @@ class RecipeController extends Controller
 
         $meal = $this->apiDetails($id);
         if (!$meal) {
-            return redirect()->route('recipes.index', ['hid' => $hid])->withErrors(['Nem található a recept.']);
+            return redirect()->route('recipes.index', ['hid' => $hid])->withErrors(['Nem talĂˇlhatĂł a recept.']);
         }
 
-        // Hozzávalók (angol + magyar név)
+        // HozzĂˇvalĂłk (angol + magyar nĂ©v)
         $ingredients = [];
         for ($i = 1; $i <= 20; $i++) {
             $ingNameEn = trim((string)($meal["strIngredient{$i}"] ?? ''));
@@ -401,7 +401,7 @@ class RecipeController extends Controller
         $meal = $this->apiDetails($id);
         if (!$meal) {
             return redirect()->route('recipes.show', ['id' => $id, 'hid' => $hid])
-                ->withErrors(['Nem található a recept.']);
+                ->withErrors(['Nem talĂˇlhatĂł a recept.']);
         }
 
         $recipeTitleHu = $this->translateEnToHuShort((string)($meal['strMeal'] ?? 'Recept'));
@@ -432,7 +432,7 @@ class RecipeController extends Controller
 
         if (empty($missing)) {
             return redirect()->route('recipes.show', ['id' => $id, 'hid' => $hid])
-                ->with('success', 'Nincs hiányzó hozzávaló – minden megvan a raktárban.');
+                ->with('success', 'Nincs hiĂˇnyzĂł hozzĂˇvalĂł â€“ minden megvan a raktĂˇrban.');
         }
 
         foreach ($missing as $m) {
@@ -451,7 +451,7 @@ class RecipeController extends Controller
         }
 
         return redirect()->route('shopping.index', ['hid' => $hid])
-            ->with('success', 'Hiányzók hozzáadva a bevásárlólistához.');
+            ->with('success', 'HiĂˇnyzĂłk hozzĂˇadva a bevĂˇsĂˇrlĂłlistĂˇhoz.');
     }
 
     public function consume(Request $request, int $id)
@@ -467,7 +467,7 @@ class RecipeController extends Controller
 
         $meal = $this->apiDetails($id);
         if (!$meal) {
-            return redirect()->route('recipes.show', ['id' => $id, 'hid' => $hid, 'cook' => 'err', 'msg' => 'Nem található a recept.']);
+            return redirect()->route('recipes.show', ['id' => $id, 'hid' => $hid, 'cook' => 'err', 'msg' => 'Nem talĂˇlhatĂł a recept.']);
         }
 
         $ings = [];
@@ -487,13 +487,13 @@ class RecipeController extends Controller
         }
 
         if (empty($ings)) {
-            return redirect()->route('recipes.show', ['id' => $id, 'hid' => $hid, 'cook' => 'err', 'msg' => 'Nincs hozzávaló a receptben.']);
+            return redirect()->route('recipes.show', ['id' => $id, 'hid' => $hid, 'cook' => 'err', 'msg' => 'Nincs hozzĂˇvalĂł a receptben.']);
         }
 
         try {
             DB::beginTransaction();
 
-            // 1) elő-ellenőrzés: mindenből van-e valami (angol + magyar névvel)
+            // 1) elĹ‘-ellenĹ‘rzĂ©s: mindenbĹ‘l van-e valami (angol + magyar nĂ©vvel)
             foreach ($ings as $ing) {
                 $rows = $this->inventoryRowsForIngredient($hid, $ing['name']);
                 if (empty($rows)) {
@@ -502,12 +502,12 @@ class RecipeController extends Controller
                         'id' => $id,
                         'hid' => $hid,
                         'cook' => 'err',
-                        'msg' => 'Nincs a raktárban: '.$ing['name']
+                        'msg' => 'Nincs a raktĂˇrban: '.$ing['name']
                     ]);
                 }
             }
 
-            // 2) levonás
+            // 2) levonĂˇs
             foreach ($ings as $ing) {
                 $rows = $this->inventoryRowsForIngredient($hid, $ing['name']);
 
@@ -552,7 +552,7 @@ class RecipeController extends Controller
                         'id' => $id,
                         'hid' => $hid,
                         'cook' => 'err',
-                        'msg' => 'Nincs elég a raktárban: '.$ing['name'].' ('.$ing['measure'].')'
+                        'msg' => 'Nincs elĂ©g a raktĂˇrban: '.$ing['name'].' ('.$ing['measure'].')'
                     ]);
                 }
             }
@@ -577,57 +577,63 @@ class RecipeController extends Controller
             'hid' => $hid,
         ]);
     }
-
     public function storeOwn(Request $request)
-    {
-        $userId = (int) session('user_id');
+{
+    $userId = (int) session('user_id');
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'ingredients' => 'required|array|min:1',
-            'ingredients.*' => 'nullable|string|max:255',
-            
-        ]);
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'instructions' => 'nullable|string',
+        'ingredients' => 'required|array|min:1',
+        'ingredients.*' => 'nullable|string|max:255',
+        'ingredient_units' => 'nullable|array',
+        'ingredient_units.*' => 'nullable|string|max:50',
+    ]);
 
-        $title = trim((string)$request->input('title'));
-        $ingsRaw = $request->input('ingredients', []);
-        $ings = [];
-        foreach ($ingsRaw as $x) {
-            $t = trim((string)$x);
-            if ($t !== '') $ings[] = $t;
-        }
+    $title = trim((string)$request->input('title'));
+    $instructions = trim((string)$request->input('instructions', ''));
+    $ingsRaw = $request->input('ingredients', []);
+    $unitsRaw = $request->input('ingredient_units', []);
+    $ings = [];
 
-        
+    foreach ($ingsRaw as $idx => $x) {
+        $ingredient = trim((string)$x);
+        if ($ingredient === '') continue;
 
-        if ($title === '' || empty($ings)) {
-            return back()->withErrors(['Enter a title and at least one ingredient.'])->withInput();
-        }
+        $unit = trim((string)($unitsRaw[$idx] ?? ''));
+        $stored = $unit !== '' ? ($ingredient . ' (' . $unit . ')') : $ingredient;
+        $ings[] = mb_substr($stored, 0, 255, 'UTF-8');
+    }
 
-        DB::beginTransaction();
-        try {
-            DB::insert(
-    "INSERT INTO recipes (user_id, title, created_at) VALUES (?, ?, NOW())",
-    [$userId, $title]
+    if ($title === '' || empty($ings)) {
+        return back()->withErrors(['Enter a title and at least one ingredient.'])->withInput();
+    }
+
+    DB::beginTransaction();
+    try {
+        DB::insert(
+            "INSERT INTO recipes (user_id, title, instructions, created_at) VALUES (?, ?, ?, NOW())",
+            [$userId, $title, ($instructions !== '' ? $instructions : null)]
         );
 
-            $rid = (int)DB::getPdo()->lastInsertId();
+        $rid = (int)DB::getPdo()->lastInsertId();
 
-            foreach ($ings as $ing) {
-                DB::insert("INSERT INTO recipe_ingredients (recipe_id, ingredient) VALUES (?, ?)", [$rid, $ing]);
-            }
-
-            DB::commit();
-
-            $hid = (int) $request->input('hid', 0);
-
-            return redirect()->route('recipes.own.show', ['id' => $rid, 'hid' => $hid])
-                ->with('success', 'Recipe saved.');
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->withErrors(['Hiba: '.$e->getMessage()])->withInput();
+        foreach ($ings as $ing) {
+            DB::insert("INSERT INTO recipe_ingredients (recipe_id, ingredient) VALUES (?, ?)", [$rid, $ing]);
         }
+
+        DB::commit();
+
+        $hid = (int) $request->input('hid', 0);
+
+        return redirect()->route('recipes.own.show', ['id' => $rid, 'hid' => $hid])
+            ->with('success', 'Recipe saved.');
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return back()->withErrors(['Hiba: '.$e->getMessage()])->withInput();
     }
+}
 
     public function showOwn(Request $request, int $id)
     {
@@ -648,40 +654,15 @@ class RecipeController extends Controller
     }
 
     /* =========================
-       Fordítás (MyMemory) – DB nélkül
+       FordĂ­tĂˇs (MyMemory) â€“ DB nĂ©lkĂĽl
        ========================= */
-    private function translateEnToHuShort(string $text, bool $allowRemote = true): string
-    {
-        $text = trim((string)$text);
-        if ($text === '') return $text;
+   
 
-        $key = 'tr:' . mb_strtolower($text, 'UTF-8');
-        if (isset($this->trCache[$key])) return $this->trCache[$key];
 
-        if (preg_match('/[áéíóöőúüű]/iu', $text)) {
-            return $this->trCache[$key] = $text;
-        }
 
-        if (!$allowRemote) {
-            return $this->trCache[$key] = $text;
-        }
 
-        $url = 'https://api.mymemory.translated.net/get?q=' . urlencode($text) . '&langpair=en|hu';
-        $raw = $this->curlGetFast($url);
 
-        $hu = $data['responseData']['translatedText'] ?? $text;
-$hu = trim((string)$hu);
-
-// MyMemory limit / warning szűrés (ne ezt írjuk ki címnek)
-if (stripos($hu, 'MYMEMORY WARNING') !== false || stripos($hu, 'USED ALL AVAILABLE FREE TRANSLATIONS') !== false) {
-    return $text; // essünk vissza angolra
-}
-
-return $hu !== '' ? $hu : $text;
-
-        return $this->trCache[$key] = $hu;
-    }
-
+  
     private function splitTextForTranslation(string $text, int $maxLen = 380): array
     {
         $text = trim((string)$text);
@@ -776,10 +757,12 @@ return $hu !== '' ? $hu : $text;
             DB::delete("DELETE FROM recipe_ingredients WHERE recipe_id = ?", [$id]);
             DB::delete("DELETE FROM recipes WHERE id = ? AND user_id = ?", [$id, $userId]);
             DB::commit();
-            return redirect()->route('recipes.index')->with('success', 'Recept törölve.');
+            return redirect()->route('recipes.index')->with('success', 'Recept tĂ¶rĂ¶lve.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withErrors(['Hiba: '.$e->getMessage()]);
         }
     }
 }
+
+
