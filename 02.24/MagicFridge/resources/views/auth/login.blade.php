@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Bejelentkezés – MagicFridge')
+@section('title', 'BejelentkezĂ©s â€“ MagicFridge')
 
 @section('content')
   <div class="card card-narrow">
@@ -9,6 +9,9 @@
 
     @if($errors->any())
       <div class="error mt-3">{{ $errors->first() }}</div>
+    @endif
+    @if(session('status'))
+      <div class="success mt-3">{{ session('status') }}</div>
     @endif
 
     <form method="POST" action="{{ route('login.do') }}">
@@ -26,7 +29,8 @@
 
       <button type="submit">Login</button>
 
-      <p class="small mt-3">Még nincs fiókod? <a href="{{ route('register.form') }}">Register here.</a></p>
+      <p class="small mt-3">MĂ©g nincs fiĂłkod? <a href="{{ route('register.form') }}">Register here.</a></p>
     </form>
   </div>
 @endsection
+

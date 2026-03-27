@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -24,15 +23,17 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $user = DB::table('users')->where('email', $request->email)->first();
+        $user = DB::table('users')->where('email', trim((string)$request->email))->first();
 
         if (!$user || !password_verify($request->password, $user->password)) {
-            return back()->withErrors(['email' => 'Incorrect email or password..'])->onlyInput('email');
+            return back()->withErrors(['email' => 'Incorrect email or password.'])->onlyInput('email');
         }
 
-        // ✅ EMAIL HITLESÍTÉS ELLENŐRZÉS
-        // Ha nincs hitelesítve, ne engedjük be
-       
+        if (empty($user->email_verified_at)) {
+            return back()
+                ->withErrors(['email' => 'Please verify your email first. Check your inbox (or laravel.log if MAIL_MAILER=log).'])
+                ->onlyInput('email');
+        }
 
         session([
             'user_id' => $user->id,
@@ -60,54 +61,38 @@ class AuthController extends Controller
             'full_name' => ['required', 'string', 'max:40'],
             'email'     => ['required', 'email', 'max:40', Rule::unique('users', 'email')],
             'password'  => ['required', 'string', 'min:4', 'max:40', 'confirmed'],
-        ], [
-            'full_name.required' => 'All fields are required.',
-            'email.required'     => 'All fields are required.',
-            'password.required'  => 'All fields are required.',
-            'email.unique'       => 'This email address is already in use.',
-            'password.confirmed' => 'The passwords do not match.',
         ]);
 
         $token = Str::random(64);
 
-        // ✅ User mentése + token
         DB::table('users')->insert([
             'full_name' => trim($validated['full_name']),
-            'email'     => trim($validated['email']),
-            'password'  => Hash::make($validated['password']),
-
-            // email hitelesítés mezők
+            'email' => trim($validated['email']),
+            'password' => Hash::make($validated['password']),
             'email_verify_token' => $token,
-            'email_verified_at'  => null,
-
+            'email_verified_at' => null,
             'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        // ✅ Email küldés hitelesítő linkkel
         $verifyUrl = route('verify.email', ['token' => $token]);
 
         try {
             Mail::raw(
-                "Szia!\n\nKattints a fiókod hitelesítéséhez:\n$verifyUrl\n\nHa nem te regisztráltál, hagyd figyelmen kívül.",
+                "Szia!\n\nKattints ide a fiók hitelesítéséhez:\n$verifyUrl\n\nMagicFridge",
                 function ($message) use ($validated) {
-                    $message->to($validated['email'])
-                        ->subject('MagicFridge – Email hitelesítés');
+                    $message->to($validated['email'])->subject('MagicFridge - Email verification');
                 }
             );
         } catch (\Throwable $e) {
-            // Ha nincs beállítva a mail, akkor se haljon el a regisztráció,
-            // csak jelezzük, hogy nem ment ki.
-            return redirect()
-                ->route('login.form')
-                ->with('status', 'Sikeres regisztráció, de nem sikerült emailt küldeni. Állítsd be a MAIL-t az .env-ben.');
+            return redirect()->route('login.form')
+                ->with('status', 'Regisztráció ok, de email küldés hiba. Teszthez állítsd MAIL_MAILER=log-ra.');
         }
 
-        return redirect()
-            ->route('login.form')
-            ->with('status', 'Sikeres regisztráció! Nézd meg az emailed és hitelesítsd a fiókot a belépéshez.');
+        return redirect()->route('login.form')
+            ->with('status', 'Regisztráció sikeres! Ellenőrizd az emailed és kattints a verify linkre.');
     }
 
-    // ✅ VERIFY LINK KEZELÉS
     public function verifyEmail(Request $request)
     {
         $token = trim((string)$request->query('token', ''));
@@ -122,14 +107,14 @@ class AuthController extends Controller
             return redirect()->route('login.form')->withErrors(['Érvénytelen vagy lejárt hitelesítő link.']);
         }
 
-        // ha már hitelesítve van
         if (!empty($u->email_verified_at)) {
-            return redirect()->route('login.form')->with('status', 'Az email már hitelesítve van, be tudsz lépni.');
+            return redirect()->route('login.form')->with('status', 'Az email már hitelesítve van.');
         }
 
         DB::table('users')->where('id', $u->id)->update([
             'email_verified_at' => now(),
             'email_verify_token' => null,
+            'updated_at' => now(),
         ]);
 
         return redirect()->route('login.form')->with('status', 'Email hitelesítve! Most már be tudsz lépni.');
