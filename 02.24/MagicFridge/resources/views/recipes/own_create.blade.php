@@ -13,7 +13,7 @@
           <div class="note">
             <div style="font-weight:900; margin-bottom:8px;">✨ Quick tips</div>
             <div class="muted">
-              Add a title and at least 1 ingredient. If you write the preparation in steps (1), 2), 3)), the recipe will look cleaner.
+              Add a title and at least 1 ingredient. If you write the preparation in steps (1), (2), (3), the recipe will look cleaner.
             </div>
           </div>
 
