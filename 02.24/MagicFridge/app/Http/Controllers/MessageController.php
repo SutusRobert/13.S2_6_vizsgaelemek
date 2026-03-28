@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,10 +10,10 @@ class MessageController extends Controller
     {
         $userId = (int) session('user_id');
 
-        // 1) lejáró / lejárt cuccokból automata üzenet generálás
+        // 1) generate automatic messages for expiring/expired items
         $this->createExpiryMessagesForUser($userId);
 
-        // 2) üzenetek listázása
+        // 2) list messages
         $messages = DB::select("
             SELECT *
             FROM messages
@@ -29,7 +28,7 @@ class MessageController extends Controller
 
     private function createExpiryMessagesForUser(int $userId): void
     {
-        // user háztartásai
+        // user households
         $households = DB::select("
             SELECT hm.household_id
             FROM household_members hm
@@ -43,7 +42,7 @@ class MessageController extends Controller
         // IN (?, ?, ?) placeholder
         $in = implode(',', array_fill(0, count($hidList), '?'));
 
-        // lejárt vagy 2 napon belül lejár
+        // expired or expires within 2 days
         $items = DB::select("
             SELECT id, household_id, name, expires_at
             FROM inventory_items
@@ -57,14 +56,14 @@ class MessageController extends Controller
         foreach ($items as $it) {
             $dateStr = (string)$it->expires_at;
 
-            $title = 'Lejárat';
-            $body  = "Lejár/lejárt: {$it->name} (dátum: {$dateStr}).";
+            $title = 'Expiration';
+            $body  = "Expiring/expired: {$it->name} (date: {$dateStr}).";
 
             DB::table('messages')->insert([
                 'user_id'     => $userId,
                 'title'       => $title,
                 'body'        => $body,
-                'link_url'    => 'inventory:'.$it->household_id, // csak jelzés (ha akarod később kattinthatóvá)
+                'link_url'    => 'inventory:'.$it->household_id, // indicator only (can become clickable later)
                 'is_read'     => 0,
                 'created_at'  => now(),
             ]);
@@ -137,7 +136,7 @@ class MessageController extends Controller
         if ($invite->status !== 'pending') return back()->withErrors(['This invitation has already been processed.']);
 
         if ($action === 'accept') {
-            // már tag?
+            // already a member?
             $exists = DB::selectOne("
                 SELECT id FROM household_members
                 WHERE household_id = ? AND member_id = ?
@@ -155,12 +154,12 @@ class MessageController extends Controller
             DB::update("UPDATE household_invites SET status='accepted' WHERE id = ?", [$inviteId]);
             DB::update("UPDATE messages SET is_read=1 WHERE id = ? AND user_id = ?", [$msgId, $userId]);
 
-            return back()->with('success', 'Meghívás elfogadva!');
+            return back()->with('success', 'Invitation accepted!');
         }
 
         DB::update("UPDATE household_invites SET status='declined' WHERE id = ?", [$inviteId]);
         DB::update("UPDATE messages SET is_read=1 WHERE id = ? AND user_id = ?", [$msgId, $userId]);
 
-        return back()->with('success', 'Meghívás elutasítva.');
+        return back()->with('success', 'Invitation declined.');
     }
 }

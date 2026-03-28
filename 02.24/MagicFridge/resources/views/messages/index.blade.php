@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Üzenetek – MagicFridge')
+@section('title', 'Messages - MagicFridge')
 
 @section('content')
   <div class="card">

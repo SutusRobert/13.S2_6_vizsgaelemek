@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Háztartás – MagicFridge')
+@section('title','Household - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">
@@ -40,7 +40,7 @@
         @foreach($members as $m)
           @php
             $isOwner = (int)$household->owner_id === (int)session('user_id');
-            $canPromote = $isOwner && ((string)$m->role !== 'admin'); // a jelenlegi logikád ezt engedi
+            $canPromote = $isOwner && ((string)$m->role !== 'admin'); // current logic allows this
           @endphp
 
           <div style="
@@ -66,7 +66,7 @@
                   <button class="btn btn-secondary" type="submit">Add role</button>
                 </form>
               @else
-                {{-- ha nem tulaj vagy admin a tag: nincs gomb --}}
+                {{-- if not owner or admin member: no button --}}
               @endif
             </div>
           </div>

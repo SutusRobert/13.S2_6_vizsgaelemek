@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Bevásárlólista – MagicFridge')
+@section('title','Shopping List - MagicFridge')
 
 @section('content')
 <div class="card" style="max-width: 1100px; width:100%;">
@@ -11,7 +11,7 @@
     </div>
 
     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-      {{-- Háztartás választó (GET) --}}
+      {{-- Household selector (GET) --}}
       <form method="get" action="{{ route('shopping.index') }}" style="margin:0; display:flex; gap:10px; align-items:center;">
         <label class="small" style="opacity:.8;">Household</label>
         <select name="hid" onchange="this.form.submit()">
@@ -24,12 +24,12 @@
         </select>
       </form>
 
-      {{-- Jobb felső gombsor --}}
+      {{-- Right-side top button row --}}
       <div class="sl-printbar">
         <button type="button" class="btn btn-secondary" onclick="window.print()">Print</button>
 
         <form method="post" action="{{ route('shopping.post') }}" style="margin:0;"
-              onsubmit="return confirm('Biztos megveszed AZ ÖSSZES tételt? Ez fel is tölti a raktárba.');">
+              onsubmit="return confirm('Are you sure you want to buy ALL items? This also adds them to inventory.');">
           @csrf
           <input type="hidden" name="action" value="buy_all">
           <input type="hidden" name="hid" value="{{ (int)$householdId }}">
@@ -37,7 +37,7 @@
         </form>
 
         <form method="post" action="{{ route('shopping.post') }}" style="margin:0;"
-              onsubmit="return confirm('Biztos törlöd AZ ÖSSZES tételt a bevásárlólistából?');">
+              onsubmit="return confirm('Are you sure you want to delete ALL items from the shopping list?');">
           @csrf
           <input type="hidden" name="action" value="clear_all">
           <input type="hidden" name="hid" value="{{ (int)$householdId }}">
@@ -55,14 +55,14 @@
     </div>
   </div>
 
-  {{-- Flash üzenetek --}}
+  {{-- Flash messages --}}
   @if(session('success'))
     <div class="success mt-3">{{ session('success') }}</div>
   @endif
 
   @if($errors->any())
     <div class="error mt-3">
-      <strong>Hiba:</strong>
+      <strong>Error:</strong>
       <ul style="margin:8px 0 0 18px;">
         @foreach($errors->all() as $e)
           <li>{{ $e }}</li>
@@ -124,7 +124,7 @@
         $bought = ((int)($it->is_bought ?? 0) === 1);
 
         $loc = (string)($it->location ?? 'pantry');
-        $locLabel = $loc === 'fridge' ? 'Hűtő' : ($loc === 'freezer' ? 'Fagyasztó' : 'Kamra');
+        $locLabel = $loc === 'fridge' ? 'Fridge' : ($loc === 'freezer' ? 'Freezer' : 'Pantry');
 
         $qty = (string)($it->quantity ?? '1');
         $unit = (string)($it->unit ?? '');
@@ -150,9 +150,9 @@
             <div class="sl-name {{ $bought ? 'sl-done' : '' }}">
               {{ $it->name }}
               <span class="small" style="opacity:.75;">
-                — {{ $qty }} {{ $unit }}
+                â€” {{ $qty }} {{ $unit }}
               </span>
-              <span class="small" style="opacity:.75;"> • {{ $locLabel }}</span>
+              <span class="small" style="opacity:.75;"> â€˘ {{ $locLabel }}</span>
             </div>
 
             @if($note !== '')
@@ -167,7 +167,7 @@
 
         <div class="sl-actions">
           {{-- Delete --}}
-          <form method="post" action="{{ route('shopping.post') }}" style="margin:0;" onsubmit="return confirm('Biztos törlöd?');">
+          <form method="post" action="{{ route('shopping.post') }}" style="margin:0;" onsubmit="return confirm('Biztos tĂ¶rlĂ¶d?');">
             @csrf
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="hid" value="{{ (int)$householdId }}">
@@ -180,8 +180,9 @@
   </div>
 
   <div class="small mt-4" style="opacity:.75;">
-Tip: if you click “Purchased,” the item will automatically be added to the inventory in the selected location.
+Tip: if you click â€śPurchased,â€ť the item will automatically be added to the inventory in the selected location.
   </div>
 
 </div>
 @endsection
+

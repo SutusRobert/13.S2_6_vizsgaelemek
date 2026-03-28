@@ -9,7 +9,7 @@
 </head>
 <body>
 
-  {{-- Buborék háttér --}}
+  {{-- Bubble background --}}
   <div class="bubbles" aria-hidden="true">
     @for($i=0; $i<20; $i++)
       <span></span>

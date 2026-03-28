@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', ($title ?? 'Recept').' – Receptek')
+@section('title', ($title ?? 'Recipe').' - Recipes')
 
 @section('content')
 <div class="main-wrapper">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    {{-- Siker/hiba üzenetek --}}
+    {{-- Success/error messages --}}
     @if(session('success'))
       <div class="success mt-3">{{ session('success') }}</div>
     @endif
@@ -37,7 +37,7 @@
       <div class="error mt-3">{{ $errors->first() }}</div>
     @endif
 
-    {{-- Főzés (levonás) eredménye --}}
+    {{-- Cooking (deduction) result --}}
     @if(($cook ?? '') === 'ok')
       <div class="success mt-3">✅ Deducted from stock. Enjoy your meal!!</div>
     @endif
@@ -83,7 +83,7 @@
             @php
               $has = (bool)($ing['has'] ?? false);
 
-              // ✅ MAGYAR NÉV előnyben, ha van
+              // Prefer Hungarian name when available
               $name = (string)($ing['name_hu'] ?? $ing['name'] ?? '');
 
               $measure = (string)($ing['measure'] ?? '');
@@ -112,7 +112,7 @@
                 @else
                   <span class="badge" style="background: rgba(255,80,80,.25); border:1px solid rgba(255,80,80,.35);">Missing</span>
 
-                  {{-- Bevásárlólistára már a magyar nevet küldjük --}}
+                  {{-- Send Hungarian name to shopping list --}}
                   <input type="hidden" name="items[{{ $idx }}][name]" value="{{ $name }}">
                   <input type="hidden" name="items[{{ $idx }}][measure]" value="{{ $measure }}">
 

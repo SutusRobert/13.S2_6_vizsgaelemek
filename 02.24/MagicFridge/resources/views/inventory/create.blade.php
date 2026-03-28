@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Raktár – MagicFridge')
+@section('title','Inventory - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">

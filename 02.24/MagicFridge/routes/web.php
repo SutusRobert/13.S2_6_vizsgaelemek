@@ -14,9 +14,9 @@ use App\Http\Controllers\RecipeController;
 
 
 
-Route::get('/verify-email', [\App\Http\Controllers\AuthController::class, 'verifyEmail'])->name('verify.email');
+Route::get('/verify-email/{token}', [\App\Http\Controllers\AuthController::class, 'verifyEmail'])->name('verify.email');
 Route::middleware('logged')->group(function () {
-    // Recipes (API + főzés)
+    // Recipes (API + cooking)
     Route::get('/recipes', [\App\Http\Controllers\RecipeController::class, 'index'])->name('recipes.index');
     Route::get('/recipes/{id}', [\App\Http\Controllers\RecipeController::class, 'show'])->whereNumber('id')->name('recipes.show');
     Route::post('/recipes/{id}/missing-to-shopping', [\App\Http\Controllers\RecipeController::class, 'addMissingToShopping'])->whereNumber('id')->name('recipes.missingToShopping');
@@ -45,17 +45,17 @@ Route::post('/recipes/{id}/consume', [RecipeController::class, 'consume'])->name
 Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
 Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
 
-// HIÁNYZÓK -> bevásárlólista (API receptből)
+// MISSING -> shopping list (from API recipe)
 Route::post('/recipes/{id}/missing-to-shopping', [RecipeController::class, 'addMissingToShopping'])
     ->name('recipes.missingToShopping');
 
 
-// Recipes (API + főzés)
+// Recipes (API + cooking)
 Route::get('/recipes', [\App\Http\Controllers\RecipeController::class, 'index'])->name('recipes.index');
 Route::get('/recipes/{id}', [\App\Http\Controllers\RecipeController::class, 'show'])->whereNumber('id')->name('recipes.show');
 Route::post('/recipes/{id}/consume', [\App\Http\Controllers\RecipeController::class, 'consume'])->whereNumber('id')->name('recipes.consume');
 
-// Own recipes (egyszerű verzió a DB dump alapján)
+// Own recipes (simple version based on DB dump)
 Route::get('/recipes/own/create', [\App\Http\Controllers\RecipeController::class, 'createOwn'])->name('recipes.own.create');
 Route::post('/recipes/own', [\App\Http\Controllers\RecipeController::class, 'storeOwn'])->name('recipes.own.store');
 Route::get('/recipes/own/{id}', [\App\Http\Controllers\RecipeController::class, 'showOwn'])->whereNumber('id')->name('recipes.own.show');
@@ -66,7 +66,7 @@ Route::post('/recipes/own/{id}/delete', [\App\Http\Controllers\RecipeController:
 Route::get('/shopping', [ShoppingListController::class, 'index'])->name('shopping.index');
 Route::post('/shopping', [ShoppingListController::class, 'post'])->name('shopping.post');
 
-// (opcionális alias, ha máshonnan /shopping/list-re linkelsz)
+// (optional alias if you link to /shopping/list from somewhere else)
 Route::get('/shopping/list', [ShoppingListController::class, 'index'])->name('shopping.list');
 Route::post('/shopping/list', [ShoppingListController::class, 'post'])->name('shopping.list.post');
 
@@ -76,7 +76,7 @@ Route::get('/', function () {
     return redirect()->route('login.form');
 })->name('home');
 
-// debug: megmutatja, melyik mappából fut a Laravel
+// debug: shows which folder Laravel is running from
 Route::get('/__where', function () {
     return base_path();
 });
@@ -85,6 +85,7 @@ Route::get('/__where', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login.form');
 Route::post('/login', [AuthController::class, 'login'])->name('login.do');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/logout', [AuthController::class, 'logoutViaGet'])->name('logout.get');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register.form');
 Route::post('/register', [AuthController::class, 'register'])->name('register.do');
@@ -101,7 +102,7 @@ Route::middleware('logged')->group(function () {
     Route::post('/messages/read', [MessageController::class, 'markRead'])->name('messages.read');
     Route::post('/messages/delete', [MessageController::class, 'delete'])->name('messages.delete');
     
-    // Respond route (mindkettő ugyanoda mutat, hogy a blade-ből is működjön)
+    // Respond route (both point to the same handler so Blade links work)
     Route::post('/messages/invite/respond', [MessageController::class, 'respondInvite'])->name('messages.invite.respond');
     Route::post('/messages/respond', [MessageController::class, 'respondInvite'])->name('messages.respond');
 

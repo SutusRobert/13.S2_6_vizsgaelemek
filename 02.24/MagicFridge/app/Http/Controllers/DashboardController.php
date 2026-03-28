@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
@@ -10,13 +9,22 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $userId = (int) session('user_id');
-        $fullName = (string) (session('full_name') ?? '');
+        $fullName = (string) (session('full_name') ?? session('user_name') ?? '');
+
+        if ($fullName === '' && $userId > 0) {
+            try {
+                $u = DB::selectOne("SELECT full_name, name FROM users WHERE id = ? LIMIT 1", [$userId]);
+                $fullName = (string) ($u->full_name ?? ($u->name ?? ''));
+            } catch (\Throwable $e) {
+                $fullName = '';
+            }
+        }
 
         $parts = preg_split('/\s+/', trim($fullName));
         $firstName = $parts ? end($parts) : '';
-        if (!$firstName) $firstName = 'Felhasználó';
+        if (!$firstName) $firstName = 'User';
 
-        // Háztartás ID-k összeszedése (ugyanaz a logika, mint a régi dashboard.php)
+        // Collect household IDs (same logic as old dashboard.php)
         $householdIds = [];
         $sessionHid = session('household_id');
 
@@ -36,7 +44,7 @@ class DashboardController extends Controller
             }
         }
 
-        // Unread üzenetek count + top3 (ugyanaz az SQL, csak Laravel DB::select-tel)
+        // Unread message count + top3 (same SQL, via Laravel DB::select)
         $unreadCount = 0;
         $unreadPreview = [];
 

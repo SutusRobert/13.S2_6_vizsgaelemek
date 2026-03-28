@@ -45,15 +45,11 @@ class AuthController extends Controller
         try {
             Mail::to(trim($validated['email']))->send(new VerifyEmail($token, trim($validated['full_name'])));
         } catch (\Throwable $e) {
-            // Useful for debugging: show the error in UI during development
+            // Log but don't block the user — they can request a resend later
             \Log::error('Verification mail failed: ' . $e->getMessage());
-
-            return back()->withInput()->withErrors([
-                'email' => 'Could not send verification email: ' . $e->getMessage(),
-            ]);
         }
 
-        return redirect()->route('login.form')
+        return redirect()->route('login')
             ->with('info', 'Registration successful! Please check your e-mail and verify your address before logging in.');
     }
 
@@ -129,11 +125,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login.form');
-    }
-
-    public function logoutViaGet(Request $request)
-    {
-        return $this->logout($request);
+        return redirect()->route('login');
     }
 }

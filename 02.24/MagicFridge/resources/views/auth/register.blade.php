@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Regisztráció – MagicFridge')
+@section('title', 'Registration - MagicFridge')
 
 @section('content')
   <div class="card card-narrow">
-    <h2>Regisztráció</h2>
+    <h2>Registration</h2>
 
     @if($errors->any())
       <div class="error mt-3">{{ $errors->first() }}</div>

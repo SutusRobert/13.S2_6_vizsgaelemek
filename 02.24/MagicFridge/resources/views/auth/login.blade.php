@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'BejelentkezĂ©s â€“ MagicFridge')
+@section('title', 'Login - MagicFridge')
 
 @section('content')
   <div class="card card-narrow">
@@ -29,7 +29,7 @@
 
       <button type="submit">Login</button>
 
-      <p class="small mt-3">MĂ©g nincs fiĂłkod? <a href="{{ route('register.form') }}">Register here.</a></p>
+      <p class="small mt-3">No account yet? <a href="{{ route('register.form') }}">Register here.</a></p>
     </form>
   </div>
 @endsection

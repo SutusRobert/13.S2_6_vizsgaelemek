@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Receptek – MagicFridge')
+@section('title','Recipes - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">
@@ -35,12 +35,12 @@
 
     @if(is_array($api) && isset($api['_error']))
     <div style="padding:10px;background:#ff4d4d;color:white;margin-bottom:10px;">
-        API HIBA: {{ $api['_error'] }}
+        API ERROR: {{ $api['_error'] }}
     </div>
     @endif
 
 
-    {{-- Saját receptjeim --}}
+    {{-- My custom recipes --}}
 <div id="own" class="mt-4">
   <h3 style="margin:0;">Own recipes</h3>
 
@@ -73,7 +73,7 @@
             <form method="post"
                   action="{{ route('recipes.own.delete', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
                   style="margin:0;"
-                  onsubmit="return confirm('Biztos törlöd?');">
+                  onsubmit="return confirm('Biztos tĂ¶rlĂ¶d?');">
               @csrf
               <button type="submit" class="btn btn-secondary">Delete</button>
             </form>
@@ -85,7 +85,7 @@
 </div>
 
 
-    {{-- Felső sor: háztartás + keresés --}}
+    {{-- Top row: household + search --}}
     <div class="mt-3" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
       <div style="min-width:260px; flex:1;">
         <label class="small" style="opacity:.85;">Household</label>
@@ -125,16 +125,16 @@
     <h3 style="margin:0;">Recipes </h3>
 
     @php
-      // JAVÍTÁS:
-      // A controller már $api-ben küldi a listát (id, title, image)
-      // A régi név: $meals / $apiMeals
-      // Ezért normalizáljuk:
+      // JAVĂŤTĂS:
+      // Controller already sends the list in $api (id, title, image)
+      // Previous names: $meals / $apiMeals
+      // Normalize for compatibility:
       $apiMeals = $meals ?? $apiMeals ?? $api ?? [];
 
-      // ha véletlen objektum jön
+      // if an object arrives by mistake
       if (is_object($apiMeals)) $apiMeals = (array)$apiMeals;
 
-      // ha _error tömb jön, akkor ne tekintsük találatnak
+      // if an _error array arrives, do not treat it as results
       if (is_array($apiMeals) && isset($apiMeals['_error'])) {
         $apiMeals = [];
       }
@@ -150,12 +150,12 @@
       ">
         @foreach($apiMeals as $m)
           @php
-            // JAVÍTÁS:
-            // Most már támogatjuk a controller új struktúráját is:
+            // JAVĂŤTĂS:
+            // Support newer controller structure as well:
             // id, title, image
             $idMeal = (int)($m['idMeal'] ?? $m->idMeal ?? $m['id'] ?? $m->id ?? 0);
 
-            $nameEn = (string)($m['strMeal'] ?? $m->strMeal ?? $m['title_en'] ?? $m->title_en ?? 'Recept');
+            $nameEn = (string)($m['strMeal'] ?? $m->strMeal ?? $m['title_en'] ?? $m->title_en ?? 'Recipe');
 
             $thumb  = (string)($m['strMealThumb'] ?? $m->strMealThumb ?? $m['image'] ?? $m->image ?? '');
 
@@ -205,3 +205,4 @@
 }
 </style>
 @endsection
+

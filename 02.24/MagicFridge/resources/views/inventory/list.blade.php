@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Készlet – MagicFridge')
+@section('title','Inventory - MagicFridge')
 
 @php
   $today = new DateTime('today');
@@ -54,7 +54,7 @@
   <label class="small" style="opacity:.85;">Household</label>
 
   <form method="get" action="{{ route('inventory.list') }}">
-    {{-- megtartjuk a szűrőket váltáskor --}}
+    {{-- keep filters when switching --}}
     <input type="hidden" name="q" value="{{ (string)($q ?? '') }}">
     <input type="hidden" name="loc" value="{{ (string)($loc ?? '') }}">
 

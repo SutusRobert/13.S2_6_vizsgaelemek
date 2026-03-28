@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Saját recept – MagicFridge')
+@section('title','Custom recipe - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">
@@ -11,14 +11,14 @@
         <div class="side-stack">
 
           <div class="note">
-            <div style="font-weight:900; margin-bottom:8px;">✨ Gyors tippek</div>
+            <div style="font-weight:900; margin-bottom:8px;">✨ Quick tips</div>
             <div class="muted">
-              Írj címet + legalább 1 hozzávalót. Ha lépésekben írod a leírást (1), 2), 3)), sokkal szebb lesz a recept.
+              Add a title and at least 1 ingredient. If you write the preparation in steps (1), 2), 3)), the recipe will look cleaner.
             </div>
           </div>
 
           <div class="note">
-            <div style="font-weight:900; margin-bottom:10px;">⚡ Gyors műveletek</div>
+            <div style="font-weight:900; margin-bottom:10px;">⚡ Quick actions</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
               <button type="button" class="btn btn-mini" onclick="quickFill()">✨ Fast example</button>
               <button type="button" class="btn btn-mini" onclick="clearAll()">🧹 Delete</button>
@@ -29,7 +29,7 @@
           </div>
 
           <div class="note">
-            <div style="font-weight:900; margin-bottom:10px;">📌 Tipp</div>
+            <div style="font-weight:900; margin-bottom:10px;">📌 Tip</div>
             <div class="muted">
               If you want to move quickly: “Quick template,” then you just rewrite the title/ingredients.
             </div>
@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    {{-- KÖZÉP: FORM --}}
+    {{-- CENTER: FORM --}}
     <div class="create-mid">
       <div class="card" style="padding:22px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
@@ -68,14 +68,14 @@
         <label class="small" style="opacity:.85;">Preparation</label>
         <textarea name="instructions"
                   rows="6"
-                  placeholder="Írd le lépésről lépésre az elkészítést..."
+                  placeholder="Describe preparation step by step..."
                   style="width:100%; resize:vertical;"></textarea>
       </div>
 
           <div class="two-col">
             <div class="form-group">
               <label for="titleInput">Title</label>
-              <input id="titleInput" type="text" name="title" placeholder="pl. Túrós tészta" value="{{ old('title') }}" required>
+              <input id="titleInput" type="text" name="title" placeholder="e.g. Cottage cheese pasta" value="{{ old('title') }}" required>
             </div>
 
             <div class="form-group">
@@ -146,7 +146,7 @@
 </div>
 
 <style>
-  /* layout – ugyanaz a hangulat, mint a régi oldalon, de a te card/btn rendszereden belül */
+  /* layout - same feel as the old page, but within your card/button system */
   .create-row{
     max-width: 1750px;
     margin: 0 auto;
@@ -175,11 +175,23 @@
   /* Ingredient rows with remove */
   .ing-row{
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     margin-top: 10px;
   }
-  .ing-row input{ flex: 1 1 auto; width: 100%; }
+  .ing-row .ing-name{ flex: 1 1 auto; min-width: 0; }
+  .ing-row .ing-amount{ flex: 0 0 90px; width: 90px; }
+  .ing-row .ing-unit{
+    flex: 0 0 90px; width: 90px;
+    padding: 0 8px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+    color: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
   .ing-remove{
     flex: 0 0 auto;
@@ -237,16 +249,39 @@
   /* ------------------------------
      Ingredient rows (add/remove)
      ------------------------------ */
-  function createIngredientRow(value = '') {
+  function createIngredientRow(value = '', amount = '', unit = 'g') {
     const row = document.createElement('div');
     row.className = 'ing-row';
 
     const input = document.createElement('input');
     input.type = 'text';
     input.name = 'ingredients[]';
+    input.className = 'ing-name';
     input.placeholder = 'pl. Chicken breast';
     input.value = value;
     input.addEventListener('input', updatePreview);
+
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.name = 'amounts[]';
+    amountInput.className = 'ing-amount';
+    amountInput.placeholder = 'Amount';
+    amountInput.min = '0';
+    amountInput.step = 'any';
+    amountInput.value = amount;
+    amountInput.addEventListener('input', updatePreview);
+
+    const unitSelect = document.createElement('select');
+    unitSelect.name = 'units[]';
+    unitSelect.className = 'ing-unit';
+    ['g','kg','ml','l','pcs','tbsp','tsp'].forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u;
+      opt.textContent = u;
+      if (u === unit) opt.selected = true;
+      unitSelect.appendChild(opt);
+    });
+    unitSelect.addEventListener('change', updatePreview);
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -256,15 +291,14 @@
     btn.addEventListener('click', () => {
       const cont = document.getElementById('ingredients');
       row.remove();
-
-      // mindig legyen legalább 1 sor
       const rows = cont.querySelectorAll('.ing-row');
       if (rows.length === 0) cont.appendChild(createIngredientRow(''));
-
       updatePreview();
     });
 
     row.appendChild(input);
+    row.appendChild(amountInput);
+    row.appendChild(unitSelect);
     row.appendChild(btn);
     return row;
   }
@@ -352,11 +386,41 @@
      Quick sample fill (nem random, sorban)
      ------------------------------ */
  const SAMPLE_RECIPES = [
-  { title: "Chicken Breast with Pasta", ingredients: ["Chicken breast", "Pasta", "Heavy cream", "Salt", "Pepper"] },
-  { title: "Quick Bolognese", ingredients: ["Ground meat", "Tomato sauce", "Pasta", "Onion", "Garlic"] },
-  { title: "Tuna Pasta", ingredients: ["Canned tuna", "Pasta", "Sour cream", "Lemon", "Salt"] },
-  { title: "Scrambled Eggs with Cheese", ingredients: ["Eggs", "Cheese", "Salt", "Pepper", "Butter"] },
-  { title: "Vegetable Rice", ingredients: ["Rice", "Peas", "Carrot", "Corn", "Salt"] },
+  {
+    title: "Chicken Breast with Pasta",
+    ingredients: ["Chicken breast", "Pasta", "Heavy cream", "Salt", "Pepper"],
+    amounts:     ["200", "150", "100", "5", "3"],
+    units:       ["g",   "g",   "ml",  "g", "g"],
+    instructions: "1) Season chicken breast with salt and pepper.\n2) Pan-fry on both sides until golden.\n3) Cook pasta according to package. Drain.\n4) Add heavy cream to the pan, simmer 3 min.\n5) Mix pasta with sauce and serve."
+  },
+  {
+    title: "Quick Bolognese",
+    ingredients: ["Ground meat", "Tomato sauce", "Pasta", "Onion", "Garlic"],
+    amounts:     ["300", "200", "200", "1", "2"],
+    units:       ["g",   "ml",  "g",   "pcs", "pcs"],
+    instructions: "1) Dice onion and garlic, fry in oil until soft.\n2) Add ground meat and brown thoroughly.\n3) Pour in tomato sauce, simmer 10 min.\n4) Cook pasta. Drain.\n5) Plate pasta, top with bolognese sauce."
+  },
+  {
+    title: "Tuna Pasta",
+    ingredients: ["Canned tuna", "Pasta", "Sour cream", "Lemon", "Salt"],
+    amounts:     ["160", "200", "100", "0.5", "5"],
+    units:       ["g",   "g",   "ml",  "pcs",  "g"],
+    instructions: "1) Cook pasta, drain.\n2) Mix sour cream with a squeeze of lemon juice.\n3) Drain and flake the canned tuna.\n4) Toss pasta with sour cream and tuna.\n5) Season with salt and serve."
+  },
+  {
+    title: "Scrambled Eggs with Cheese",
+    ingredients: ["Eggs", "Cheese", "Salt", "Pepper", "Butter"],
+    amounts:     ["3",    "50",     "3",    "2",       "20"],
+    units:       ["pcs",  "g",      "g",    "g",       "g"],
+    instructions: "1) Crack eggs into a bowl, add salt and pepper, whisk.\n2) Melt butter in a pan on low heat.\n3) Pour in eggs and stir gently with a spatula.\n4) Remove from heat just before fully set.\n5) Top with grated cheese and serve."
+  },
+  {
+    title: "Vegetable Rice",
+    ingredients: ["Rice", "Peas", "Carrot", "Corn", "Salt"],
+    amounts:     ["200", "100", "1",      "100", "5"],
+    units:       ["g",   "g",   "pcs",    "g",   "g"],
+    instructions: "1) Cook rice in salted water, drain.\n2) Dice carrot and sauté in oil for 3 min.\n3) Add peas and corn, cook another 2 min.\n4) Mix vegetables into the rice.\n5) Season with salt and serve."
+  },
 ];
 
   function nextSampleRecipe(){
@@ -375,9 +439,16 @@
     const t = document.getElementById('titleInput');
     if (t) t.value = recipe.title;
 
+    const prep = document.querySelector('textarea[name="instructions"]');
+    if (prep) prep.value = recipe.instructions || '';
+
     const cont = document.getElementById('ingredients');
     cont.innerHTML = '';
-    recipe.ingredients.forEach(v => cont.appendChild(createIngredientRow(v)));
+    recipe.ingredients.forEach((v, i) => {
+      const amount = recipe.amounts ? (recipe.amounts[i] || '') : '';
+      const unit   = recipe.units   ? (recipe.units[i]   || 'g') : 'g';
+      cont.appendChild(createIngredientRow(v, amount, unit));
+    });
     if (cont.querySelectorAll('.ing-row').length === 0) cont.appendChild(createIngredientRow(''));
 
     updatePreview();
@@ -392,11 +463,17 @@
   window.addEventListener('DOMContentLoaded', () => {
     const cont = document.getElementById('ingredients');
 
-    // Old input visszatöltés: ha validáció után visszadob, töltsük vissza az old('ingredients')-et, ha van
+    // Reload old input: if validation fails and redirects back, repopulate old('ingredients') when present
     const oldIngredients = @json(old('ingredients', []));
+    const oldAmounts = @json(old('amounts', []));
+    const oldUnits   = @json(old('units', []));
     if (Array.isArray(oldIngredients) && oldIngredients.length > 0){
       cont.innerHTML = '';
-      oldIngredients.forEach(v => cont.appendChild(createIngredientRow(String(v ?? ''))));
+      oldIngredients.forEach((v, i) => cont.appendChild(createIngredientRow(
+        String(v ?? ''),
+        String(oldAmounts[i] ?? ''),
+        String(oldUnits[i]   ?? 'g')
+      )));
     } else {
       // induljon 6 sorral, hogy ne legyen “csupasz”
       cont.innerHTML = '';
