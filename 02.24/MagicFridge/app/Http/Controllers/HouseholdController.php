@@ -42,18 +42,16 @@ class HouseholdController extends Controller
             ]);
             $householdId = (int) DB::getPdo()->lastInsertId();
 
-            // tulaj admin tag
             DB::table('household_members')->insert([
                 'household_id' => $householdId,
                 'member_id' => $userId,
-                'role' => 'tag',
+                'role' => 'member',
 
             ]);
 
             $household = DB::selectOne("SELECT * FROM households WHERE id = ? LIMIT 1", [$householdId]);
         }
 
-        // tagok
         $members = DB::select("
             SELECT hm.id AS hm_id, u.id AS user_id, u.full_name, hm.role
             FROM household_members hm
@@ -159,10 +157,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['No permission.']);
         }
 
-        $newRole = ($row->role === 'basic user') ? 'tag' : 'basic user';
-
-
-        $newRole = ($row->role === 'basic user') ? 'tag' : 'basic user';
+        $newRole = ($row->role === 'basic user') ? 'member' : 'basic user';
 
         DB::update("UPDATE household_members SET role = ? WHERE id = ?", [$newRole, $hmId]);
 

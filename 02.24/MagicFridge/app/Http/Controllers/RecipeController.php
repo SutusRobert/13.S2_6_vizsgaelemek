@@ -173,23 +173,149 @@ class RecipeController extends Controller
         return [1.0, null];
     }
 
-    private function convertQty(float $qty, ?string $fromUnit, ?string $toUnit): array
+    private function canonicalUnit(?string $unit): ?string
     {
-        $fu = $fromUnit ? $this->normalizeForMatch($fromUnit) : null;
-        $tu = $toUnit ? $this->normalizeForMatch($toUnit) : null;
+        if ($unit === null) return null;
 
-        if ($tu === null || $tu === '') return [$qty, true];
-        if ($fu === null || $fu === '') return [$qty, true];
+        $u = $this->normalizeForMatch($unit);
+        $u = rtrim($u, '.');
 
         $map = [
             'grams' => 'g', 'gram' => 'g',
-            'kilograms' => 'kg', 'kilogram' => 'kg',
+            'kilograms' => 'kg', 'kilogram' => 'kg', 'kgs' => 'kg',
             'milliliters' => 'ml', 'milliliter' => 'ml',
             'liters' => 'l', 'liter' => 'l',
-            'pcs' => 'db', 'piece' => 'db', 'pieces' => 'db'
+            'tablespoon' => 'tbsp', 'tablespoons' => 'tbsp', 'tblsp' => 'tbsp', 'tbs' => 'tbsp',
+            'teaspoon' => 'tsp', 'teaspoons' => 'tsp',
+            'cups' => 'cup',
+            'ounces' => 'oz', 'ounce' => 'oz',
+            'pounds' => 'lb', 'pound' => 'lb', 'lbs' => 'lb',
+            'pcs' => 'db', 'piece' => 'db', 'pieces' => 'db',
+            'clove' => 'db', 'cloves' => 'db',
+            'large' => 'db', 'small' => 'db',
         ];
-        if (isset($map[$fu])) $fu = $map[$fu];
-        if (isset($map[$tu])) $tu = $map[$tu];
+
+        return $map[$u] ?? $u;
+    }
+
+    private function ingredientDensityGPerMl(string $name): ?float
+    {
+        $n = $this->normalizeForMatch($name);
+
+        if (str_contains($n, 'honey') || str_contains($n, 'mez')) return 1.4;
+        if (str_contains($n, 'sugar') || str_contains($n, 'cukor')) return 0.85;
+        if (str_contains($n, 'salt') || str_contains($n, 'so')) return 1.2;
+        if (str_contains($n, 'flour') || str_contains($n, 'liszt')) return 0.53;
+        if (str_contains($n, 'butter') || str_contains($n, 'vaj')) return 0.96;
+
+        return null;
+    }
+
+    private function recipeAmountToBase(string $name, float $qty, ?string $unit): array
+    {
+        $u = $this->canonicalUnit($unit);
+        if ($u === null || $u === '') return [$qty, null];
+
+        if ($u === 'kg') return [$qty * 1000.0, 'g'];
+        if ($u === 'g') return [$qty, 'g'];
+        if ($u === 'l') return [$qty * 1000.0, 'ml'];
+        if ($u === 'ml') return [$qty, 'ml'];
+        if ($u === 'oz') return [$qty * 28.35, 'g'];
+        if ($u === 'lb') return [$qty * 453.59, 'g'];
+        if ($u === 'tsp') return [$qty * 5.0, 'ml'];
+        if ($u === 'tbsp') return [$qty * 15.0, 'ml'];
+        if ($u === 'cup') return [$qty * 240.0, 'ml'];
+        if ($u === 'db') return [$qty, 'db'];
+
+        return [$qty, $u];
+    }
+
+    private function comparableAmount(string $name, float $qty, ?string $unit): array
+    {
+        [$baseQty, $baseUnit] = $this->recipeAmountToBase($name, $qty, $unit);
+        $density = $this->ingredientDensityGPerMl($name);
+
+        if ($baseUnit === 'ml' && $density !== null) {
+            return [$baseQty * $density, 'g'];
+        }
+
+        return [$baseQty, $baseUnit];
+    }
+
+    private function hasEnoughIngredient(int $hid, string $name, float $needQty, ?string $needUnit): bool
+    {
+        $rows = $this->inventoryRowsForIngredient($hid, $name);
+        if (empty($rows)) return false;
+
+        [$requiredQty, $requiredUnit] = $this->comparableAmount($name, $needQty, $needUnit);
+        if ($requiredUnit === null || $requiredUnit === '') return true;
+
+        $availableQty = 0.0;
+        $sawComparable = false;
+
+        foreach ($rows as $row) {
+            [$rowQty, $rowUnit] = $this->comparableAmount($name, (float)$row->quantity, $row->unit ?? null);
+
+            if ($rowUnit === null && $requiredUnit === 'db') {
+                $rowUnit = 'db';
+            }
+
+            if ($rowUnit !== $requiredUnit) continue;
+
+            $availableQty += $rowQty;
+            $sawComparable = true;
+        }
+
+        if (!$sawComparable) return false;
+
+        return $availableQty + 0.00001 >= $requiredQty;
+    }
+
+    private function storePackForIngredient(string $name, float $recipeQty, ?string $recipeUnit): array
+    {
+        $n = $this->normalizeForMatch($name);
+        [$needQty, $needUnit] = $this->recipeAmountToBase($name, $recipeQty, $recipeUnit);
+
+        $density = $this->ingredientDensityGPerMl($name);
+        if ($needUnit === 'ml' && $density !== null) {
+            $needQty *= $density;
+            $needUnit = 'g';
+        }
+
+        if (str_contains($n, 'honey') || str_contains($n, 'mez')) return [max(500.0, ceil(max($needQty, 1.0) / 500.0) * 500.0), 'g'];
+        if (str_contains($n, 'salt') || str_contains($n, 'so')) return [max(500.0, ceil(max($needQty, 1.0) / 500.0) * 500.0), 'g'];
+        if (str_contains($n, 'sugar') || str_contains($n, 'cukor')) return [max(1000.0, ceil(max($needQty, 1.0) / 1000.0) * 1000.0), 'g'];
+        if (str_contains($n, 'flour') || str_contains($n, 'liszt')) return [max(1000.0, ceil(max($needQty, 1.0) / 1000.0) * 1000.0), 'g'];
+        if (str_contains($n, 'rice') || str_contains($n, 'rizs') || str_contains($n, 'pasta')) return [max(500.0, ceil(max($needQty, 1.0) / 500.0) * 500.0), 'g'];
+        if (str_contains($n, 'paprika') || str_contains($n, 'pepper') || str_contains($n, 'cumin') || str_contains($n, 'turmeric') || str_contains($n, 'cinnamon')) return [max(50.0, ceil(max($needQty, 1.0) / 50.0) * 50.0), 'g'];
+        if (str_contains($n, 'oil') || str_contains($n, 'olaj') || str_contains($n, 'vinegar') || str_contains($n, 'ecet')) return [max(1000.0, ceil(max($needQty, 1.0) / 1000.0) * 1000.0), 'ml'];
+        if (str_contains($n, 'milk') || str_contains($n, 'tej')) return [max(1000.0, ceil(max($needQty, 1.0) / 1000.0) * 1000.0), 'ml'];
+        if (str_contains($n, 'cream') || str_contains($n, 'tejszin')) return [max(200.0, ceil(max($needQty, 1.0) / 200.0) * 200.0), 'ml'];
+        if (str_contains($n, 'yogurt')) return [max(150.0, ceil(max($needQty, 1.0) / 150.0) * 150.0), 'g'];
+
+        if (str_contains($n, 'egg')) {
+            return [max(6.0, ceil($needQty > 0 ? $needQty : 1.0)), 'pcs'];
+        }
+
+        if (str_contains($n, 'chicken') || str_contains($n, 'beef') || str_contains($n, 'pork') || str_contains($n, 'fish')) {
+            $packs = ($needUnit === 'g' && $needQty > 0) ? ceil($needQty / 500.0) : 1.0;
+            return [max(1.0, $packs) * 500.0, 'g'];
+        }
+
+        if ($needUnit === 'g') return [max(100.0, ceil(max($needQty, 1.0) / 100.0) * 100.0), 'g'];
+        if ($needUnit === 'ml') return [max(250.0, ceil(max($needQty, 1.0) / 250.0) * 250.0), 'ml'];
+        if ($needUnit === 'db') return [max(1.0, ceil($needQty)), 'pcs'];
+
+        return [1.0, 'pcs'];
+    }
+
+    private function convertQty(float $qty, ?string $fromUnit, ?string $toUnit, string $name = ''): array
+    {
+        $fu = $this->canonicalUnit($fromUnit);
+        $tu = $this->canonicalUnit($toUnit);
+
+        if ($tu === null || $tu === '') return [$qty, true];
+        if ($fu === null || $fu === '') return [$qty, true];
 
         if ($fu === $tu) return [$qty, true];
 
@@ -198,6 +324,21 @@ class RecipeController extends Controller
 
         if ($fu === 'ml' && $tu === 'l') return [$qty / 1000.0, true];
         if ($fu === 'l' && $tu === 'ml') return [$qty * 1000.0, true];
+
+        [$baseQty, $baseUnit] = $this->recipeAmountToBase($name, $qty, $fu);
+        $density = $this->ingredientDensityGPerMl($name);
+
+        if ($baseUnit === 'ml' && ($tu === 'ml' || $tu === 'l')) {
+            return $this->convertQty($baseQty, 'ml', $tu, $name);
+        }
+
+        if ($baseUnit === 'ml' && $density !== null && ($tu === 'g' || $tu === 'kg')) {
+            return $this->convertQty($baseQty * $density, 'g', $tu, $name);
+        }
+
+        if ($baseUnit === 'g' && ($tu === 'g' || $tu === 'kg')) {
+            return $this->convertQty($baseQty, 'g', $tu, $name);
+        }
 
         return [$qty, false];
     }
@@ -233,6 +374,31 @@ class RecipeController extends Controller
             }
         }
         return false;
+    }
+
+    private function guessLocationForItem(string $name): string
+    {
+        $n = $this->normalizeForMatch($name);
+
+        $freezer = [
+            'frozen', 'ice cream', 'icecream',
+            'nugget', 'fries', 'fish fingers',
+            'pizza',
+        ];
+
+        $fridge = [
+            'milk', 'yogurt', 'cheese', 'cream', 'sour cream', 'butter', 'margarine',
+            'egg', 'eggs',
+            'chicken', 'turkey', 'beef', 'pork', 'fish',
+            'ham', 'sausage', 'bacon',
+            'lettuce', 'spinach', 'tomato', 'cucumber', 'pepper',
+            'strawberry', 'berry',
+        ];
+
+        foreach ($freezer as $k) if (str_contains($n, $k)) return 'freezer';
+        foreach ($fridge as $k) if (str_contains($n, $k)) return 'fridge';
+
+        return 'pantry';
     }
 
     private function inventoryRowsForIngredient(int $hid, string $ingredientEn): array
@@ -330,18 +496,14 @@ class RecipeController extends Controller
             ];
         }
 
-        $invNames = $this->householdInventoryNameList($hid);
-
         $missingCount = 0;
         $ingredientsChecked = [];
         foreach ($ingredients as $idx => $ing) {
             $nameEn = (string)$ing['name_en'];
             $nameHu = (string)$ing['name_hu'];
 
-            $has = $this->invContains($invNames, $nameEn);
-            if (!$has && $nameHu !== '') {
-                $has = $this->invContains($invNames, $nameHu);
-            }
+            [$needQty, $needUnit] = $this->parseMeasureToQtyUnit((string)$ing['measure']);
+            $has = $this->hasEnoughIngredient($hid, $nameEn, (float)($needQty > 0 ? $needQty : 1.0), $needUnit);
 
             if (!$has) $missingCount++;
 
@@ -360,6 +522,9 @@ class RecipeController extends Controller
         $titleHu = (string)($meal['strMeal'] ?? 'Recipe');
         $instructionsEn = (string)($meal['strInstructions'] ?? '');
         $instructionsHu = $instructionsEn;
+        $instructionText = trim(preg_replace('/\s+/u', ' ', $instructionsHu) ?? '');
+        $instructionSentenceCount = preg_match_all('/[.!?](\s|$)/u', $instructionText);
+        $needsMoreInstructions = mb_strlen($instructionText, 'UTF-8') < 450 || $instructionSentenceCount < 4;
 
         return view('recipes.show', [
             'hid' => $hid,
@@ -368,6 +533,9 @@ class RecipeController extends Controller
             'title' => $titleHu,
             'image' => (string)($meal['strMealThumb'] ?? ''),
             'instructions' => $instructionsHu,
+            'sourceUrl' => trim((string)($meal['strSource'] ?? '')),
+            'youtubeUrl' => trim((string)($meal['strYoutube'] ?? '')),
+            'needsMoreInstructions' => $needsMoreInstructions,
             'ingredients' => $ingredientsChecked,
             'missingCount' => $missingCount,
             'cook' => $cook,
@@ -393,25 +561,23 @@ class RecipeController extends Controller
         }
 
         $recipeTitleHu = (string)($meal['strMeal'] ?? 'Recipe');
-        $note = 'Recipe: ' . $recipeTitleHu;
-
-        $invNames = $this->householdInventoryNameList($hid);
-
         $missing = [];
         for ($i = 1; $i <= 20; $i++) {
             $ingName = trim((string)($meal["strIngredient{$i}"] ?? ''));
             $measure = trim((string)($meal["strMeasure{$i}"] ?? ''));
             if ($ingName === '') continue;
 
-            $has = $this->invContains($invNames, $ingName);
+            [$qty, $unit] = $this->parseMeasureToQtyUnit($measure);
+            $has = $this->hasEnoughIngredient($hid, $ingName, (float)($qty > 0 ? $qty : 1.0), $unit);
             if ($has) continue;
 
-            [$qty, $unit] = $this->parseMeasureToQtyUnit($measure);
+            [$storeQty, $storeUnit] = $this->storePackForIngredient($ingName, (float)($qty > 0 ? $qty : 1.0), $unit);
 
             $missing[] = [
                 'name' => $ingName,
-                'qty'  => (float)($qty > 0 ? $qty : 1.0),
-                'unit' => $unit,
+                'qty'  => (float)$storeQty,
+                'unit' => $storeUnit,
+                'measure' => $measure,
             ];
         }
 
@@ -426,10 +592,10 @@ class RecipeController extends Controller
                 'name' => $m['name'],
                 'quantity' => $m['qty'],
                 'unit' => $m['unit'],
-                'note' => $note,
+                'note' => 'Recipe: ' . $recipeTitleHu . (!empty($m['measure']) ? ' | Needed for recipe: ' . $m['measure'] : ''),
                 'is_bought' => 0,
                 'created_by' => $userId,
-                'location' => 'pantry',
+                'location' => $this->guessLocationForItem((string)$m['name']),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -502,7 +668,7 @@ class RecipeController extends Controller
                     $invQty = (float)$row->quantity;
                     $invUnit = $row->unit ?? null;
 
-                    [$needInInvUnit, $ok] = $this->convertQty($remainingNeed, $ing['unit'], $invUnit);
+                    [$needInInvUnit, $ok] = $this->convertQty($remainingNeed, $ing['unit'], $invUnit, $ing['name']);
                     if (!$ok) $needInInvUnit = $remainingNeed;
 
                     if ($invQty <= 0) continue;

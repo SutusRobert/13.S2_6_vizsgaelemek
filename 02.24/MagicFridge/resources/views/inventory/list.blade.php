@@ -15,7 +15,17 @@
         <h2 style="margin-bottom:6px;">Inventory</h2>
         <div class="small">Household: <strong>{{ $householdName }}</strong></div>
       </div>
-      <a class="btn btn-secondary" href="{{ route('inventory.create', ['hid' => $householdId]) }}">+ New item</a>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <a class="btn btn-secondary" href="{{ route('inventory.create', ['hid' => $householdId]) }}">+ New item</a>
+
+        <form method="post" action="{{ route('inventory.list.post') }}" style="margin:0;"
+              onsubmit="return confirm('Are you sure you want to delete ALL inventory items for this household?');">
+          @csrf
+          <input type="hidden" name="action" value="delete_all">
+          <input type="hidden" name="hid" value="{{ (int)$householdId }}">
+          <button type="submit" class="btn btn-secondary">Delete all</button>
+        </form>
+      </div>
     </div>
 
     @if(session('success'))
@@ -35,11 +45,11 @@
 
   <div class="form-group" style="margin-top:0;">
     <label>Location</label>
-    <select name="loc">
-      <option value="">All of them</option>
-      <option value="fridge"  {{ $loc==='fridge'?'selected':'' }}>Fridge</option>
-      <option value="freezer" {{ $loc==='freezer'?'selected':'' }}>Freezer</option>
-      <option value="pantry"  {{ $loc==='pantry'?'selected':'' }}>Pantry</option>
+    <select name="loc" class="notranslate" translate="no">
+      <option class="notranslate" translate="no" value="" data-label-en="All of them" data-label-hu="Mindegyik">All of them</option>
+      <option class="notranslate" translate="no" value="fridge" data-label-en="Fridge" data-label-hu="Hűtő" {{ $loc==='fridge'?'selected':'' }}>Fridge</option>
+      <option class="notranslate" translate="no" value="freezer" data-label-en="Freezer" data-label-hu="Fagyasztó" {{ $loc==='freezer'?'selected':'' }}>Freezer</option>
+      <option class="notranslate" translate="no" value="pantry" data-label-en="Pantry" data-label-hu="Kamra" {{ $loc==='pantry'?'selected':'' }}>Pantry</option>
     </select>
   </div>
 
@@ -58,13 +68,13 @@
     <input type="hidden" name="q" value="{{ (string)($q ?? '') }}">
     <input type="hidden" name="loc" value="{{ (string)($loc ?? '') }}">
 
-    <select name="hid" onchange="this.form.submit()">
+    <select name="hid" class="notranslate" translate="no" onchange="this.form.submit()">
       @foreach(($households ?? []) as $hh)
         @php
           $hhId = (int)($hh['household_id'] ?? $hh->household_id ?? 0);
           $hhName = (string)($hh['name'] ?? $hh->name ?? '');
         @endphp
-        <option value="{{ $hhId }}" {{ $hhId === (int)($householdId ?? $householdId ?? 0) ? 'selected' : '' }}>
+        <option class="notranslate" translate="no" value="{{ $hhId }}" {{ $hhId === (int)($householdId ?? $householdId ?? 0) ? 'selected' : '' }}>
           {{ $hhName }}
         </option>
       @endforeach
@@ -122,10 +132,10 @@
                     @if($q !== '') <input type="hidden" name="q" value="{{ $q }}"> @endif
                     @if($loc !== '') <input type="hidden" name="loc" value="{{ $loc }}"> @endif
 
-                    <select name="location">
-                      <option value="fridge"  {{ $it->location==='fridge'?'selected':'' }}>Fridge</option>
-                      <option value="freezer" {{ $it->location==='freezer'?'selected':'' }}>Freezer</option>
-                      <option value="pantry"  {{ $it->location==='pantry'?'selected':'' }}>Pantry</option>
+                    <select name="location" class="notranslate" translate="no">
+                      <option class="notranslate" translate="no" value="fridge" data-label-en="Fridge" data-label-hu="Hűtő" {{ $it->location==='fridge'?'selected':'' }}>Fridge</option>
+                      <option class="notranslate" translate="no" value="freezer" data-label-en="Freezer" data-label-hu="Fagyasztó" {{ $it->location==='freezer'?'selected':'' }}>Freezer</option>
+                      <option class="notranslate" translate="no" value="pantry" data-label-en="Pantry" data-label-hu="Kamra" {{ $it->location==='pantry'?'selected':'' }}>Pantry</option>
                     </select>
 
                     <input type="number" step="0.01" name="quantity" value="{{ $it->quantity }}" style="max-width:110px;">

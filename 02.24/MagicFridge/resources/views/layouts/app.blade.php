@@ -4,17 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title', 'MagicFridge')</title>
-  <link rel="stylesheet" href="{{ asset('assets/style.css') }}?v=2">
+  <link rel="stylesheet" href="{{ asset('assets/style.css') }}?v=4">
   @stack('head')
 </head>
 <body>
-
-  {{-- Bubble background --}}
-  <div class="bubbles" aria-hidden="true">
-    @for($i=0; $i<20; $i++)
-      <span></span>
-    @endfor
-  </div>
 
   <div class="navbar">
     <div class="nav-left">
@@ -97,6 +90,13 @@
         button.textContent = isHungarian ? 'English' : 'Magyar';
         button.dataset.targetLang = isHungarian ? sourceLang : translatedLang;
         button.setAttribute('aria-label', isHungarian ? 'Translate to English' : 'Translate to Hungarian');
+        updateManagedLabels(lang);
+      }
+
+      function updateManagedLabels(lang) {
+        document.querySelectorAll('[data-label-en][data-label-hu]').forEach((el) => {
+          el.textContent = lang === translatedLang ? el.dataset.labelHu : el.dataset.labelEn;
+        });
       }
 
       function getSelect() {
@@ -141,7 +141,11 @@
         });
 
         if (savedLang !== sourceLang) {
-          setTimeout(() => chooseLanguage(savedLang), 500);
+          setTimeout(() => {
+            chooseLanguage(savedLang);
+            updateManagedLabels(savedLang);
+          }, 500);
+          setTimeout(() => updateManagedLabels(savedLang), 1200);
         }
       }
 

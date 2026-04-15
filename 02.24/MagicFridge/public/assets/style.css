@@ -19,6 +19,12 @@ body {
 
 /* NAVBAR -------------------------------------------------------- */
 
+.bubbles,
+.bubbles span{
+    display: none !important;
+    animation: none !important;
+}
+
 .navbar {
     width: 100%;
     padding: 16px 36px;
@@ -30,7 +36,8 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 10000;
+    overflow: visible;
 }
 
 .nav-left {
@@ -1256,8 +1263,19 @@ body::before{
 #google_translate_element,
 .goog-te-banner-frame,
 .goog-te-gadget,
-.skiptranslate iframe{
+.skiptranslate iframe,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip:hover,
+.VIpgJd-yAWNEb-L7lbkb{
   display: none !important;
+}
+
+.goog-text-highlight,
+.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 body{
@@ -1295,7 +1313,7 @@ body{
   padding: 14px;
   border-radius: 16px;
 
-  background: rgba(15,23,42,0.65);
+  background: rgba(15,23,42,0.96);
   backdrop-filter: blur(18px);
   border: 1px solid rgba(255,255,255,0.14);
   box-shadow: 0 24px 60px rgba(0,0,0,0.45);
@@ -1304,7 +1322,7 @@ body{
   transform: translateY(-6px);
   pointer-events: none;
   transition: opacity .18s ease, transform .18s ease;
-  z-index: 100;
+  z-index: 10001;
 }
 
 .about-nav:hover .about-dropdown{

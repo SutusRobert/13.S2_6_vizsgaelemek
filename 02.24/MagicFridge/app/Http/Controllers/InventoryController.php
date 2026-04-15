@@ -179,8 +179,66 @@ class InventoryController extends Controller
 
     public function listPost(Request $request)
     {
-        // keep your existing update/delete logic,
-        // just ensure household permission is always checked with assertMember().
-        return back()->with('success', 'OK');
+        $userId = (int) session('user_id');
+        $hid = (int) $request->input('hid', 0);
+        $action = (string) $request->input('action', '');
+
+        if ($hid <= 0) {
+            return redirect()->route('inventory.list')->withErrors(['Missing household.']);
+        }
+
+        $this->assertMember($userId, $hid);
+
+        $redirectParams = ['hid' => $hid];
+        $q = trim((string) $request->input('q', ''));
+        $loc = trim((string) $request->input('loc', ''));
+        if ($q !== '') $redirectParams['q'] = $q;
+        if ($loc !== '') $redirectParams['loc'] = $loc;
+
+        if ($action === 'delete_all') {
+            DB::delete("DELETE FROM inventory_items WHERE household_id = ?", [$hid]);
+
+            return redirect()->route('inventory.list', ['hid' => $hid])
+                ->with('success', 'All inventory items deleted.');
+        }
+
+        $id = (int) $request->input('id', 0);
+        if ($id <= 0) {
+            return redirect()->route('inventory.list', $redirectParams)->withErrors(['Missing item.']);
+        }
+
+        if ($action === 'delete') {
+            DB::delete("DELETE FROM inventory_items WHERE id = ? AND household_id = ?", [$id, $hid]);
+
+            return redirect()->route('inventory.list', $redirectParams)
+                ->with('success', 'Item deleted.');
+        }
+
+        if ($action === 'update') {
+            $request->validate([
+                'location' => 'required|in:fridge,freezer,pantry',
+                'quantity' => 'nullable|numeric',
+                'expires_at' => 'nullable|date',
+            ]);
+
+            DB::update(
+                "UPDATE inventory_items
+                 SET location = ?, quantity = ?, expires_at = ?, updated_at = ?
+                 WHERE id = ? AND household_id = ?",
+                [
+                    $request->input('location'),
+                    $request->input('quantity') ?? 1,
+                    $request->input('expires_at') ?: null,
+                    date('Y-m-d H:i:s'),
+                    $id,
+                    $hid,
+                ]
+            );
+
+            return redirect()->route('inventory.list', $redirectParams)
+                ->with('success', 'Item updated.');
+        }
+
+        return redirect()->route('inventory.list', $redirectParams)->withErrors(['Unknown action.']);
     }
 }
