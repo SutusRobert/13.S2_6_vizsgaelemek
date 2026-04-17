@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Háztartás – MagicFridge')
+@section('title','Household - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">
@@ -38,15 +38,10 @@
 
       <div class="mt-3" style="display:flex; flex-direction:column; gap:12px;">
         @foreach($members as $m)
-          @php
-            $isOwner = (int)$household->owner_id === (int)session('user_id');
-            $canPromote = $isOwner && ((string)$m->role !== 'admin'); // a jelenlegi logikád ezt engedi
-          @endphp
-
           <div style="
             display:flex;
             align-items:center;
-            justify-content:space-between;
+            justify-content:flex-start;
             gap:12px;
             padding:12px 14px;
             border-radius:14px;
@@ -55,19 +50,7 @@
           ">
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
               <strong>{{ $m->full_name }}</strong>
-              <span class="badge">{{ $m->role }}</span>
-            </div>
-
-            <div>
-              @if($canPromote)
-                <form method="post" action="{{ route('households.toggleRole') }}" style="margin:0;">
-                  @csrf
-                  <input type="hidden" name="hm_id" value="{{ $m->hm_id }}">
-                  <button class="btn btn-secondary" type="submit">Add role</button>
-                </form>
-              @else
-                {{-- ha nem tulaj vagy admin a tag: nincs gomb --}}
-              @endif
+              <span class="badge">{{ $m->role === 'tag' ? 'member' : $m->role }}</span>
             </div>
           </div>
         @endforeach

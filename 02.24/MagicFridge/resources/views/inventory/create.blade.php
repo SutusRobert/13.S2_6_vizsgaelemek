@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Raktár – MagicFridge')
+@section('title','Inventory - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">
@@ -24,9 +24,9 @@
 
       <div class="form-group">
         <label>Household</label>
-        <select name="hid" required>
+        <select name="hid" class="notranslate" translate="no" required>
           @foreach($households as $h)
-            <option value="{{ (int)$h['household_id'] }}" {{ (int)$h['household_id']===(int)$householdId ? 'selected' : '' }}>
+            <option class="notranslate" translate="no" value="{{ (int)$h['household_id'] }}" {{ (int)$h['household_id']===(int)$householdId ? 'selected' : '' }}>
               {{ $h['name'] }}
             </option>
           @endforeach
@@ -46,10 +46,10 @@
       <div class="inv-filters">
         <div class="form-group" style="margin-top:0;">
           <label>Location</label>
-          <select name="location">
-            <option value="fridge" {{ old('location')==='fridge' ? 'selected' : '' }}>Fridge</option>
-            <option value="freezer" {{ old('location')==='freezer' ? 'selected' : '' }}>Freezer</option>
-            <option value="pantry" {{ old('location','pantry')==='pantry' ? 'selected' : '' }}>Pantry</option>
+          <select name="location" class="notranslate" translate="no">
+            <option class="notranslate" translate="no" value="fridge" data-label-en="Fridge" data-label-hu="Hűtő" {{ old('location')==='fridge' ? 'selected' : '' }}>Fridge</option>
+            <option class="notranslate" translate="no" value="freezer" data-label-en="Freezer" data-label-hu="Fagyasztó" {{ old('location')==='freezer' ? 'selected' : '' }}>Freezer</option>
+            <option class="notranslate" translate="no" value="pantry" data-label-en="Pantry" data-label-hu="Kamra" {{ old('location','pantry')==='pantry' ? 'selected' : '' }}>Pantry</option>
           </select>
         </div>
 

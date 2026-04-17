@@ -4,7 +4,7 @@
 
 @push('head')
 <style>
-  /* Bubik tényleg háttér */
+  /* Bubbles are truly background */
   .bubbles{
     position: fixed;
     inset: 0;
@@ -43,11 +43,11 @@
 @section('content')
 <div class="dash-row">
 
-  <!-- BAL: HŰTŐ BOX -->
+  <!-- LEFT: FRIDGE BOX -->
   <div class="dash-left">
     <div class="fridge-card">
       <div class="fridge-hero">
-        <img src="{{ asset('assets/logo.png') }}" alt="Hűtő" class="fridge-img">
+        <img src="{{ asset('assets/logo.png') }}" alt="Fridge" class="fridge-img">
       </div>
       <p></p>
       <div class="fridge-body">
@@ -56,16 +56,11 @@
         <p class="small mt-2">
          Track your products, quantities, and expiration dates all in one place.
         </p>
-
-        <div class="mt-3" style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn" href="#">Open warehouse</a>
-      
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- KÖZÉP: DASHBOARD CARD -->
+  <!-- CENTER: DASHBOARD CARD -->
   <div class="dash-mid">
     <div class="main-wrapper">
       <div class="card">
@@ -119,7 +114,7 @@
               <span class="dn-title">Recent notifications</span>
             </div>
             <div class="dn-badge {{ $unreadCount > 0 ? 'is-on' : '' }}">
-              {{ $unreadCount > 0 ? ($unreadCount . ' új') : 'Nincs új' }}
+              {{ $unreadCount > 0 ? ($unreadCount . ' new') : 'No new' }}
             </div>
           </div>
 
@@ -127,7 +122,7 @@
             <div class="dn-list">
               @foreach($unreadPreview as $m)
                 <div class="dn-item">
-                  <div class="dn-item-title">{{ $m->title ?? 'Értesítés' }}</div>
+                  <div class="dn-item-title">{{ $m->title ?? 'Notification' }}</div>
                   <div class="dn-item-desc">
                     {{ \Illuminate\Support\Str::limit(strip_tags($m->body ?? ''), 110, '…') }}
                   </div>
@@ -160,7 +155,7 @@
         <div class="note">
           <div style="font-weight:900; margin-bottom:10px;">⚡ Quick actions</div>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <a class="btn btn-mini" href="#">🔔 Messages ({{ $unreadCount > 0 ? ($unreadCount.' új') : 'No new messages' }})</a>
+            <a class="btn btn-mini" href="#">🔔 Messages ({{ $unreadCount > 0 ? ($unreadCount.' new') : 'No new messages' }})</a>
             <a class="btn btn-mini" href="#">🧊 inventory</a>
             <a class="btn btn-mini" href="#">🛒 Shopping list</a>
             <a class="btn btn-mini" href="#">🍳 Recipes</a>
@@ -181,7 +176,7 @@
 
 @push('scripts')
 <script>
-/* Bubik random indulás + parallax (a régi kód) */
+/* Random bubble start + parallax (legacy code) */
 (() => {
   const bubbles = document.getElementById('bubbles');
   if (!bubbles) return;

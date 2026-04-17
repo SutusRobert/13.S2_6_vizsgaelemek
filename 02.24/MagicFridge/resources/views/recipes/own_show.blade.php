@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', ($recipe->title ?? 'Saját recept') . ' – MagicFridge')
+@section('title', ($recipe->title ?? 'Custom recipe') . ' - MagicFridge')
 
 @section('content')
 <div class="main-wrapper">
@@ -13,15 +13,15 @@
 
         @if(!empty($recipe->created_at))
           <div class="small" style="opacity:.75; margin-top:8px;">
-            Mentve: {{ $recipe->created_at }}
+            Saved: {{ $recipe->created_at }}
           </div>
         @endif
       </div>
 
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a class="btn btn-secondary" href="{{ route('recipes.index', ['hid' => (int)($hid ?? request()->get('hid', 0))]) }}">🍽️ Recipes</a>
+        <a class="btn btn-secondary" href="{{ route('recipes.index', ['hid' => (int)($hid ?? request()->get('hid', 0))]) }}">← Recipes</a>
 
-        <a class="btn btn-secondary" href="{{ url()->previous() }}">⬅️ Back</a>
+        <a class="btn btn-secondary" href="{{ url()->previous() }}">← Back</a>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
       {{-- Ingredients --}}
       <div style="border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.08); border-radius:18px; padding:16px;">
         <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap;">
-          <h3 style="margin:0;">🧺 Ingredient</h3>
+          <h3 style="margin:0;">Ingredient</h3>
           <div class="small" style="opacity:.8;">
             Total: <b>{{ is_countable($ingredients ?? null) ? count($ingredients) : 0 }}</b>
           </div>
@@ -49,7 +49,7 @@
           <div class="mt-3" style="display:flex; flex-wrap:wrap; gap:10px;">
             @foreach($ingredients as $ing)
               <div style="
-                padding:10px 12px;
+                padding:10px 14px;
                 border-radius:999px;
                 border:1px solid rgba(255,255,255,.14);
                 background: rgba(255,255,255,.06);
@@ -62,26 +62,16 @@
         @endif
       </div>
 
-              @if(!empty($recipe->instructions))
-          <div class="mt-4">
-            <h3>Preparation</h3>
-            <div style="white-space: pre-line; opacity:.9;">
-              {{ $recipe->instructions }}
-            </div>
-          </div>
-        @endif
-
-
       {{-- Side card --}}
       <div style="border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); border-radius:18px; padding:16px;">
-        <div style="font-weight:900; margin-bottom:10px;">⚡ Quick actions</div>
+        <div style="font-weight:900; margin-bottom:10px;">Quick actions</div>
 
         <div style="display:grid; gap:10px;">
-            <a class="btn btn-primary" href="{{ route('recipes.index', ['hid' => (int)($hid ?? request()->get('hid', 0))]) }}">🍽️ My recipes</a>
+            <a class="btn btn-primary" href="{{ route('recipes.index', ['hid' => (int)($hid ?? request()->get('hid', 0))]) }}">My recipes</a>
 
             <a class="btn btn-secondary" href="{{ route('recipes.own.create', ['hid' => (int)($hid ?? request()->get('hid', 0))]) }}">+ New custom recipe</a>
 
-          <a class="btn btn-secondary" href="{{ route('dashboard') }}">🏠 Dashboard</a>
+          <a class="btn btn-secondary" href="{{ route('dashboard') }}">Dashboard</a>
         </div>
 
         <div class="small" style="opacity:.75; margin-top:12px; line-height:1.5;">
@@ -89,6 +79,16 @@
         </div>
       </div>
     </div>
+
+    {{-- Preparation --}}
+    @if(!empty($recipe->instructions))
+      <div class="mt-4" style="border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.08); border-radius:18px; padding:16px;">
+        <h3 style="margin:0 0 12px;">Preparation</h3>
+        <div style="white-space: pre-line; opacity:.9; line-height:1.7;">
+          {{ $recipe->instructions }}
+        </div>
+      </div>
+    @endif
 
   </div>
 </div>
@@ -99,3 +99,4 @@
   }
 </style>
 @endsection
+

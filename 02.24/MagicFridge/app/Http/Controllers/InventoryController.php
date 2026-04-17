@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -31,19 +30,19 @@ class InventoryController extends Controller
     }
 
     /**
-     * Ha nincs household, létrehoz egy alapot és belépteti a usert tagként.
-     * Ezáltal a /inventory nem fog többé /households-ra dobni.
+    * If there is no household, create a default one and add the user as member.
+    * This prevents /inventory from redirecting to /households.
      */
     private function ensureDefaultHousehold(int $userId): void
     {
         $households = $this->householdsForUser($userId);
         if (!empty($households)) return;
 
-        // Név (ha van session full_name, azt használjuk)
-        $fullName = (string)(session('full_name') ?? '');
+        // Name from session if available
+        $fullName = (string)(session('full_name') ?? session('user_name') ?? '');
 
         if ($fullName === '') {
-            // ha nincs session-ben, próbáljuk a users táblából (biztonságos fallback)
+            // if missing from session, try users table (safe fallback)
             $u = DB::selectOne("SELECT full_name, name FROM users WHERE id = ? LIMIT 1", [$userId]);
             $fullName = (string)($u->full_name ?? ($u->name ?? 'User'));
         }
@@ -60,7 +59,7 @@ class InventoryController extends Controller
         DB::table('household_members')->insert([
             'household_id' => $hid,
             'member_id' => $userId,
-            'role' => 'tag', // DB enum alapján jó
+            'role' => 'tag', // valid by DB enum
         ]);
     }
 
@@ -68,7 +67,7 @@ class InventoryController extends Controller
     {
         $userId = (int) session('user_id');
 
-        // ✅ ne dobjon át households-ra: inkább hozzon létre egyet
+        // do not redirect to households: create one instead
         $this->ensureDefaultHousehold($userId);
 
         $households = $this->householdsForUser($userId);
@@ -132,7 +131,7 @@ class InventoryController extends Controller
     {
         $userId = (int) session('user_id');
 
-        // ✅ itt se dobjon át households-ra
+        // do not redirect to households here either
         $this->ensureDefaultHousehold($userId);
 
         $households = $this->householdsForUser($userId);
@@ -180,8 +179,66 @@ class InventoryController extends Controller
 
     public function listPost(Request $request)
     {
-        // ezt hagyom a te meglévő logikádra (update/delete),
-        // csak annyi a lényeg, hogy mindig ellenőrizd a hid jogot assertMember()-rel.
-        return back()->with('success', 'OK');
+        $userId = (int) session('user_id');
+        $hid = (int) $request->input('hid', 0);
+        $action = (string) $request->input('action', '');
+
+        if ($hid <= 0) {
+            return redirect()->route('inventory.list')->withErrors(['Missing household.']);
+        }
+
+        $this->assertMember($userId, $hid);
+
+        $redirectParams = ['hid' => $hid];
+        $q = trim((string) $request->input('q', ''));
+        $loc = trim((string) $request->input('loc', ''));
+        if ($q !== '') $redirectParams['q'] = $q;
+        if ($loc !== '') $redirectParams['loc'] = $loc;
+
+        if ($action === 'delete_all') {
+            DB::delete("DELETE FROM inventory_items WHERE household_id = ?", [$hid]);
+
+            return redirect()->route('inventory.list', ['hid' => $hid])
+                ->with('success', 'All inventory items deleted.');
+        }
+
+        $id = (int) $request->input('id', 0);
+        if ($id <= 0) {
+            return redirect()->route('inventory.list', $redirectParams)->withErrors(['Missing item.']);
+        }
+
+        if ($action === 'delete') {
+            DB::delete("DELETE FROM inventory_items WHERE id = ? AND household_id = ?", [$id, $hid]);
+
+            return redirect()->route('inventory.list', $redirectParams)
+                ->with('success', 'Item deleted.');
+        }
+
+        if ($action === 'update') {
+            $request->validate([
+                'location' => 'required|in:fridge,freezer,pantry',
+                'quantity' => 'nullable|numeric',
+                'expires_at' => 'nullable|date',
+            ]);
+
+            DB::update(
+                "UPDATE inventory_items
+                 SET location = ?, quantity = ?, expires_at = ?, updated_at = ?
+                 WHERE id = ? AND household_id = ?",
+                [
+                    $request->input('location'),
+                    $request->input('quantity') ?? 1,
+                    $request->input('expires_at') ?: null,
+                    date('Y-m-d H:i:s'),
+                    $id,
+                    $hid,
+                ]
+            );
+
+            return redirect()->route('inventory.list', $redirectParams)
+                ->with('success', 'Item updated.');
+        }
+
+        return redirect()->route('inventory.list', $redirectParams)->withErrors(['Unknown action.']);
     }
 }

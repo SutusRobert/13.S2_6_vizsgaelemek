@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class ShoppingListController extends Controller
@@ -37,7 +37,7 @@ class ShoppingListController extends Controller
         // tulaj is lehet
         if (!$ok) {
             $owner = DB::selectOne("SELECT id FROM households WHERE id = ? AND owner_id = ? LIMIT 1", [$hid, $userId]);
-            if (!$owner) abort(403, 'Nincs jogosultság ehhez a háztartáshoz.');
+            if (!$owner) abort(403, 'You do not have permission for this household.');
         }
     }
 
@@ -72,25 +72,54 @@ class ShoppingListController extends Controller
 
     private function guessLocationForItem(string $name): string
     {
-        $n = mb_strtolower(trim($name), 'UTF-8');
+        $n = $this->normalizeForMatch($name);
 
         $freezer = [
-            'fagyaszt', 'mirelit', 'jég', 'jeg',
-            'fagyasztott', 'nugget', 'hasáb', 'hasab',
-            'pizza', 'spenót', 'spenot', 'borsó', 'borso'
+            'frozen', 'ice cream', 'icecream',
+            'nugget', 'fries', 'fish fingers',
+            'pizza'
         ];
 
         $fridge = [
-            'tej', 'joghurt', 'sajt', 'tejszín', 'tejszin', 'vaj', 'margarin',
-            'tojás', 'tojas',
-            'csirke', 'pulyka', 'marha', 'sertés', 'sertes', 'hal',
-            'sonka', 'kolbász', 'kolbasz'
+            'milk', 'yogurt', 'cheese', 'cream', 'sour cream', 'butter', 'margarine',
+            'egg', 'eggs',
+            'chicken', 'turkey', 'beef', 'pork', 'fish',
+            'ham', 'sausage', 'bacon',
+            'lettuce', 'spinach', 'tomato', 'cucumber', 'pepper',
+            'strawberry', 'berry'
         ];
 
-        foreach ($freezer as $k) if (mb_stripos($n, $k, 0, 'UTF-8') !== false) return 'freezer';
-        foreach ($fridge as $k) if (mb_stripos($n, $k, 0, 'UTF-8') !== false) return 'fridge';
+        foreach ($freezer as $k) if (str_contains($n, $k)) return 'freezer';
+        foreach ($fridge as $k) if (str_contains($n, $k)) return 'fridge';
 
         return 'pantry';
+    }
+
+    private function averageExpiryDateForItem(string $name, string $location): string
+    {
+        $n = $this->normalizeForMatch($name);
+        $days = match ($location) {
+            'freezer' => 180,
+            'fridge' => 7,
+            default => 90,
+        };
+
+        if (str_contains($n, 'milk') || str_contains($n, 'tej')) $days = 7;
+        elseif (str_contains($n, 'yogurt')) $days = 14;
+        elseif (str_contains($n, 'cream') || str_contains($n, 'tejszin') || str_contains($n, 'sour')) $days = 10;
+        elseif (str_contains($n, 'cheese') || str_contains($n, 'sajt')) $days = 21;
+        elseif (str_contains($n, 'egg') || str_contains($n, 'tojas')) $days = 28;
+        elseif (str_contains($n, 'chicken') || str_contains($n, 'csirke')) $days = $location === 'freezer' ? 180 : 3;
+        elseif (str_contains($n, 'beef') || str_contains($n, 'pork') || str_contains($n, 'fish')) $days = $location === 'freezer' ? 180 : 4;
+        elseif (str_contains($n, 'ham') || str_contains($n, 'sausage')) $days = 10;
+        elseif (str_contains($n, 'apple') || str_contains($n, 'carrot') || str_contains($n, 'onion') || str_contains($n, 'garlic')) $days = 30;
+        elseif (str_contains($n, 'banana') || str_contains($n, 'tomato') || str_contains($n, 'lettuce')) $days = 5;
+        elseif (str_contains($n, 'bread')) $days = 5;
+        elseif (str_contains($n, 'rice') || str_contains($n, 'pasta') || str_contains($n, 'flour') || str_contains($n, 'sugar') || str_contains($n, 'salt')) $days = 365;
+        elseif (str_contains($n, 'oil') || str_contains($n, 'vinegar') || str_contains($n, 'honey')) $days = 365;
+        elseif (str_contains($n, 'paprika') || str_contains($n, 'pepper') || str_contains($n, 'cumin') || str_contains($n, 'turmeric') || str_contains($n, 'cinnamon')) $days = 365;
+
+        return date('Y-m-d', strtotime('+' . $days . ' days'));
     }
 
     private function parseMeasureToQtyUnit(string $measure): array
@@ -134,7 +163,7 @@ class ShoppingListController extends Controller
     private function normalizeForMatch(string $s): string
     {
         $s = mb_strtolower(trim($s), 'UTF-8');
-        return str_replace(['á','é','í','ó','ö','ő','ú','ü','ű'], ['a','e','i','o','o','o','u','u','u'], $s);
+        return Str::ascii($s);
     }
 
     private function toStorePack(string $name, float $recipeQty, ?string $recipeUnit): array
@@ -152,20 +181,20 @@ class ShoppingListController extends Controller
             return [$packs, 'l'];
         }
 
-        if (str_contains($n, 'joghurt') || str_contains($n, 'yogurt')) return [1, 'pohár'];
-        if (str_contains($n, 'tejfol') || str_contains($n, 'tejföl') || str_contains($n, 'sour')) return [1, 'doboz'];
-        if (str_contains($n, 'tejszin') || str_contains($n, 'tejszín') || str_contains($n, 'cream')) return [1, 'doboz'];
-        if (str_contains($n, 'olaj') || str_contains($n, 'oil')) return [1, 'üveg'];
-        if (str_contains($n, 'ecet') || str_contains($n, 'vinegar')) return [1, 'üveg'];
+        if (str_contains($n, 'yogurt')) return [1, 'cup'];
+        if (str_contains($n, 'tejfol') || str_contains($n, 'tejfĂ¶l') || str_contains($n, 'sour')) return [1, 'doboz'];
+        if (str_contains($n, 'tejszin') || str_contains($n, 'tejszĂ­n') || str_contains($n, 'cream')) return [1, 'doboz'];
+        if (str_contains($n, 'olaj') || str_contains($n, 'oil')) return [1, 'ĂĽveg'];
+        if (str_contains($n, 'ecet') || str_contains($n, 'vinegar')) return [1, 'ĂĽveg'];
 
-        if (str_contains($n, 'tojas') || str_contains($n, 'tojás') || str_contains($n, 'egg')) {
+        if (str_contains($n, 'egg')) {
             if ($u === 'pcs' || $u === 'db') return [max(1, (int)ceil($recipeQty)), 'db'];
             return [6, 'db'];
         }
 
         if (
             str_contains($n, 'csirke') || str_contains($n, 'pulyka') ||
-            str_contains($n, 'marha') || str_contains($n, 'sertes') || str_contains($n, 'sertés')
+            str_contains($n, 'beef') || str_contains($n, 'pork')
         ) {
             $needG = null;
             if ($u === 'g')  $needG = $recipeQty;
@@ -190,13 +219,13 @@ class ShoppingListController extends Controller
 
         $households = $this->householdsForUser($userId);
         if (empty($households)) {
-            return redirect()->route('households.index')->withErrors(['Előbb hozz létre vagy csatlakozz egy háztartáshoz.']);
+            return redirect()->route('households.index')->withErrors(['Create or join a household first.']);
         }
 
         $hid = (int)($request->query('hid') ?? 0);
         if ($hid <= 0) $hid = (int)$households[0]->household_id;
 
-        // ha nem a user háztartása, fallback
+        // if not in user's household list, fallback
         $hhMap = [];
         foreach ($households as $h) $hhMap[(int)$h->household_id] = (string)$h->name;
         if (!isset($hhMap[$hid])) $hid = (int)$households[0]->household_id;
@@ -210,7 +239,7 @@ class ShoppingListController extends Controller
             ORDER BY is_bought ASC, id DESC
         ", [$hid]);
 
-        // Saját receptek a dropdownhoz (ha van a DB-ben)
+        // custom recipes for dropdown (if present in DB)
         $recipes = DB::select("
             SELECT id, title
             FROM recipes
@@ -236,7 +265,7 @@ class ShoppingListController extends Controller
 
         $households = $this->householdsForUser($userId);
         if (empty($households)) {
-            return redirect()->route('households.index')->withErrors(['Előbb hozz létre vagy csatlakozz egy háztartáshoz.']);
+            return redirect()->route('households.index')->withErrors(['Create or join a household first.']);
         }
 
         $hid = (int)$request->input('hid', 0);
@@ -270,8 +299,8 @@ class ShoppingListController extends Controller
                         [$qty, $unit] = $this->toStorePack($nm, (float)$rq, $ru);
 
                         $noteParts = [];
-                        if ($recipeTitle !== '') $noteParts[] = "Recept: " . $recipeTitle;
-                        if ($measure !== '') $noteParts[] = "Mérték: " . $measure;
+                        if ($recipeTitle !== '') $noteParts[] = "Recipe: " . $recipeTitle;
+                        if ($measure !== '') $noteParts[] = "Measure: " . $measure;
                         $note = $noteParts ? implode(" | ", $noteParts) : null;
 
                         $loc = $this->guessLocationForItem($nm);
@@ -289,10 +318,10 @@ class ShoppingListController extends Controller
                     }
 
                     return redirect()->route('shopping.index', ['hid' => $hid])
-                        ->with('success', $added > 0 ? "Hiányzók hozzáadva a bevásárlólistához." : "Nincs hozzáadandó hiányzó tétel.");
+                        ->with('success', $added > 0 ? "Missing ingredients added to the shopping list." : "No missing items to add.");
                 }
 
-                // régi formátum
+                // legacy format
                 $names = $request->input('missing_name', []);
                 if (!is_array($names)) $names = [];
 
@@ -301,7 +330,7 @@ class ShoppingListController extends Controller
                     if ($nm === '') continue;
                     if ($this->invContains($invNames, $nm)) continue;
 
-                    $note = $recipeTitle !== '' ? ("Recept: " . $recipeTitle) : null;
+                    $note = $recipeTitle !== '' ? ("Recipe: " . $recipeTitle) : null;
                     $loc = $this->guessLocationForItem($nm);
 
                     DB::table('shopping_list_items')->insert([
@@ -315,7 +344,7 @@ class ShoppingListController extends Controller
                     ]);
                 }
 
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', "Hiányzók hozzáadva a bevásárlólistához.");
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', "Missing ingredients added to the shopping list.");
             }
 
             /* 1) add_missing_for_own_recipe */
@@ -324,7 +353,7 @@ class ShoppingListController extends Controller
 
                 $r = DB::selectOne("SELECT title FROM recipes WHERE id = ? AND user_id = ? LIMIT 1", [$recipeId, $userId]);
                 if (!$r) {
-                    return redirect()->route('shopping.index', ['hid' => $hid])->withErrors(['Nincs ilyen saját recept, vagy nincs jogosultságod.']);
+                    return redirect()->route('shopping.index', ['hid' => $hid])->withErrors(['Custom recipe not found, or you do not have permission.']);
                 }
 
                 $ings = DB::select("SELECT ingredient FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id", [$recipeId]);
@@ -341,7 +370,7 @@ class ShoppingListController extends Controller
                         'name' => $nm,
                         'quantity' => 1,
                         'unit' => null,
-                        'note' => "Recept: " . (string)$r->title,
+                        'note' => "Recipe: " . (string)$r->title,
                         'location' => 'pantry',
                         'created_by' => $userId,
                     ]);
@@ -349,7 +378,7 @@ class ShoppingListController extends Controller
                 }
 
                 return redirect()->route('shopping.index', ['hid' => $hid])
-                    ->with('success', $added > 0 ? "Hiányzók hozzáadva a bevásárlólistához." : "Minden hozzávaló megvan a raktárban.");
+                    ->with('success', $added > 0 ? "Missing ingredients added to the shopping list." : "All ingredients are available in stock.");
             }
 
             /* 2) add */
@@ -359,7 +388,7 @@ class ShoppingListController extends Controller
                     'quantity' => 'nullable',
                     'unit' => 'nullable|string|max:50',
                     'note' => 'nullable|string',
-                    'location' => 'required|in:fridge,freezer,pantry',
+                    'location' => 'required|in:auto,fridge,freezer,pantry',
                 ]);
 
                 $name = trim((string)$request->input('name'));
@@ -369,7 +398,10 @@ class ShoppingListController extends Controller
 
                 $unit = trim((string)$request->input('unit', ''));
                 $note = trim((string)$request->input('note', ''));
-                $location = (string)$request->input('location', 'pantry');
+                $location = (string)$request->input('location', 'auto');
+                if ($location === 'auto') {
+                    $location = $this->guessLocationForItem($name);
+                }
 
                 DB::table('shopping_list_items')->insert([
                     'household_id' => $hid,
@@ -381,7 +413,7 @@ class ShoppingListController extends Controller
                     'created_by' => $userId,
                 ]);
 
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Hozzáadva a listához.');
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Added to the list.');
             }
 
             /* 3) toggle (megvett/vissza + inventory upsert megvettkor) */
@@ -414,6 +446,7 @@ class ShoppingListController extends Controller
                         $unit = $item->unit !== null ? (string)$item->unit : null;
                         $note = $item->note !== null ? (string)$item->note : null;
                         $loc  = in_array((string)$item->location, ['fridge','freezer','pantry'], true) ? (string)$item->location : 'pantry';
+                        $expiresAt = $this->averageExpiryDateForItem($name, $loc);
 
                         // find existing inventory item (unit-aware)
                         if ($unit !== null && trim($unit) !== '') {
@@ -438,9 +471,10 @@ class ShoppingListController extends Controller
                         if ($existing) {
                             DB::update("
                                 UPDATE inventory_items
-                                SET quantity = quantity + ?
+                                SET quantity = quantity + ?,
+                                    expires_at = COALESCE(expires_at, ?)
                                 WHERE id = ? AND household_id = ?
-                            ", [$qty, (int)$existing->id, $hid]);
+                            ", [$qty, $expiresAt, (int)$existing->id, $hid]);
                         } else {
                             DB::table('inventory_items')->insert([
                                 'household_id' => $hid,
@@ -449,33 +483,33 @@ class ShoppingListController extends Controller
                                 'location' => $loc,
                                 'quantity' => $qty,
                                 'unit' => $unit,
-                                'expires_at' => null,
+                                'expires_at' => $expiresAt,
                                 'note' => $note,
                             ]);
                         }
                     });
                 }
 
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Mentve.');
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Saved.');
             }
 
             /* 4) delete */
             if ($action === 'delete') {
                 $id = (int)$request->input('id', 0);
                 DB::delete("DELETE FROM shopping_list_items WHERE id = ? AND household_id = ?", [$id, $hid]);
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Törölve.');
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'TĂ¶rĂ¶lve.');
             }
 
             /* 5) clear_bought */
             if ($action === 'clear_bought') {
                 DB::delete("DELETE FROM shopping_list_items WHERE household_id = ? AND is_bought = 1", [$hid]);
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'A megvett tételek törölve.');
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Purchased items deleted.');
             }
 
             /* 6) clear_all */
             if ($action === 'clear_all') {
                 DB::delete("DELETE FROM shopping_list_items WHERE household_id = ?", [$hid]);
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Az összes tétel törölve.');
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'All items deleted.');
             }
 
             /* 7) buy_all (mind megvett + inventory) */
@@ -488,7 +522,7 @@ class ShoppingListController extends Controller
                 ", [$hid]);
 
                 if (empty($toBuy)) {
-                    return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Nincs megveendő tétel.');
+                    return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'There are no items to buy.');
                 }
 
                 DB::transaction(function () use ($toBuy, $userId, $hid) {
@@ -499,6 +533,7 @@ class ShoppingListController extends Controller
                         $unit = $item->unit !== null ? (string)$item->unit : null;
                         $note = $item->note !== null ? (string)$item->note : null;
                         $loc  = in_array((string)$item->location, ['fridge','freezer','pantry'], true) ? (string)$item->location : 'pantry';
+                        $expiresAt = $this->averageExpiryDateForItem($name, $loc);
 
                         DB::update("
                             UPDATE shopping_list_items
@@ -530,9 +565,10 @@ class ShoppingListController extends Controller
                         if ($existing) {
                             DB::update("
                                 UPDATE inventory_items
-                                SET quantity = quantity + ?
+                                SET quantity = quantity + ?,
+                                    expires_at = COALESCE(expires_at, ?)
                                 WHERE id = ? AND household_id = ?
-                            ", [$qty, (int)$existing->id, $hid]);
+                            ", [$qty, $expiresAt, (int)$existing->id, $hid]);
                         } else {
                             DB::table('inventory_items')->insert([
                                 'household_id' => $hid,
@@ -541,19 +577,19 @@ class ShoppingListController extends Controller
                                 'location' => $loc,
                                 'quantity' => $qty,
                                 'unit' => $unit,
-                                'expires_at' => null,
+                                'expires_at' => $expiresAt,
                                 'note' => $note,
                             ]);
                         }
                     }
                 });
 
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Minden tétel megvéve és felvéve a raktárba.');
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'All items purchased and added to inventory.');
             }
 
-            return redirect()->route('shopping.index', ['hid' => $hid])->withErrors(['Ismeretlen művelet.']);
+            return redirect()->route('shopping.index', ['hid' => $hid])->withErrors(['Ismeretlen mĹ±velet.']);
         } catch (\Throwable $e) {
-            return redirect()->route('shopping.index', ['hid' => $hid])->withErrors(['Hiba: ' . $e->getMessage()]);
+            return redirect()->route('shopping.index', ['hid' => $hid])->withErrors(['Error: ' . $e->getMessage()]);
         }
     }
 }

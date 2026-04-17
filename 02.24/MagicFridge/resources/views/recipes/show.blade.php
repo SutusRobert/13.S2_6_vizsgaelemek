@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', ($title ?? 'Recept').' – Receptek')
+@section('title', ($title ?? 'Recipe').' - Recipes')
 
 @section('content')
 <div class="main-wrapper">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    {{-- Siker/hiba üzenetek --}}
+    {{-- Success/error messages --}}
     @if(session('success'))
       <div class="success mt-3">{{ session('success') }}</div>
     @endif
@@ -37,7 +37,7 @@
       <div class="error mt-3">{{ $errors->first() }}</div>
     @endif
 
-    {{-- Főzés (levonás) eredménye --}}
+    {{-- Cooking (deduction) result --}}
     @if(($cook ?? '') === 'ok')
       <div class="success mt-3">✅ Deducted from stock. Enjoy your meal!!</div>
     @endif
@@ -83,7 +83,7 @@
             @php
               $has = (bool)($ing['has'] ?? false);
 
-              // ✅ MAGYAR NÉV előnyben, ha van
+              // Prefer Hungarian name when available
               $name = (string)($ing['name_hu'] ?? $ing['name'] ?? '');
 
               $measure = (string)($ing['measure'] ?? '');
@@ -112,7 +112,7 @@
                 @else
                   <span class="badge" style="background: rgba(255,80,80,.25); border:1px solid rgba(255,80,80,.35);">Missing</span>
 
-                  {{-- Bevásárlólistára már a magyar nevet küldjük --}}
+                  {{-- Send Hungarian name to shopping list --}}
                   <input type="hidden" name="items[{{ $idx }}][name]" value="{{ $name }}">
                   <input type="hidden" name="items[{{ $idx }}][measure]" value="{{ $measure }}">
 
@@ -137,9 +137,48 @@
 
     <div class="mt-4">
       <h3>Instructions</h3>
+
+      @if(($needsMoreInstructions ?? false) || !empty($sourceUrl) || !empty($youtubeUrl))
+        <div class="note mt-2">
+          @if($needsMoreInstructions ?? false)
+            <div style="font-weight:900; margin-bottom:8px;">Need more detail?</div>
+            <div class="small" style="opacity:.9;">
+              This recipe source gives a short method. Use the original source or video below for the fuller cooking flow, and prep all ingredients before starting.
+            </div>
+          @else
+            <div class="small" style="opacity:.9;">More help for this recipe:</div>
+          @endif
+
+          @if(!empty($sourceUrl) || !empty($youtubeUrl))
+            <div class="mt-3" style="display:flex; gap:10px; flex-wrap:wrap;">
+              @if(!empty($sourceUrl))
+                <a class="btn btn-secondary" href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">Open full recipe</a>
+              @endif
+
+              @if(!empty($youtubeUrl))
+                <a class="btn btn-secondary" href="{{ $youtubeUrl }}" target="_blank" rel="noopener noreferrer">Watch video</a>
+              @endif
+            </div>
+          @endif
+        </div>
+      @endif
+
       <div class="mt-2" style="white-space:pre-line; opacity:.9;">
-        {{ $instructions }}
+        {{ trim((string)$instructions) !== '' ? $instructions : 'No instructions were provided for this recipe.' }}
       </div>
+
+      @if($needsMoreInstructions ?? false)
+        <div class="note mt-3">
+          <div style="font-weight:900; margin-bottom:8px;">Quick cooking checklist</div>
+          <div class="small" style="opacity:.9; line-height:1.55;">
+            1. Read the ingredient list and measure everything first.
+            2. Start with the longest cooking item, usually potatoes, rice, pasta, meat, or thick vegetables.
+            3. Cook aromatics like onion and garlic gently before adding spices, liquids, or sauces.
+            4. Add delicate ingredients near the end so they do not overcook.
+            5. Taste, adjust seasoning, and make sure meat, eggs, or seafood are fully cooked before serving.
+          </div>
+        </div>
+      @endif
     </div>
 
   </div>

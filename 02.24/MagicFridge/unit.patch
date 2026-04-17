@@ -1,0 +1,159 @@
+﻿diff --git a/app/Http/Controllers/RecipeController.php b/app/Http/Controllers/RecipeController.php
+index 9458f684..43db8bd4 100644
+--- a/app/Http/Controllers/RecipeController.php
++++ b/app/Http/Controllers/RecipeController.php
+@@ -586,15 +586,21 @@ public function storeOwn(Request $request)
+             'title' => 'required|string|max:255',
+             'ingredients' => 'required|array|min:1',
+             'ingredients.*' => 'nullable|string|max:255',
+-            
++            'ingredient_units' => 'nullable|array',
++            'ingredient_units.*' => 'nullable|string|max:50',
+         ]);
+
+         $title = trim((string)$request->input('title'));
+         $ingsRaw = $request->input('ingredients', []);
++        $unitsRaw = $request->input('ingredient_units', []);
+         $ings = [];
+-        foreach ($ingsRaw as $x) {
+-            $t = trim((string)$x);
+-            if ($t !== '') $ings[] = $t;
++        foreach ($ingsRaw as $idx => $x) {
++            $ingredient = trim((string)$x);
++            if ($ingredient === '') continue;
++
++            $unit = trim((string)($unitsRaw[$idx] ?? ''));
++            $stored = $unit !== '' ? ($ingredient . ' (' . $unit . ')') : $ingredient;
++            $ings[] = mb_substr($stored, 0, 255, 'UTF-8');
+         }
+
+         
+diff --git a/resources/views/recipes/own_create.blade.php b/resources/views/recipes/own_create.blade.php
+index 5c1ff23c..378ff5e6 100644
+--- a/resources/views/recipes/own_create.blade.php
++++ b/resources/views/recipes/own_create.blade.php
+@@ -180,6 +180,10 @@
+     margin-top: 10px;
+   }
+   .ing-row input{ flex: 1 1 auto; width: 100%; }
++  .ing-row .ing-unit{
++    flex: 0 0 120px;
++    max-width: 120px;
++  }
+
+   .ing-remove{
+     flex: 0 0 auto;
+@@ -237,7 +241,7 @@ function escapeHtml(str){
+   /* ------------------------------
+      Ingredient rows (add/remove)
+      ------------------------------ */
+-  function createIngredientRow(value = '') {
++  function createIngredientRow(value = '', unit = '') {
+     const row = document.createElement('div');
+     row.className = 'ing-row';
+
+@@ -248,6 +252,14 @@ function createIngredientRow(value = '') {
+     input.value = value;
+     input.addEventListener('input', updatePreview);
+
++    const unitInput = document.createElement('input');
++    unitInput.type = 'text';
++    unitInput.name = 'ingredient_units[]';
++    unitInput.placeholder = 'pl. g / ml / db';
++    unitInput.value = unit;
++    unitInput.className = 'ing-unit';
++    unitInput.addEventListener('input', updatePreview);
++
+     const btn = document.createElement('button');
+     btn.type = 'button';
+     btn.className = 'ing-remove';
+@@ -265,6 +277,7 @@ function createIngredientRow(value = '') {
+     });
+
+     row.appendChild(input);
++    row.appendChild(unitInput);
+     row.appendChild(btn);
+     return row;
+   }
+@@ -285,8 +298,10 @@ function clearIngredients() {
+   }
+
+   function validateIngredients(){
+-    const inputs = Array.from(document.querySelectorAll('#ingredients input[name="ingredients[]"]'));
+-    const cleaned = inputs.map(i => (i.value || '').trim()).filter(v => v.length > 0);
++    const rows = Array.from(document.querySelectorAll('#ingredients .ing-row'));
++    const cleaned = rows
++      .map(row => ((row.querySelector('input[name="ingredients[]"]')?.value) || '').trim())
++      .filter(v => v.length > 0);
+     if (cleaned.length < 1){
+       alert('Add at least 1 ingredient.');
+       return false;
+@@ -306,9 +321,12 @@ function updatePreview(){
+     const warnOut  = document.getElementById('previewWarn');
+     const listOut  = document.getElementById('previewList');
+
+-    const inputs = Array.from(document.querySelectorAll('#ingredients input[name="ingredients[]"]'));
+-    const vals = inputs.map(i => (i.value || '').trim());
+-    const cleaned = vals.filter(v => v.length > 0);
++    const rows = Array.from(document.querySelectorAll('#ingredients .ing-row'));
++    const vals = rows.map(row => ({
++      ingredient: ((row.querySelector('input[name="ingredients[]"]')?.value) || '').trim(),
++      unit: ((row.querySelector('input[name="ingredient_units[]"]')?.value) || '').trim(),
++    }));
++    const cleaned = vals.filter(v => v.ingredient.length > 0);
+
+     titleOut.textContent = title !== '' ? title : 'Untitled recipe (preview)';
+     countOut.textContent = String(vals.length);
+@@ -331,10 +349,11 @@ function updatePreview(){
+     }
+
+     cleaned.slice(0, 12).forEach((v, idx) => {
++      const display = v.unit !== '' ? `${v.ingredient} (${v.unit})` : v.ingredient;
+       const row = document.createElement('div');
+       row.className = 'preview-item';
+       row.innerHTML =
+-        '<div><b>' + escapeHtml(v) + '</b><br><small class="muted">#' + (idx+1) + '</small></div>' +
++        '<div><b>' + escapeHtml(display) + '</b><br><small class="muted">#' + (idx+1) + '</small></div>' +
+         '<div class="muted">ingredients</div>';
+       listOut.appendChild(row);
+     });
+@@ -352,11 +371,11 @@ function updatePreview(){
+      Quick sample fill (nem random, sorban)
+      ------------------------------ */
+  const SAMPLE_RECIPES = [
+-  { title: "Chicken Breast with Pasta", ingredients: ["Chicken breast", "Pasta", "Heavy cream", "Salt", "Pepper"] },
+-  { title: "Quick Bolognese", ingredients: ["Ground meat", "Tomato sauce", "Pasta", "Onion", "Garlic"] },
+-  { title: "Tuna Pasta", ingredients: ["Canned tuna", "Pasta", "Sour cream", "Lemon", "Salt"] },
+-  { title: "Scrambled Eggs with Cheese", ingredients: ["Eggs", "Cheese", "Salt", "Pepper", "Butter"] },
+-  { title: "Vegetable Rice", ingredients: ["Rice", "Peas", "Carrot", "Corn", "Salt"] },
++  { title: "Chicken Breast with Pasta", ingredients: [{name:"Chicken breast",unit:"500 g"}, {name:"Pasta",unit:"250 g"}, {name:"Heavy cream",unit:"200 ml"}, {name:"Salt",unit:"1 tsp"}, {name:"Pepper",unit:"0.5 tsp"}] },
++  { title: "Quick Bolognese", ingredients: [{name:"Ground meat",unit:"400 g"}, {name:"Tomato sauce",unit:"300 ml"}, {name:"Pasta",unit:"250 g"}, {name:"Onion",unit:"1 db"}, {name:"Garlic",unit:"2 cloves"}] },
++  { title: "Tuna Pasta", ingredients: [{name:"Canned tuna",unit:"1 can"}, {name:"Pasta",unit:"250 g"}, {name:"Sour cream",unit:"150 g"}, {name:"Lemon",unit:"0.5 db"}, {name:"Salt",unit:"1 tsp"}] },
++  { title: "Scrambled Eggs with Cheese", ingredients: [{name:"Eggs",unit:"4 db"}, {name:"Cheese",unit:"120 g"}, {name:"Salt",unit:"1 pinch"}, {name:"Pepper",unit:"1 pinch"}, {name:"Butter",unit:"20 g"}] },
++  { title: "Vegetable Rice", ingredients: [{name:"Rice",unit:"250 g"}, {name:"Peas",unit:"100 g"}, {name:"Carrot",unit:"1 db"}, {name:"Corn",unit:"100 g"}, {name:"Salt",unit:"1 tsp"}] },
+ ];
+
+   function nextSampleRecipe(){
+@@ -377,7 +396,7 @@ function quickFill(){
+
+     const cont = document.getElementById('ingredients');
+     cont.innerHTML = '';
+-    recipe.ingredients.forEach(v => cont.appendChild(createIngredientRow(v)));
++    recipe.ingredients.forEach(v => cont.appendChild(createIngredientRow(v.name || '', v.unit || '')));
+     if (cont.querySelectorAll('.ing-row').length === 0) cont.appendChild(createIngredientRow(''));
+
+     updatePreview();
+@@ -394,9 +413,12 @@ function clearAll(){
+
+     // Old input visszatöltés: ha validáció után visszadob, töltsük vissza az old('ingredients')-et, ha van
+     const oldIngredients = @json(old('ingredients', []));
++    const oldUnits = @json(old('ingredient_units', []));
+     if (Array.isArray(oldIngredients) && oldIngredients.length > 0){
+       cont.innerHTML = '';
+-      oldIngredients.forEach(v => cont.appendChild(createIngredientRow(String(v ?? ''))));
++      oldIngredients.forEach((v, idx) => cont.appendChild(
++        createIngredientRow(String(v ?? ''), String(oldUnits[idx] ?? ''))
++      ));
+     } else {
+       // induljon 6 sorral, hogy ne legyen “csupasz”
+       cont.innerHTML = '';

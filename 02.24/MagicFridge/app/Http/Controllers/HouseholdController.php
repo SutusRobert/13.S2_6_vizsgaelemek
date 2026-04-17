@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -10,12 +9,21 @@ class HouseholdController extends Controller
     public function index(Request $request)
     {
         $userId = (int) session('user_id');
-        $fullName = (string) (session('full_name') ?? 'Felhasználó');
+        $fullName = (string) (session('full_name') ?? session('user_name') ?? '');
 
-        // 1) ha van saját (owner) háztartás
+        if ($fullName === '' && $userId > 0) {
+            $u = DB::selectOne("SELECT full_name, name FROM users WHERE id = ? LIMIT 1", [$userId]);
+            $fullName = (string) ($u->full_name ?? ($u->name ?? ''));
+        }
+
+        if ($fullName === '') {
+            $fullName = 'User';
+        }
+
+        // 1) if there is an owner household
         $household = DB::selectOne("SELECT * FROM households WHERE owner_id = ? LIMIT 1", [$userId]);
 
-        // 2) ha nincs saját, tagként keressünk
+        // 2) if no owner household, search as member
         if (!$household) {
             $household = DB::selectOne("
                 SELECT h.*
@@ -26,7 +34,7 @@ class HouseholdController extends Controller
             ", [$userId]);
         }
 
-        // 3) ha még mindig nincs: hozzuk létre
+        // 3) if still missing: create one
         if (!$household) {
             DB::table('households')->insert([
                 'owner_id' => $userId,
@@ -34,18 +42,16 @@ class HouseholdController extends Controller
             ]);
             $householdId = (int) DB::getPdo()->lastInsertId();
 
-            // tulaj admin tag
             DB::table('household_members')->insert([
                 'household_id' => $householdId,
                 'member_id' => $userId,
-                'role' => 'tag',
+                'role' => 'member',
 
             ]);
 
             $household = DB::selectOne("SELECT * FROM households WHERE id = ? LIMIT 1", [$householdId]);
         }
 
-        // tagok
         $members = DB::select("
             SELECT hm.id AS hm_id, u.id AS user_id, u.full_name, hm.role
             FROM household_members hm
@@ -69,7 +75,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['Enter an email address.']);
         }
 
-        // csak az owner háztartásából engedünk meghívni (mint a régi)
+        // allow invites only from owner household (same as before)
         $household = DB::selectOne("SELECT id, name FROM households WHERE owner_id = ? LIMIT 1", [$userId]);
         if (!$household) {
             return redirect()->route('households.index')->withErrors(['No household.']);
@@ -84,7 +90,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['You cannot invite yourself.']);
         }
 
-        // már tag?
+        // already a member?
         $exists = DB::selectOne("
             SELECT id FROM household_members WHERE household_id = ? AND member_id = ? LIMIT 1
         ", [(int)$household->id, (int)$user->id]);
@@ -104,7 +110,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['There is already a pending invitation for this user.']);
         }
 
-        // invite létrehozása
+        // create invite
         DB::table('household_invites')->insert([
             'household_id' => (int)$household->id,
             'invited_user_id' => (int)$user->id,
@@ -113,7 +119,7 @@ class HouseholdController extends Controller
         ]);
         $inviteId = (int) DB::getPdo()->lastInsertId();
 
-        // message létrehozása (pont mint a régi)
+        // create message (same as before)
         $inviterName = (string) (session('full_name') ?? 'Someone');
         $title = "Household invitation";
         $body  = $inviterName . " invited you to the \"" . $household->name . "\" household.";
@@ -151,10 +157,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['No permission.']);
         }
 
-        $newRole = ($row->role === 'basic user') ? 'tag' : 'basic user';
-
-
-        $newRole = ($row->role === 'basic user') ? 'tag' : 'basic user';
+        $newRole = ($row->role === 'basic user') ? 'member' : 'basic user';
 
         DB::update("UPDATE household_members SET role = ? WHERE id = ?", [$newRole, $hmId]);
 
