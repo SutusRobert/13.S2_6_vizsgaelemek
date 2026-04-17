@@ -19,6 +19,12 @@ body {
 
 /* NAVBAR -------------------------------------------------------- */
 
+.bubbles,
+.bubbles span{
+    display: none !important;
+    animation: none !important;
+}
+
 .navbar {
     width: 100%;
     padding: 16px 36px;
@@ -30,7 +36,8 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 10000;
+    overflow: visible;
 }
 
 .nav-left {
@@ -1236,6 +1243,45 @@ body::before{
 }
 
 /* Rólunk trigger */
+.translate-toggle{
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.translate-toggle:hover{
+  background: rgba(255,255,255,0.16);
+  box-shadow: 0 0 18px rgba(96,165,250,0.45);
+}
+
+#google_translate_element,
+.goog-te-banner-frame,
+.goog-te-gadget,
+.skiptranslate iframe,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip:hover,
+.VIpgJd-yAWNEb-L7lbkb{
+  display: none !important;
+}
+
+.goog-text-highlight,
+.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+body{
+  top: 0 !important;
+}
+
 .about-nav{
   position: relative;
 }
@@ -1267,7 +1313,7 @@ body::before{
   padding: 14px;
   border-radius: 16px;
 
-  background: rgba(15,23,42,0.65);
+  background: rgba(15,23,42,0.96);
   backdrop-filter: blur(18px);
   border: 1px solid rgba(255,255,255,0.14);
   box-shadow: 0 24px 60px rgba(0,0,0,0.45);
@@ -1276,7 +1322,7 @@ body::before{
   transform: translateY(-6px);
   pointer-events: none;
   transition: opacity .18s ease, transform .18s ease;
-  z-index: 100;
+  z-index: 10001;
 }
 
 .about-nav:hover .about-dropdown{
@@ -1409,4 +1455,24 @@ body::before{
 .nav-brand-link:hover{
   text-decoration:none;
   color:inherit;
+}
+
+@media (max-width: 680px){
+  .navbar{
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .nav-right{
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .translate-toggle,
+  .about-trigger,
+  .nav-right .btn{
+    padding: 8px 10px;
+    font-size: 12px;
+  }
 }

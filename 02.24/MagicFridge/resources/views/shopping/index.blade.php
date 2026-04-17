@@ -96,9 +96,10 @@
     <div class="form-group" style="flex: 0 0 170px;">
       <label>Location (inventory)</label>
       <select name="location">
+        <option value="auto" selected>Auto</option>
         <option value="fridge">Fridge</option>
         <option value="freezer">Freezer</option>
-        <option value="pantry" selected>Pantry</option>
+        <option value="pantry">Pantry</option>
       </select>
     </div>
 
@@ -150,9 +151,9 @@
             <div class="sl-name {{ $bought ? 'sl-done' : '' }}">
               {{ $it->name }}
               <span class="small" style="opacity:.75;">
-                â€” {{ $qty }} {{ $unit }}
+                - {{ $qty }} {{ $unit }}
               </span>
-              <span class="small" style="opacity:.75;"> â€˘ {{ $locLabel }}</span>
+              <span class="small" style="opacity:.75;"> - {{ $locLabel }}</span>
             </div>
 
             @if($note !== '')
@@ -167,7 +168,7 @@
 
         <div class="sl-actions">
           {{-- Delete --}}
-          <form method="post" action="{{ route('shopping.post') }}" style="margin:0;" onsubmit="return confirm('Biztos tĂ¶rlĂ¶d?');">
+          <form method="post" action="{{ route('shopping.post') }}" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this item?');">
             @csrf
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="hid" value="{{ (int)$householdId }}">
@@ -180,9 +181,8 @@
   </div>
 
   <div class="small mt-4" style="opacity:.75;">
-Tip: if you click â€śPurchased,â€ť the item will automatically be added to the inventory in the selected location.
+Tip: if you click "Bought", the item will automatically be added to the inventory in the selected location.
   </div>
 
 </div>
 @endsection
-

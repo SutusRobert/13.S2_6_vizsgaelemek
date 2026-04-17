@@ -72,25 +72,54 @@ class ShoppingListController extends Controller
 
     private function guessLocationForItem(string $name): string
     {
-        $n = mb_strtolower(trim($name), 'UTF-8');
+        $n = $this->normalizeForMatch($name);
 
         $freezer = [
-            'frozen', 'ice',
-            'nugget', 'fries',
-            'pizza', 'spinach', 'peas'
+            'frozen', 'ice cream', 'icecream',
+            'nugget', 'fries', 'fish fingers',
+            'pizza'
         ];
 
         $fridge = [
-            'milk', 'yogurt', 'cheese', 'cream', 'butter', 'margarine',
-            'egg',
+            'milk', 'yogurt', 'cheese', 'cream', 'sour cream', 'butter', 'margarine',
+            'egg', 'eggs',
             'chicken', 'turkey', 'beef', 'pork', 'fish',
-            'ham', 'sausage'
+            'ham', 'sausage', 'bacon',
+            'lettuce', 'spinach', 'tomato', 'cucumber', 'pepper',
+            'strawberry', 'berry'
         ];
 
-        foreach ($freezer as $k) if (mb_stripos($n, $k, 0, 'UTF-8') !== false) return 'freezer';
-        foreach ($fridge as $k) if (mb_stripos($n, $k, 0, 'UTF-8') !== false) return 'fridge';
+        foreach ($freezer as $k) if (str_contains($n, $k)) return 'freezer';
+        foreach ($fridge as $k) if (str_contains($n, $k)) return 'fridge';
 
         return 'pantry';
+    }
+
+    private function averageExpiryDateForItem(string $name, string $location): string
+    {
+        $n = $this->normalizeForMatch($name);
+        $days = match ($location) {
+            'freezer' => 180,
+            'fridge' => 7,
+            default => 90,
+        };
+
+        if (str_contains($n, 'milk') || str_contains($n, 'tej')) $days = 7;
+        elseif (str_contains($n, 'yogurt')) $days = 14;
+        elseif (str_contains($n, 'cream') || str_contains($n, 'tejszin') || str_contains($n, 'sour')) $days = 10;
+        elseif (str_contains($n, 'cheese') || str_contains($n, 'sajt')) $days = 21;
+        elseif (str_contains($n, 'egg') || str_contains($n, 'tojas')) $days = 28;
+        elseif (str_contains($n, 'chicken') || str_contains($n, 'csirke')) $days = $location === 'freezer' ? 180 : 3;
+        elseif (str_contains($n, 'beef') || str_contains($n, 'pork') || str_contains($n, 'fish')) $days = $location === 'freezer' ? 180 : 4;
+        elseif (str_contains($n, 'ham') || str_contains($n, 'sausage')) $days = 10;
+        elseif (str_contains($n, 'apple') || str_contains($n, 'carrot') || str_contains($n, 'onion') || str_contains($n, 'garlic')) $days = 30;
+        elseif (str_contains($n, 'banana') || str_contains($n, 'tomato') || str_contains($n, 'lettuce')) $days = 5;
+        elseif (str_contains($n, 'bread')) $days = 5;
+        elseif (str_contains($n, 'rice') || str_contains($n, 'pasta') || str_contains($n, 'flour') || str_contains($n, 'sugar') || str_contains($n, 'salt')) $days = 365;
+        elseif (str_contains($n, 'oil') || str_contains($n, 'vinegar') || str_contains($n, 'honey')) $days = 365;
+        elseif (str_contains($n, 'paprika') || str_contains($n, 'pepper') || str_contains($n, 'cumin') || str_contains($n, 'turmeric') || str_contains($n, 'cinnamon')) $days = 365;
+
+        return date('Y-m-d', strtotime('+' . $days . ' days'));
     }
 
     private function parseMeasureToQtyUnit(string $measure): array
@@ -359,7 +388,7 @@ class ShoppingListController extends Controller
                     'quantity' => 'nullable',
                     'unit' => 'nullable|string|max:50',
                     'note' => 'nullable|string',
-                    'location' => 'required|in:fridge,freezer,pantry',
+                    'location' => 'required|in:auto,fridge,freezer,pantry',
                 ]);
 
                 $name = trim((string)$request->input('name'));
@@ -369,7 +398,10 @@ class ShoppingListController extends Controller
 
                 $unit = trim((string)$request->input('unit', ''));
                 $note = trim((string)$request->input('note', ''));
-                $location = (string)$request->input('location', 'pantry');
+                $location = (string)$request->input('location', 'auto');
+                if ($location === 'auto') {
+                    $location = $this->guessLocationForItem($name);
+                }
 
                 DB::table('shopping_list_items')->insert([
                     'household_id' => $hid,
@@ -414,6 +446,7 @@ class ShoppingListController extends Controller
                         $unit = $item->unit !== null ? (string)$item->unit : null;
                         $note = $item->note !== null ? (string)$item->note : null;
                         $loc  = in_array((string)$item->location, ['fridge','freezer','pantry'], true) ? (string)$item->location : 'pantry';
+                        $expiresAt = $this->averageExpiryDateForItem($name, $loc);
 
                         // find existing inventory item (unit-aware)
                         if ($unit !== null && trim($unit) !== '') {
@@ -438,9 +471,10 @@ class ShoppingListController extends Controller
                         if ($existing) {
                             DB::update("
                                 UPDATE inventory_items
-                                SET quantity = quantity + ?
+                                SET quantity = quantity + ?,
+                                    expires_at = COALESCE(expires_at, ?)
                                 WHERE id = ? AND household_id = ?
-                            ", [$qty, (int)$existing->id, $hid]);
+                            ", [$qty, $expiresAt, (int)$existing->id, $hid]);
                         } else {
                             DB::table('inventory_items')->insert([
                                 'household_id' => $hid,
@@ -449,7 +483,7 @@ class ShoppingListController extends Controller
                                 'location' => $loc,
                                 'quantity' => $qty,
                                 'unit' => $unit,
-                                'expires_at' => null,
+                                'expires_at' => $expiresAt,
                                 'note' => $note,
                             ]);
                         }
@@ -499,6 +533,7 @@ class ShoppingListController extends Controller
                         $unit = $item->unit !== null ? (string)$item->unit : null;
                         $note = $item->note !== null ? (string)$item->note : null;
                         $loc  = in_array((string)$item->location, ['fridge','freezer','pantry'], true) ? (string)$item->location : 'pantry';
+                        $expiresAt = $this->averageExpiryDateForItem($name, $loc);
 
                         DB::update("
                             UPDATE shopping_list_items
@@ -530,9 +565,10 @@ class ShoppingListController extends Controller
                         if ($existing) {
                             DB::update("
                                 UPDATE inventory_items
-                                SET quantity = quantity + ?
+                                SET quantity = quantity + ?,
+                                    expires_at = COALESCE(expires_at, ?)
                                 WHERE id = ? AND household_id = ?
-                            ", [$qty, (int)$existing->id, $hid]);
+                            ", [$qty, $expiresAt, (int)$existing->id, $hid]);
                         } else {
                             DB::table('inventory_items')->insert([
                                 'household_id' => $hid,
@@ -541,7 +577,7 @@ class ShoppingListController extends Controller
                                 'location' => $loc,
                                 'quantity' => $qty,
                                 'unit' => $unit,
-                                'expires_at' => null,
+                                'expires_at' => $expiresAt,
                                 'note' => $note,
                             ]);
                         }
@@ -557,4 +593,3 @@ class ShoppingListController extends Controller
         }
     }
 }
-

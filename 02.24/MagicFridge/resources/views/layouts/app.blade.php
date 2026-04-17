@@ -4,17 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title', 'MagicFridge')</title>
-  <link rel="stylesheet" href="{{ asset('assets/style.css') }}?v=1">
+  <link rel="stylesheet" href="{{ asset('assets/style.css') }}?v=4">
   @stack('head')
 </head>
 <body>
-
-  {{-- Bubble background --}}
-  <div class="bubbles" aria-hidden="true">
-    @for($i=0; $i<20; $i++)
-      <span></span>
-    @endfor
-  </div>
 
   <div class="navbar">
     <div class="nav-left">
@@ -23,6 +16,11 @@
     </div>
 
     <div class="nav-right">
+      <div id="google_translate_element" aria-hidden="true"></div>
+      <button class="translate-toggle notranslate" id="translateToggle" type="button" data-target-lang="hu">
+        Translate
+      </button>
+
       <div class="about-nav">
         <span class="about-trigger">About us</span>
         <div class="about-dropdown">
@@ -56,6 +54,105 @@
   <div class="main-wrapper">
     @yield('content')
   </div>
+
+  <script>
+    window.googleTranslateElementInit = function () {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,hu',
+        autoDisplay: false
+      }, 'google_translate_element');
+
+      window.MagicFridgeTranslate && window.MagicFridgeTranslate.init();
+    };
+
+    window.MagicFridgeTranslate = (() => {
+      const storageKey = 'magicfridge_lang';
+      const sourceLang = 'en';
+      const translatedLang = 'hu';
+
+      function setCookie(name, value) {
+        document.cookie = `${name}=${value};path=/`;
+        document.cookie = `${name}=${value};path=/;domain=${location.hostname}`;
+      }
+
+      function clearTranslateCookie() {
+        const expired = 'Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = `googtrans=;expires=${expired};path=/`;
+        document.cookie = `googtrans=;expires=${expired};path=/;domain=${location.hostname}`;
+      }
+
+      function updateButton(lang) {
+        const button = document.getElementById('translateToggle');
+        if (!button) return;
+
+        const isHungarian = lang === translatedLang;
+        button.textContent = isHungarian ? 'English' : 'Magyar';
+        button.dataset.targetLang = isHungarian ? sourceLang : translatedLang;
+        button.setAttribute('aria-label', isHungarian ? 'Translate to English' : 'Translate to Hungarian');
+        updateManagedLabels(lang);
+      }
+
+      function updateManagedLabels(lang) {
+        document.querySelectorAll('[data-label-en][data-label-hu]').forEach((el) => {
+          el.textContent = lang === translatedLang ? el.dataset.labelHu : el.dataset.labelEn;
+        });
+      }
+
+      function getSelect() {
+        return document.querySelector('.goog-te-combo');
+      }
+
+      function chooseLanguage(lang) {
+        const select = getSelect();
+        if (!select) return false;
+
+        select.value = lang;
+        select.dispatchEvent(new Event('change'));
+        return true;
+      }
+
+      function switchLanguage(lang) {
+        localStorage.setItem(storageKey, lang);
+        updateButton(lang);
+
+        if (lang === sourceLang) {
+          clearTranslateCookie();
+          location.reload();
+          return;
+        }
+
+        setCookie('googtrans', `/${sourceLang}/${lang}`);
+
+        if (!chooseLanguage(lang)) {
+          location.reload();
+        }
+      }
+
+      function init() {
+        const button = document.getElementById('translateToggle');
+        if (!button) return;
+
+        const savedLang = localStorage.getItem(storageKey) || sourceLang;
+        updateButton(savedLang);
+
+        button.addEventListener('click', () => {
+          switchLanguage(button.dataset.targetLang || translatedLang);
+        });
+
+        if (savedLang !== sourceLang) {
+          setTimeout(() => {
+            chooseLanguage(savedLang);
+            updateManagedLabels(savedLang);
+          }, 500);
+          setTimeout(() => updateManagedLabels(savedLang), 1200);
+        }
+      }
+
+      return { init };
+    })();
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
   @stack('scripts')
 </body>

@@ -56,11 +56,6 @@
         <p class="small mt-2">
          Track your products, quantities, and expiration dates all in one place.
         </p>
-
-        <div class="mt-3" style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn" href="#">Open warehouse</a>
-      
-        </div>
       </div>
     </div>
   </div>
