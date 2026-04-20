@@ -61,7 +61,7 @@
           </div>
         </div>
 
-        <form method="post" action="{{ route('recipes.own.store') }}" class="mt-3" onsubmit="return validateIngredients()">
+        <form method="post" action="{{ route('recipes.own.store') }}" class="mt-3" enctype="multipart/form-data" onsubmit="return validateIngredients()">
           @csrf
           <input type="hidden" name="hid" value="{{ (int)($hid ?? 0) }}">
                   <div class="mt-3">
@@ -81,6 +81,14 @@
             <div class="form-group">
               <label class="small" style="opacity:.85;">&nbsp;</label>
               <button type="button" class="btn btn-secondary" style="width:100%;" onclick="quickFill()">✨ Fast Example</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:14px;">
+            <label for="imageInput">Recipe image</label>
+            <input id="imageInput" type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif">
+            <div class="small muted" style="margin-top:8px;">
+              Optional. JPG, PNG, WEBP or GIF, max 4 MB.
             </div>
           </div>
 
@@ -134,6 +142,11 @@
           <div class="note" style="padding:12px 14px;">
             <div style="font-weight:900; margin-bottom:6px;" id="previewTitle">Untitled recipe</div>
             <div class="muted" id="previewWarn">Add ingredients.</div>
+          </div>
+
+          <div id="previewImageBox" class="preview-image">
+            <span>No image selected.</span>
+            <img id="previewImage" src="" alt="" style="display:none;">
           </div>
 
           <div id="previewList" class="preview-list"></div>
@@ -214,6 +227,23 @@
     border: 1px solid rgba(255,255,255,.14);
     background: rgba(255,255,255,.06);
     font-size: 13px; opacity:.95;
+  }
+  .preview-image{
+    min-height: 180px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: rgba(255,255,255,.68);
+    font-weight: 800;
+  }
+  .preview-image img{
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
   }
   .preview-list{ margin-top: 12px; display: grid; gap: 8px; }
   .preview-item{
@@ -432,6 +462,30 @@
   },
 ];
 
+  function updateImagePreview(){
+    const input = document.getElementById('imageInput');
+    const box = document.getElementById('previewImageBox');
+    const img = document.getElementById('previewImage');
+    if (!input || !box || !img) return;
+
+    const label = box.querySelector('span');
+    const file = input.files && input.files[0] ? input.files[0] : null;
+    if (!file) {
+      img.removeAttribute('src');
+      img.style.display = 'none';
+      if (label) label.style.display = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = event => {
+      img.src = String(event.target?.result || '');
+      img.style.display = 'block';
+      if (label) label.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
   function nextSampleRecipe(){
     // localStorage-ben tároljuk, melyik minta következik, így frissítés után is folytatódik a kör.
     const raw = localStorage.getItem('mf_own_create_idx');
@@ -468,8 +522,11 @@
   function clearAll(){
     // Teljes kliensoldali ürítés: cím + hozzávalók + előnézet.
     document.getElementById('titleInput').value = '';
+    const imageInput = document.getElementById('imageInput');
+    if (imageInput) imageInput.value = '';
     clearIngredients();
     updatePreview();
+    updateImagePreview();
   }
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -493,7 +550,9 @@
     }
 
     document.getElementById('titleInput')?.addEventListener('input', updatePreview);
+    document.getElementById('imageInput')?.addEventListener('change', updateImagePreview);
     updatePreview();
+    updateImagePreview();
   });
 </script>
 @endsection

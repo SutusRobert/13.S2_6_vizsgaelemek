@@ -51,6 +51,23 @@
       <div class="error mt-3">{{ $msg ?? 'Error occurred.' }}</div>
     @endif
 
+    <div class="mt-3" style="width:100%; min-height:260px; border-radius:16px; overflow:hidden; background:rgba(0,0,0,.16); border:1px solid rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center;">
+      @if(!empty($recipe->image_path))
+        <img src="{{ asset($recipe->image_path) }}" alt="" style="width:100%; height:300px; object-fit:cover;">
+      @else
+        <div style="opacity:.7; font-weight:900;">No image for this recipe.</div>
+      @endif
+      </div>
+
+    <form method="post" action="{{ route('recipes.own.image', ['id' => (int)$recipe->id]) }}" enctype="multipart/form-data" class="mt-3" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      @csrf
+      <input type="hidden" name="hid" value="{{ (int)$hid }}">
+      <input type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif" required style="max-width:320px;">
+      <button type="submit" class="btn btn-secondary">
+        {{ !empty($recipe->image_path) ? 'Change image' : 'Add image' }}
+      </button>
+    </form>
+
     {{-- Tartalmi racs: bal oldalt a keszletellenorzott hozzavalok, jobb oldalt gyors muveletek. --}}
     <div class="mt-4" style="display:grid; grid-template-columns: 1fr 320px; gap:18px;">
       <div style="border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.08); border-radius:18px; padding:16px;">

@@ -37,24 +37,35 @@
       @if(empty($own) || count($own) === 0)
         <div class="mt-2" style="opacity:.8;">You don't have a recipes</div>
       @else
-        <div class="mt-2" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="mt-2" style="display:flex; flex-direction:column; gap:12px;">
           @foreach($own as $r)
-            <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;
+            <div style="display:flex; justify-content:space-between; gap:14px; align-items:stretch; flex-wrap:wrap;
                         border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06);
-                        border-radius: 16px; padding: 10px 12px;">
-              <div>
-                <div style="font-weight:900;">
-                  <a href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
-                     style="text-decoration:none;">
-                    {{ $r->title }}
-                  </a>
-                </div>
-                <div class="small" style="opacity:.75;">
-                  Saved: {{ $r->created_at }}
+                        border-radius: 16px; padding: 12px;">
+              <div style="display:flex; gap:14px; align-items:center; min-width:260px; flex:1;">
+                @if(!empty($r->image_path))
+                  <div style="width:150px; height:96px; border-radius:8px; overflow:hidden; background:rgba(0,0,0,.15); flex:0 0 150px;">
+                    <img src="{{ asset($r->image_path) }}" alt="" style="width:100%; height:100%; object-fit:cover;">
+                  </div>
+                @else
+                  <div style="width:150px; height:96px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.16); color:rgba(255,255,255,.65); flex:0 0 150px; font-weight:800;">
+                    No image
+                  </div>
+                @endif
+                <div>
+                  <div style="font-weight:900;">
+                    <a href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
+                       style="text-decoration:none;">
+                      {{ $r->title }}
+                    </a>
+                  </div>
+                  <div class="small" style="opacity:.75; margin-top:6px;">
+                    Saved: {{ $r->created_at }}
+                  </div>
                 </div>
               </div>
 
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                 <a class="btn btn-secondary"
                    href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}">
                   Open

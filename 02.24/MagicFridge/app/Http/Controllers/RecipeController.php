@@ -4,10 +4,26 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class RecipeController extends Controller
 {
     private ?string $lastCurlError = null;
+
+    private function ensureRecipeImagePathColumn(): bool
+    {
+        try {
+            if (!Schema::hasTable('recipes')) return false;
+            if (Schema::hasColumn('recipes', 'image_path')) return true;
+
+            // A projektben több tábla kézzel/SQL dumpból is létrejöhetett,
+            // ezért a képoszlopot futásidőben is pótoljuk, ha a migration nem futott le.
+            DB::statement("ALTER TABLE recipes ADD image_path VARCHAR(255) NULL");
+            return Schema::hasColumn('recipes', 'image_path');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
 
     /* =========================
        Háztartás segédfüggvények
@@ -636,8 +652,15 @@ class RecipeController extends Controller
 
         $api = $this->apiSearch($q, 50);
 
+        $ownImageSelect = '';
+        try {
+            $ownImageSelect = $this->ensureRecipeImagePathColumn() ? ', r.image_path' : '';
+        } catch (\Throwable $e) {
+            $ownImageSelect = '';
+        }
+
         $own = DB::select("
-            SELECT r.id, r.title, r.created_at
+            SELECT r.id, r.title, r.created_at{$ownImageSelect}
             FROM recipes r
             WHERE r.user_id = ?
             ORDER BY r.id DESC
@@ -948,6 +971,7 @@ class RecipeController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'instructions' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'ingredients' => 'required|array|min:1',
             'ingredients.*' => 'nullable|string|max:255',
             'amounts' => 'nullable|array',
@@ -984,6 +1008,11 @@ class RecipeController extends Controller
             return back()->withErrors(['Enter a title and at least one ingredient.'])->withInput();
         }
 
+        $hasImagePathColumn = $this->ensureRecipeImagePathColumn();
+        if ($request->hasFile('image') && !$hasImagePathColumn) {
+            return back()->withErrors(['Could not prepare the recipe image column. Try again, or run the database update.'])->withInput();
+        }
+
         DB::beginTransaction();
         try {
             $hasInstructionsColumn = false;
@@ -995,10 +1024,38 @@ class RecipeController extends Controller
                 $hasInstructionsColumn = false;
             }
 
-            if ($hasInstructionsColumn) {
+            $imagePath = null;
+            if ($hasImagePathColumn && $request->hasFile('image')) {
+                $file = $request->file('image');
+                if ($file && $file->isValid()) {
+                    // A saját recept képeit közvetlenül public alá mentjük,
+                    // így külön storage link nélkül is megjeleníthetők.
+                    $dir = public_path('uploads/recipes');
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0775, true);
+                    }
+
+                    $ext = strtolower((string)$file->getClientOriginalExtension());
+                    $filename = 'own-recipe-' . $userId . '-' . time() . '-' . Str::random(10) . '.' . $ext;
+                    $file->move($dir, $filename);
+                    $imagePath = 'uploads/recipes/' . $filename;
+                }
+            }
+
+            if ($hasInstructionsColumn && $hasImagePathColumn) {
+                DB::insert(
+                    "INSERT INTO recipes (user_id, title, instructions, image_path, created_at) VALUES (?, ?, ?, ?, NOW())",
+                    [$userId, $title, ($instructions !== '' ? $instructions : null), $imagePath]
+                );
+            } elseif ($hasInstructionsColumn) {
                 DB::insert(
                     "INSERT INTO recipes (user_id, title, instructions, created_at) VALUES (?, ?, ?, NOW())",
                     [$userId, $title, ($instructions !== '' ? $instructions : null)]
+                );
+            } elseif ($hasImagePathColumn) {
+                DB::insert(
+                    "INSERT INTO recipes (user_id, title, image_path, created_at) VALUES (?, ?, ?, NOW())",
+                    [$userId, $title, $imagePath]
                 );
             } else {
                 DB::insert(
@@ -1208,17 +1265,76 @@ class RecipeController extends Controller
         }
     }
 
+    public function updateOwnImage(Request $request, int $id)
+    {
+        $userId = (int) session('user_id');
+        $hid = (int)$request->input('hid', 0);
+
+        $request->validate([
+            'hid' => 'required|integer',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+        ]);
+
+        $this->assertMember($userId, $hid);
+
+        if (!$this->ensureRecipeImagePathColumn()) {
+            return back()->withErrors(['Could not prepare the recipe image column.']);
+        }
+
+        $recipe = DB::selectOne("SELECT * FROM recipes WHERE id = ? AND user_id = ? LIMIT 1", [$id, $userId]);
+        if (!$recipe) {
+            return redirect()->route('recipes.index', ['hid' => $hid])->withErrors(['Own recipe not found.']);
+        }
+
+        $file = $request->file('image');
+        if (!$file || !$file->isValid()) {
+            return back()->withErrors(['Invalid image file.']);
+        }
+
+        $dir = public_path('uploads/recipes');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $ext = strtolower((string)$file->getClientOriginalExtension());
+        $filename = 'own-recipe-' . $userId . '-' . time() . '-' . Str::random(10) . '.' . $ext;
+        $file->move($dir, $filename);
+        $imagePath = 'uploads/recipes/' . $filename;
+
+        DB::update("UPDATE recipes SET image_path = ? WHERE id = ? AND user_id = ?", [$imagePath, $id, $userId]);
+
+        if (!empty($recipe->image_path)) {
+            $oldPath = public_path((string)$recipe->image_path);
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        return redirect()->route('recipes.own.show', ['id' => $id, 'hid' => $hid])
+            ->with('success', 'Recipe image saved.');
+    }
+
     public function deleteOwn(Request $request, int $id)
     {
         $userId = (int) session('user_id');
 
         DB::beginTransaction();
         try {
+            $recipe = DB::selectOne("SELECT * FROM recipes WHERE id = ? AND user_id = ? LIMIT 1", [$id, $userId]);
+
             // Először a gyermek hozzávalókat töröljük, utána magát a receptet,
             // hogy ne maradjanak árva recipe_ingredients sorok.
             DB::delete("DELETE FROM recipe_ingredients WHERE recipe_id = ?", [$id]);
             DB::delete("DELETE FROM recipes WHERE id = ? AND user_id = ?", [$id, $userId]);
             DB::commit();
+
+            if ($recipe && !empty($recipe->image_path)) {
+                $path = public_path((string)$recipe->image_path);
+                if (is_file($path)) {
+                    @unlink($path);
+                }
+            }
+
             return redirect()->route('recipes.index')->with('success', 'Recipe deleted.');
         } catch (\Throwable $e) {
             DB::rollBack();

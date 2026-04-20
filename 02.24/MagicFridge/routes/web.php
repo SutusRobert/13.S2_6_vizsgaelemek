@@ -31,6 +31,7 @@ Route::middleware('logged')->group(function () {
     Route::get('/recipes/own/{id}', [RecipeController::class, 'showOwn'])->whereNumber('id')->name('recipes.own.show');
     Route::post('/recipes/own/{id}/missing-to-shopping', [RecipeController::class, 'addMissingOwnToShopping'])->whereNumber('id')->name('recipes.own.missingToShopping');
     Route::post('/recipes/own/{id}/consume', [RecipeController::class, 'consumeOwn'])->whereNumber('id')->name('recipes.own.consume');
+    Route::post('/recipes/own/{id}/image', [RecipeController::class, 'updateOwnImage'])->whereNumber('id')->name('recipes.own.image');
     Route::post('/recipes/own/{id}/delete', [RecipeController::class, 'deleteOwn'])->whereNumber('id')->name('recipes.own.delete');
 });
 
@@ -59,6 +60,7 @@ Route::post('/recipes/own', [RecipeController::class, 'storeOwn'])->name('recipe
 Route::get('/recipes/own/{id}', [RecipeController::class, 'showOwn'])->whereNumber('id')->name('recipes.own.show');
 Route::post('/recipes/own/{id}/missing-to-shopping', [RecipeController::class, 'addMissingOwnToShopping'])->whereNumber('id')->name('recipes.own.missingToShopping');
 Route::post('/recipes/own/{id}/consume', [RecipeController::class, 'consumeOwn'])->whereNumber('id')->name('recipes.own.consume');
+Route::post('/recipes/own/{id}/image', [RecipeController::class, 'updateOwnImage'])->whereNumber('id')->name('recipes.own.image');
 Route::post('/recipes/own/{id}/delete', [RecipeController::class, 'deleteOwn'])->whereNumber('id')->name('recipes.own.delete');
 
 // Bevásárlólista: egy GET oldal és egy POST action-dispatcher kezeli a műveleteket.
