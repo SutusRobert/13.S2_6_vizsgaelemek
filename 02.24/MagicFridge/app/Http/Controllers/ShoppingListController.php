@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\DB;
 class ShoppingListController extends Controller
 {
     /* ================================
-     * Households (owner + member)
+     * Háztartások kezelése tulajdonosként és tagként
      * ================================ */
     private function householdsForUser(int $userId): array
     {
+        // A bevásárlólista tulajdonosként és tagként is elérhető háztartásokat mutat.
         return DB::select("
             SELECT id AS household_id, name
             FROM households
@@ -34,7 +35,7 @@ class ShoppingListController extends Controller
             LIMIT 1
         ", [$userId, $hid]);
 
-        // tulaj is lehet
+        // Itt a tulajdonost is elfogadjuk, akkor is, ha nincs külön household_members sora.
         if (!$ok) {
             $owner = DB::selectOne("SELECT id FROM households WHERE id = ? AND owner_id = ? LIMIT 1", [$hid, $userId]);
             if (!$owner) abort(403, 'You do not have permission for this household.');
@@ -42,10 +43,12 @@ class ShoppingListController extends Controller
     }
 
     /* ================================
-     * Inventory helpers (missing check)
+     * Készlet segédfüggvények hiányellenőrzéshez
      * ================================ */
     private function invNamesForHousehold(int $hid): array
     {
+        // Hiányzó hozzávalók felvétele előtt csak névlistára van szükség,
+        // így nem kérjük le a teljes inventory sort.
         return DB::select("
             SELECT LOWER(TRIM(name)) AS n
             FROM inventory_items
@@ -56,6 +59,9 @@ class ShoppingListController extends Controller
 
     private function invContains(array $invRows, string $needle): bool
     {
+        // A víz alapból elérhető, ezért készletnév nélkül is "megtaláltnak" számít.
+        if ($this->isAlwaysAvailableIngredient($needle)) return true;
+
         $needle = mb_strtolower(trim($needle), 'UTF-8');
         if ($needle === '') return false;
 
@@ -63,6 +69,8 @@ class ShoppingListController extends Controller
             $n = (string)($r->n ?? '');
             if ($n === '') continue;
 
+            // Részleges egyezést használunk, hogy például "tomato" és "tomato puree"
+            // ne feltétlenül kerüljenek duplán a bevásárlólistára.
             if (mb_stripos($n, $needle, 0, 'UTF-8') !== false || mb_stripos($needle, $n, 0, 'UTF-8') !== false) {
                 return true;
             }
@@ -70,8 +78,18 @@ class ShoppingListController extends Controller
         return false;
     }
 
+    private function isAlwaysAvailableIngredient(string $name): bool
+    {
+        // Ezeket nem kezeljük valódi készletként, mert tipikusan mindig rendelkezésre állnak.
+        $n = $this->normalizeForMatch($name);
+
+        return in_array($n, ['water', 'viz'], true);
+    }
+
     private function guessLocationForItem(string $name): string
     {
+        // Kulcsszavas heurisztika: vásárlás után automatikusan a legvalószínűbb
+        // inventory helyre tesszük a terméket.
         $n = $this->normalizeForMatch($name);
 
         $freezer = [
@@ -97,6 +115,8 @@ class ShoppingListController extends Controller
 
     private function averageExpiryDateForItem(string $name, string $location): string
     {
+        // Bevásárláskor becsült lejárati dátumot adunk, hogy a frissen készletbe
+        // kerülő termékek is részt vegyenek a lejárati figyelmeztetésekben.
         $n = $this->normalizeForMatch($name);
         $days = match ($location) {
             'freezer' => 180,
@@ -124,50 +144,75 @@ class ShoppingListController extends Controller
 
     private function parseMeasureToQtyUnit(string $measure): array
     {
+        // A receptből érkező mértékek szabad szövegek, ezért több gyakori
+        // formátumot kezelünk külön: vegyes tört, tört, szám + egység.
         $m = trim($measure);
         if ($m === '') return [1.0, null];
 
         $m = str_replace(',', '.', $m);
 
-        // mixed fraction: "1 1/2"
+        // Vegyes tört: "1 1/2 cup" -> 1.5 cup.
         if (preg_match('/^\s*(\d+)\s+(\d+)\s*\/\s*(\d+)\s*(.*)$/u', $m, $mm)) {
             $qty = (float)$mm[1] + ((float)$mm[2] / max(1.0, (float)$mm[3]));
             $unit = trim((string)$mm[4]);
             return [$qty, $unit !== '' ? $unit : null];
         }
 
-        // fraction: "1/2"
+        // Egyszerű tört: "1/2 tsp" -> 0.5 tsp.
         if (preg_match('/^\s*(\d+)\s*\/\s*(\d+)\s*(.*)$/u', $m, $mm)) {
             $qty = (float)$mm[1] / max(1.0, (float)$mm[2]);
             $unit = trim((string)$mm[3]);
             return [$qty, $unit !== '' ? $unit : null];
         }
 
-        // number + unit
+        // Sima szám opcionális egységgel.
         if (preg_match('/^\s*(\d+(?:\.\d+)?)\s*([^\d].*)?$/u', $m, $mm)) {
             $qty = (float)$mm[1];
             $unit = trim((string)($mm[2] ?? ''));
 
             if ($unit !== '') $unit = preg_split('/\s+/u', $unit)[0];
 
-            if ($unit !== '' && preg_match('/^(chopped|slice|sliced|minced|pinch|handful|to|taste)$/iu', $unit)) {
+            if ($this->isPreparationWord($unit)) {
+                // "5 thinly sliced" esetén a thinly nem egység, hanem elkészítési mód.
+                return [$qty, 'pcs'];
+            }
+
+            if ($unit !== '' && preg_match('/^(pinch|handful|to|taste)$/iu', $unit)) {
                 return [1.0, null];
             }
 
-            return [$qty, $unit !== '' ? $unit : null];
+            // Ha nincs egység, darabnak vesszük, hogy a vásárlás és a főzés ugyanúgy számoljon.
+            return [$qty, $unit !== '' ? $unit : 'pcs'];
         }
 
         return [1.0, null];
     }
 
+    private function isPreparationWord(?string $word): bool
+    {
+        // Nem mértékegységek, hanem előkészítési/állapot szavak.
+        if ($word === null) return false;
+
+        $w = $this->normalizeForMatch($word);
+
+        return in_array($w, [
+            'chopped', 'finely', 'thinly', 'roughly', 'sliced', 'slice',
+            'minced', 'diced', 'cubed', 'grated', 'crushed', 'peeled',
+            'fresh', 'large', 'small', 'medium',
+        ], true);
+    }
+
     private function normalizeForMatch(string $s): string
     {
+        // Egyezésekhez ékezet nélküli kisbetűs alakot használunk.
         $s = mb_strtolower(trim($s), 'UTF-8');
         return Str::ascii($s);
     }
 
     private function toStorePack(string $name, float $recipeQty, ?string $recipeUnit): array
     {
+        // A bevásárlólistára bolti egységet teszünk, nem feltétlenül a recept
+        // pontos mennyiségét. Ezért lesz például tejből 1 liter, húsból csomag.
         $n = $this->normalizeForMatch($name);
         $u = $recipeUnit ? $this->normalizeForMatch($recipeUnit) : null;
 
@@ -177,6 +222,7 @@ class ShoppingListController extends Controller
             if ($u === 'l')  $needMl = $recipeQty * 1000.0;
 
             $packs = 1;
+            // Tejnél literes kiszerelésre kerekítünk felfelé.
             if ($needMl !== null) $packs = (int)ceil($needMl / 1000.0);
             return [$packs, 'l'];
         }
@@ -201,6 +247,7 @@ class ShoppingListController extends Controller
             if ($u === 'kg') $needG = $recipeQty * 1000.0;
 
             if ($needG !== null) {
+                // Húsnál 500 g-os csomagokkal számolunk.
                 $packs = (int)ceil($needG / 500.0);
                 return [max(1, $packs), 'csomag'];
             }
@@ -211,7 +258,7 @@ class ShoppingListController extends Controller
     }
 
     /* ================================
-     * GET: page
+     * GET: bevásárlólista oldal
      * ================================ */
     public function index(Request $request)
     {
@@ -225,7 +272,8 @@ class ShoppingListController extends Controller
         $hid = (int)($request->query('hid') ?? 0);
         if ($hid <= 0) $hid = (int)$households[0]->household_id;
 
-        // if not in user's household list, fallback
+        // Ha a query paraméterben kapott háztartás nem a felhasználóé, visszaesünk
+        // az első elérhető háztartásra.
         $hhMap = [];
         foreach ($households as $h) $hhMap[(int)$h->household_id] = (string)$h->name;
         if (!isset($hhMap[$hid])) $hid = (int)$households[0]->household_id;
@@ -239,7 +287,7 @@ class ShoppingListController extends Controller
             ORDER BY is_bought ASC, id DESC
         ", [$hid]);
 
-        // custom recipes for dropdown (if present in DB)
+        // Saját receptek listája a shopping oldali gyors "hiányzó alapanyagok" funkcióhoz.
         $recipes = DB::select("
             SELECT id, title
             FROM recipes
@@ -257,7 +305,7 @@ class ShoppingListController extends Controller
     }
 
     /* ================================
-     * POST: actions (add/toggle/delete/clear/buy/missing)
+     * POST: műveletválasztó hozzáadáshoz, törléshez és vásárláshoz
      * ================================ */
     public function post(Request $request)
     {
@@ -276,7 +324,7 @@ class ShoppingListController extends Controller
         $action = trim((string)$request->input('action', ''));
 
         try {
-            /* 0) add_missing_api */
+            /* 0) API-s recept hiányzó tételeinek felvétele */
             if ($action === 'add_missing_api') {
                 $recipeTitle = trim((string)$request->input('recipe_title', ''));
                 $invNames = $this->invNamesForHousehold($hid);
@@ -285,6 +333,8 @@ class ShoppingListController extends Controller
                 $missingItems = $request->input('missing_item', null);
 
                 if (is_array($missingItems)) {
+                    // Új formátum: minden hiányzó tétel külön tömbben jön névvel,
+                    // mértékkel és checkbox állapottal.
                     foreach ($missingItems as $it) {
                         if (!is_array($it)) continue;
                         if (!isset($it['add'])) continue;
@@ -298,6 +348,7 @@ class ShoppingListController extends Controller
                         [$rq, $ru] = $this->parseMeasureToQtyUnit($measure);
                         [$qty, $unit] = $this->toStorePack($nm, (float)$rq, $ru);
 
+                        // A note megőrzi, melyik receptből és milyen eredeti mennyiségből készült a tétel.
                         $noteParts = [];
                         if ($recipeTitle !== '') $noteParts[] = "Recipe: " . $recipeTitle;
                         if ($measure !== '') $noteParts[] = "Measure: " . $measure;
@@ -321,7 +372,7 @@ class ShoppingListController extends Controller
                         ->with('success', $added > 0 ? "Missing ingredients added to the shopping list." : "No missing items to add.");
                 }
 
-                // legacy format
+                // Régi formátum támogatása: csak névlista érkezik, mennyiség nélkül.
                 $names = $request->input('missing_name', []);
                 if (!is_array($names)) $names = [];
 
@@ -347,7 +398,7 @@ class ShoppingListController extends Controller
                 return redirect()->route('shopping.index', ['hid' => $hid])->with('success', "Missing ingredients added to the shopping list.");
             }
 
-            /* 1) add_missing_for_own_recipe */
+            /* 1) Saját recept hiányzó tételeinek felvétele */
             if ($action === 'add_missing_for_own_recipe') {
                 $recipeId = (int)$request->input('recipe_id', 0);
 
@@ -361,6 +412,7 @@ class ShoppingListController extends Controller
 
                 $added = 0;
                 foreach ($ings as $row) {
+                    // Saját recepteknél a hiányellenőrzés egyszerű névegyezésen alapul.
                     $nm = trim((string)($row->ingredient ?? ''));
                     if ($nm === '') continue;
                     if ($this->invContains($invNames, $nm)) continue;
@@ -381,7 +433,7 @@ class ShoppingListController extends Controller
                     ->with('success', $added > 0 ? "Missing ingredients added to the shopping list." : "All ingredients are available in stock.");
             }
 
-            /* 2) add */
+            /* 2) Kézzel megadott új tétel felvétele */
             if ($action === 'add') {
                 $request->validate([
                     'name' => 'required|string|max:255',
@@ -400,6 +452,7 @@ class ShoppingListController extends Controller
                 $note = trim((string)$request->input('note', ''));
                 $location = (string)$request->input('location', 'auto');
                 if ($location === 'auto') {
+                    // Auto módban nem a felhasználónak kell megmondania, hova kerüljön majd a készletben.
                     $location = $this->guessLocationForItem($name);
                 }
 
@@ -416,7 +469,7 @@ class ShoppingListController extends Controller
                 return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Added to the list.');
             }
 
-            /* 3) toggle (megvett/vissza + inventory upsert megvettkor) */
+            /* 3) Megvett/visszavont állapot és megvételkor inventory upsert */
             if ($action === 'toggle') {
                 $id = (int)$request->input('id', 0);
                 $to = (int)$request->input('to', 0);
@@ -430,6 +483,8 @@ class ShoppingListController extends Controller
                 ", [$id, $hid]);
 
                 if ($item) {
+                    // A checkbox-szerű állapotváltás és az inventory frissítés egy tranzakció,
+                    // így nem fordulhat elő, hogy megvettnek látszik, de nem kerül készletbe.
                     DB::transaction(function () use ($to, $userId, $id, $hid, $item) {
                         DB::update("
                             UPDATE shopping_list_items
@@ -439,6 +494,8 @@ class ShoppingListController extends Controller
                             WHERE id = ? AND household_id = ?
                         ", [$to, $to, $to, $userId, $id, $hid]);
 
+                        // Ha visszavonjuk a vásárlást, csak a shopping státuszt állítjuk vissza.
+                        // A korábban inventoryba tett mennyiséget nem vonjuk automatikusan vissza.
                         if ($to !== 1) return;
 
                         $name = (string)$item->name;
@@ -448,7 +505,8 @@ class ShoppingListController extends Controller
                         $loc  = in_array((string)$item->location, ['fridge','freezer','pantry'], true) ? (string)$item->location : 'pantry';
                         $expiresAt = $this->averageExpiryDateForItem($name, $loc);
 
-                        // find existing inventory item (unit-aware)
+                        // Egység- és helyérzékeny upsert: azonos termék + azonos unit + azonos hely
+                        // esetén mennyiséget növelünk, különben új inventory sort hozunk létre.
                         if ($unit !== null && trim($unit) !== '') {
                             $existing = DB::selectOne("
                                 SELECT id
@@ -493,27 +551,45 @@ class ShoppingListController extends Controller
                 return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Saved.');
             }
 
-            /* 4) delete */
+            /* 4) Egy shopping tétel törlése */
             if ($action === 'delete') {
                 $id = (int)$request->input('id', 0);
                 DB::delete("DELETE FROM shopping_list_items WHERE id = ? AND household_id = ?", [$id, $hid]);
                 return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'TĂ¶rĂ¶lve.');
             }
 
-            /* 5) clear_bought */
+            /* 5) Megvett tételek törlése */
             if ($action === 'clear_bought') {
-                DB::delete("DELETE FROM shopping_list_items WHERE household_id = ? AND is_bought = 1", [$hid]);
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'Purchased items deleted.');
+                // A régebbi adatoknál előfordulhat, hogy bought_at már ki van töltve,
+                // ezért nem csak is_bought alapján törlünk.
+                $deleted = DB::delete("
+                    DELETE FROM shopping_list_items
+                    WHERE household_id = ?
+                      AND (is_bought = 1 OR bought_at IS NOT NULL)
+                ", [$hid]);
+
+                $message = $deleted > 0
+                    ? $deleted . ' purchased item(s) deleted.'
+                    : 'There were no purchased items to delete.';
+
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', $message);
             }
 
-            /* 6) clear_all */
+            /* 6) Teljes bevásárlólista törlése */
             if ($action === 'clear_all') {
-                DB::delete("DELETE FROM shopping_list_items WHERE household_id = ?", [$hid]);
-                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', 'All items deleted.');
+                $deleted = DB::delete("DELETE FROM shopping_list_items WHERE household_id = ?", [$hid]);
+
+                $message = $deleted > 0
+                    ? $deleted . ' shopping list item(s) deleted.'
+                    : 'The shopping list was already empty.';
+
+                return redirect()->route('shopping.index', ['hid' => $hid])->with('success', $message);
             }
 
-            /* 7) buy_all (mind megvett + inventory) */
+            /* 7) Minden tétel megvásárlása és inventoryba vezetése */
             if ($action === 'buy_all') {
+                // Csak a még nem megvett tételeket dolgozzuk fel, hogy ismételt kattintásra
+                // ne duplázódjon a készlet.
                 $toBuy = DB::select("
                     SELECT id, name, quantity, unit, note, location
                     FROM shopping_list_items
@@ -535,6 +611,8 @@ class ShoppingListController extends Controller
                         $loc  = in_array((string)$item->location, ['fridge','freezer','pantry'], true) ? (string)$item->location : 'pantry';
                         $expiresAt = $this->averageExpiryDateForItem($name, $loc);
 
+                        // Előbb a shopping tételt jelöljük megvettnek, majd ugyanabban a tranzakcióban
+                        // inventory upsertet végzünk.
                         DB::update("
                             UPDATE shopping_list_items
                             SET is_bought = 1,
@@ -544,6 +622,7 @@ class ShoppingListController extends Controller
                         ", [$userId, $id, $hid]);
 
                         if ($unit !== null && trim($unit) !== '') {
+                            // Azonos egységnél mennyiséget összevonunk, eltérő egységnél külön sort hagyunk.
                             $existing = DB::selectOne("
                                 SELECT id
                                 FROM inventory_items

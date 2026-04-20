@@ -57,6 +57,7 @@
 
   <script>
     window.googleTranslateElementInit = function () {
+      // A Google Translate widget rejtve fut, a saját gombunk csak ezt vezérli.
       new google.translate.TranslateElement({
         pageLanguage: 'en',
         includedLanguages: 'en,hu',
@@ -72,11 +73,13 @@
       const translatedLang = 'hu';
 
       function setCookie(name, value) {
+        // A Google Translate a googtrans cookie alapján dönti el, milyen nyelvre váltson.
         document.cookie = `${name}=${value};path=/`;
         document.cookie = `${name}=${value};path=/;domain=${location.hostname}`;
       }
 
       function clearTranslateCookie() {
+        // Angolra visszaváltáskor törölni kell a fordító cookie-t, különben újratöltés után is fordítana.
         const expired = 'Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = `googtrans=;expires=${expired};path=/`;
         document.cookie = `googtrans=;expires=${expired};path=/;domain=${location.hostname}`;
@@ -86,6 +89,7 @@
         const button = document.getElementById('translateToggle');
         if (!button) return;
 
+        // A gomb mindig azt a nyelvet mutatja, amire a következő kattintás váltani fog.
         const isHungarian = lang === translatedLang;
         button.textContent = isHungarian ? 'English' : 'Magyar';
         button.dataset.targetLang = isHungarian ? sourceLang : translatedLang;
@@ -94,6 +98,7 @@
       }
 
       function updateManagedLabels(lang) {
+        // Azokat a feliratokat, amelyeket nem a Google fordít, kézzel cseréljük adat-attribútumokból.
         document.querySelectorAll('[data-label-en][data-label-hu]').forEach((el) => {
           el.textContent = lang === translatedLang ? el.dataset.labelHu : el.dataset.labelEn;
         });
@@ -107,16 +112,19 @@
         const select = getSelect();
         if (!select) return false;
 
+        // A rejtett Google select change eseménye indítja el ténylegesen a fordítást.
         select.value = lang;
         select.dispatchEvent(new Event('change'));
         return true;
       }
 
       function switchLanguage(lang) {
+        // A választott nyelvet localStorage-ben tároljuk, hogy oldalváltás után is megmaradjon.
         localStorage.setItem(storageKey, lang);
         updateButton(lang);
 
         if (lang === sourceLang) {
+          // Visszaváltásnál újratöltés kell, mert a Google widget a cookie törlése után áll vissza tisztán.
           clearTranslateCookie();
           location.reload();
           return;
@@ -125,6 +133,7 @@
         setCookie('googtrans', `/${sourceLang}/${lang}`);
 
         if (!chooseLanguage(lang)) {
+          // Ha a Google select még nem töltött be, reload után a cookie alapján fogja átvenni a nyelvet.
           location.reload();
         }
       }
@@ -133,6 +142,7 @@
         const button = document.getElementById('translateToggle');
         if (!button) return;
 
+        // Induláskor a korábban mentett nyelvet vesszük elő, alapból angolt.
         const savedLang = localStorage.getItem(storageKey) || sourceLang;
         updateButton(savedLang);
 
@@ -141,6 +151,7 @@
         });
 
         if (savedLang !== sourceLang) {
+          // A Google widget aszinkron tölt be, ezért kis késleltetéssel próbáljuk újra alkalmazni a nyelvet.
           setTimeout(() => {
             chooseLanguage(savedLang);
             updateManagedLabels(savedLang);

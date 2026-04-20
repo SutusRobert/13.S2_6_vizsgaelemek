@@ -4,7 +4,7 @@
 
 @push('head')
 <style>
-  /* Bubbles are truly background */
+  /* A buborékok csak háttérelemek, ezért nem kattinthatók. */
   .bubbles{
     position: fixed;
     inset: 0;
@@ -43,7 +43,7 @@
 @section('content')
 <div class="dash-row">
 
-  <!-- LEFT: FRIDGE BOX -->
+  <!-- Bal oldali hűtődoboz -->
   <div class="dash-left">
     <div class="fridge-card">
       <div class="fridge-hero">
@@ -60,7 +60,7 @@
     </div>
   </div>
 
-  <!-- CENTER: DASHBOARD CARD -->
+  <!-- Középső dashboard kártya -->
   <div class="dash-mid">
     <div class="main-wrapper">
       <div class="card">
@@ -142,7 +142,7 @@
     </div>
   </div>
 
-  <!-- JOBB: TIPPEK BOX -->
+  <!-- Jobb oldali tippek doboz -->
   <div class="dash-side">
     <div class="card side-card">
       <div class="side-stack">
@@ -176,11 +176,12 @@
 
 @push('scripts')
 <script>
-/* Random bubble start + parallax (legacy code) */
+/* Buborék háttér mozgatása: véletlen kezdés + enyhe parallax egérmozgásra. */
 (() => {
   const bubbles = document.getElementById('bubbles');
   if (!bubbles) return;
 
+  // Minden buborék kap saját sebességet/mélységet, ettől nem egyszerre mozognak.
   const items = Array.from(bubbles.querySelectorAll('span')).map((el, i) => {
     const dur = parseFloat(getComputedStyle(el).animationDuration) || 20;
     el.style.animationDelay = (Math.random() * dur * -1).toFixed(2) + 's';
@@ -193,6 +194,7 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   window.addEventListener('mousemove', (e) => {
+    // Az egér pozícióját -1..1 tartományra normalizáljuk a képernyő közepéhez képest.
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     mx = clamp((e.clientX - cx) / cx, -1, 1);
@@ -200,11 +202,13 @@
   }, { passive: true });
 
   function tick() {
+    // A tx/ty lassan közelíti a célértéket, ezért a parallax nem rángat, hanem csúszik.
     tx += (mx - tx) * 0.06;
     ty += (my - ty) * 0.06;
 
     const sy = window.scrollY || 0;
     for (const it of items) {
+      // Mélységtől függően minden buborék kicsit más mértékben mozdul el.
       const px = tx * it.depth * it.speed;
       const py = ty * it.depth * it.speed + (sy * 0.02 * it.speed);
       it.el.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;

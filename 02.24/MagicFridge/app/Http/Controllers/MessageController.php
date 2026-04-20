@@ -10,10 +10,11 @@ class MessageController extends Controller
     {
         $userId = (int) session('user_id');
 
-        // 1) generate automatic messages for expiring/expired items
+        // Lejárati értesítéseket lustán generálunk az inbox megnyitásakor,
+        // így ehhez a kis apphoz nem kell külön scheduler.
         $this->createExpiryMessagesForUser($userId);
 
-        // 2) list messages
+        // Előre kerülnek az olvasatlan üzenetek, azon belül a frissebb id-k.
         $messages = DB::select("
             SELECT *
             FROM messages
@@ -28,7 +29,8 @@ class MessageController extends Controller
 
     private function createExpiryMessagesForUser(int $userId): void
     {
-        // user households
+        // A lejárati értesítés minden olyan háztartásra vonatkozik, ahol a user tag,
+        // ezért a közös készletből minden háztartástag kap saját inbox üzenetet.
         $households = DB::select("
             SELECT hm.household_id
             FROM household_members hm
@@ -39,10 +41,11 @@ class MessageController extends Controller
 
         $hidList = array_map(fn($r) => (int)$r->household_id, $households);
 
-        // IN (?, ?, ?) placeholder
+        // Pont annyi placeholdert építünk az IN feltételbe, ahány háztartás van.
         $in = implode(',', array_fill(0, count($hidList), '?'));
 
-        // expired or expires within 2 days
+        // Csak a hamarosan lejáró és még nem értesített tételeket vesszük fel;
+        // az expired_notified mező akadályozza meg az ismétlődő értesítéseket.
         $items = DB::select("
             SELECT id, household_id, name, expires_at
             FROM inventory_items
@@ -68,6 +71,8 @@ class MessageController extends Controller
                 'created_at'  => now(),
             ]);
 
+            // Csak sikeres üzenetlétrehozás után jelöljük értesítettnek,
+            // így hiba esetén később újrapróbálható.
             DB::update("UPDATE inventory_items SET expired_notified = 1 WHERE id = ?", [(int)$it->id]);
         }
     }
@@ -118,6 +123,8 @@ class MessageController extends Controller
 
         if (!$msg) return back()->withErrors(['The message could not be found.']);
 
+        // A meghívó üzenetek a cél meghívót "invite:{id}" formában tárolják,
+        // így nem kell külön message_invites kapcsolótábla.
         $link = (string)($msg->link_url ?? '');
         if (!str_starts_with($link, 'invite:')) {
             return back()->withErrors(['This message is not an invitation.']);
@@ -136,7 +143,8 @@ class MessageController extends Controller
         if ($invite->status !== 'pending') return back()->withErrors(['This invitation has already been processed.']);
 
         if ($action === 'accept') {
-            // already a member?
+            // Az elfogadás idempotens: ha időközben már létrejött a tagság,
+            // nem hozunk létre duplikált household_members sort.
             $exists = DB::selectOne("
                 SELECT id FROM household_members
                 WHERE household_id = ? AND member_id = ?

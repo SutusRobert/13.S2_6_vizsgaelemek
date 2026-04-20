@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    {{-- Success/error messages --}}
+    {{-- Sikeres vagy hibás művelet üzenetei --}}
     @if(session('success'))
       <div class="success mt-3">{{ session('success') }}</div>
     @endif
@@ -37,7 +37,7 @@
       <div class="error mt-3">{{ $errors->first() }}</div>
     @endif
 
-    {{-- Cooking (deduction) result --}}
+    {{-- Főzés utáni készletlevonás eredménye --}}
     @if(($cook ?? '') === 'ok')
       <div class="success mt-3">✅ Deducted from stock. Enjoy your meal!!</div>
     @endif
@@ -60,7 +60,7 @@
           </div>
         </div>
 
-        {{-- 🍳 I’ll make it (deduct from stock)--}}
+        {{-- Csak akkor engedjük a főzés gombot, ha a szerveroldali készletellenőrzés szerint nincs hiány. --}}
         @if(((int)($missingCount ?? 0)) === 0)
           <form method="post" action="{{ route('recipes.consume', ['id'=>$mealId]) }}" style="margin:0;">
             @csrf
@@ -83,7 +83,7 @@
             @php
               $has = (bool)($ing['has'] ?? false);
 
-              // Prefer Hungarian name when available
+              // Ha később lesz fordított név, azt jelenítjük meg, különben marad az API neve.
               $name = (string)($ing['name_hu'] ?? $ing['name'] ?? '');
 
               $measure = (string)($ing['measure'] ?? '');
@@ -112,7 +112,7 @@
                 @else
                   <span class="badge" style="background: rgba(255,80,80,.25); border:1px solid rgba(255,80,80,.35);">Missing</span>
 
-                  {{-- Send Hungarian name to shopping list --}}
+                  {{-- A checkbox kikapcsolásakor kiürítjük a hidden mezőket, így az adott tétel nem kerül feladásra. --}}
                   <input type="hidden" name="items[{{ $idx }}][name]" value="{{ $name }}">
                   <input type="hidden" name="items[{{ $idx }}][measure]" value="{{ $measure }}">
 

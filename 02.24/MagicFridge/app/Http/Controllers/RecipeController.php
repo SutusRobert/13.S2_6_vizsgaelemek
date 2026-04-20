@@ -10,21 +10,27 @@ class RecipeController extends Controller
     private ?string $lastCurlError = null;
 
     /* =========================
-       Households helpers
+       Háztartás segédfüggvények
        ========================= */
     private function householdsForUser(int $userId): array
     {
         return DB::select("
+            SELECT id AS household_id, name
+            FROM households
+            WHERE owner_id = ?
+            UNION
             SELECT h.id AS household_id, h.name
-            FROM households h
-            INNER JOIN household_members hm ON hm.household_id = h.id
+            FROM household_members hm
+            JOIN households h ON h.id = hm.household_id
             WHERE hm.member_id = ?
-            ORDER BY h.name ASC
-        ", [$userId]);
+            ORDER BY household_id ASC
+        ", [$userId, $userId]);
     }
 
     private function assertMember(int $userId, int $hid): void
     {
+        // Minden recept/készlet művelet előtt ellenőrizzük, hogy a felhasználó
+        // tényleg tagja-e annak a háztartásnak, amelynek a készletével dolgozik.
         $ok = DB::selectOne("
             SELECT id
             FROM household_members
@@ -32,14 +38,19 @@ class RecipeController extends Controller
             LIMIT 1
         ", [$userId, $hid]);
 
-        if (!$ok) abort(403, 'You do not have permission for this household.');
+        if (!$ok) {
+            $owner = DB::selectOne("SELECT id FROM households WHERE id = ? AND owner_id = ? LIMIT 1", [$hid, $userId]);
+            if (!$owner) abort(403, 'You do not have permission for this household.');
+        }
     }
 
     /* =========================
-       TheMealDB API
+       TheMealDB API-kapcsolat
        ========================= */
     private function apiSearch(string $query, int $limit = 50): array
     {
+        // Üres keresésnél adunk egy alap kulcsszót, hogy a receptlista ne üres
+        // képernyővel induljon.
         $query = trim($query) !== '' ? trim($query) : 'chicken';
         $url = 'https://www.themealdb.com/api/json/v1/1/search.php?s=' . urlencode($query);
 
@@ -62,6 +73,8 @@ class RecipeController extends Controller
 
         $meals = array_slice($decoded['meals'], 0, $limit);
 
+        // A külső API nagy objektumából csak azt a kis, stabil adatcsomagot adjuk
+        // tovább a view-nak, amire a felületnek szüksége van.
         $results = [];
         foreach ($meals as $m) {
             $titleEn = (string)($m['strMeal'] ?? '');
@@ -102,6 +115,8 @@ class RecipeController extends Controller
         }
 
         $ch = curl_init($url);
+        // A wrapper egységesíti a külső API hívást: timeout, JSON elfogadás,
+        // hibatárolás és HTTP státuszkód ellenőrzés egy helyen van.
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
@@ -136,28 +151,34 @@ class RecipeController extends Controller
     }
 
     /* =========================
-       String helpers
+       Szöveg- és mennyiségkezelő segédek
        ========================= */
     private function normalizeForMatch(string $s): string
     {
+        // Egyezéshez kisbetűs, ékezet nélküli alakot használunk, így pl. "víz"
+        // és "viz" ugyanabba az összehasonlítható formába kerül.
         $s = mb_strtolower(trim($s), 'UTF-8');
         return Str::ascii($s);
     }
 
     private function parseMeasureToQtyUnit(string $measure): array
     {
+        // TheMealDB mérték mezői szabad szövegek, ezért előbb több gyakori
+        // mintára bontjuk őket: vegyes tört, tört, majd sima szám + egység.
         $m = trim((string)$measure);
         if ($m === '') return [1.0, null];
 
         $m = str_replace(',', '.', $m);
 
         if (preg_match('/^\s*(\d+)\s+(\d+)\s*\/\s*(\d+)\s*(.*)$/u', $m, $mm)) {
+            // Példa: "1 1/2 cup" -> 1.5 cup.
             $qty = (float)$mm[1] + ((float)$mm[2] / max(1.0, (float)$mm[3]));
             $unit = trim((string)$mm[4]);
             return [$qty, $unit !== '' ? $unit : null];
         }
 
         if (preg_match('/^\s*(\d+)\s*\/\s*(\d+)\s*(.*)$/u', $m, $mm)) {
+            // Példa: "1/2 tsp" -> 0.5 tsp.
             $qty = (float)$mm[1] / max(1.0, (float)$mm[2]);
             $unit = trim((string)$mm[3]);
             return [$qty, $unit !== '' ? $unit : null];
@@ -167,16 +188,47 @@ class RecipeController extends Controller
             $qty = (float)$mm[1];
             $unit = trim((string)($mm[2] ?? ''));
             if ($unit !== '') $unit = preg_split('/\s+/u', $unit)[0];
-            return [$qty, $unit !== '' ? $unit : null];
+            if ($this->isPreparationWord($unit)) {
+                // Ha az első szó elkészítési mód ("finely", "chopped"), akkor
+                // a szám valójában darabszám: pl. "2 finely chopped" -> 2 pcs.
+                return [$qty, 'pcs'];
+            }
+            // Egység nélküli számot darabnak vesszük, hogy az ellenőrzés és a
+            // főzés levonása ugyanúgy értelmezze.
+            return [$qty, $unit !== '' ? $unit : 'pcs'];
         }
 
         return [1.0, null];
+    }
+
+    private function isPreparationWord(?string $word): bool
+    {
+        // Ezek a szavak nem mértékegységek, hanem az alapanyag feldolgozási módjai.
+        if ($word === null) return false;
+
+        $w = $this->normalizeForMatch($word);
+
+        return in_array($w, [
+            'chopped', 'finely', 'thinly', 'roughly', 'sliced', 'slice',
+            'minced', 'diced', 'cubed', 'grated', 'crushed', 'peeled',
+            'fresh', 'large', 'small', 'medium',
+        ], true);
+    }
+
+    private function isAlwaysAvailableIngredient(string $name): bool
+    {
+        // A víz nem készletfüggő alapanyag: ne kerüljön bevásárlólistára,
+        // ne legyen hiányzó, és főzéskor se vonjuk le.
+        $n = $this->normalizeForMatch($name);
+
+        return in_array($n, ['water', 'viz'], true);
     }
 
     private function canonicalUnit(?string $unit): ?string
     {
         if ($unit === null) return null;
 
+        // A különböző API/űrlap egységneveket közös belső alakra fordítjuk.
         $u = $this->normalizeForMatch($unit);
         $u = rtrim($u, '.');
 
@@ -200,6 +252,8 @@ class RecipeController extends Controller
 
     private function ingredientDensityGPerMl(string $name): ?float
     {
+        // Egyes hozzávalóknál a recept térfogatot ad (cup/tsp), a készlet pedig
+        // grammot tárol. A közelítő sűrűség ezt teszi összehasonlíthatóvá.
         $n = $this->normalizeForMatch($name);
 
         if (str_contains($n, 'honey') || str_contains($n, 'mez')) return 1.4;
@@ -207,12 +261,39 @@ class RecipeController extends Controller
         if (str_contains($n, 'salt') || str_contains($n, 'so')) return 1.2;
         if (str_contains($n, 'flour') || str_contains($n, 'liszt')) return 0.53;
         if (str_contains($n, 'butter') || str_contains($n, 'vaj')) return 0.96;
+        if (str_contains($n, 'rice') || str_contains($n, 'rizs')) return 0.85;
+        if (str_contains($n, 'yogurt') || str_contains($n, 'joghurt')) return 1.03;
+        if (
+            str_contains($n, 'cumin') || str_contains($n, 'coriander') ||
+            str_contains($n, 'turmeric') || str_contains($n, 'paprika') ||
+            str_contains($n, 'pepper') || str_contains($n, 'chilli') ||
+            str_contains($n, 'chili') || str_contains($n, 'cinnamon') ||
+            str_contains($n, 'masala') || str_contains($n, 'spice') ||
+            str_contains($n, 'seeds')
+        ) return 0.5;
+
+        return null;
+    }
+
+    private function ingredientPieceWeightG(string $name): ?float
+    {
+        // Ha a recept darabszámot ad, de a készlet grammot tárol,
+        // néhány gyakori alapanyagnál átlagos darabsúllyal hasonlítunk.
+        $n = $this->normalizeForMatch($name);
+
+        if (str_contains($n, 'drumstick')) return 125.0;
+        if (str_contains($n, 'chicken breast')) return 200.0;
+        if (str_contains($n, 'chicken thigh')) return 150.0;
+        if (str_contains($n, 'chicken wing')) return 75.0;
+        if (str_contains($n, 'egg') || str_contains($n, 'tojas')) return 50.0;
 
         return null;
     }
 
     private function recipeAmountToBase(string $name, float $qty, ?string $unit): array
     {
+        // Minden mértéket alapegységre hozunk: tömeg -> g, térfogat -> ml,
+        // darab -> db. Így később már azonos alapegységeket hasonlítunk.
         $u = $this->canonicalUnit($unit);
         if ($u === null || $u === '') return [$qty, null];
 
@@ -235,8 +316,15 @@ class RecipeController extends Controller
         [$baseQty, $baseUnit] = $this->recipeAmountToBase($name, $qty, $unit);
         $density = $this->ingredientDensityGPerMl($name);
 
+        // Ha a recept térfogatot ad, de az alapanyaghoz van sűrűségünk,
+        // grammra váltunk, mert sok inventory tétel grammos egységben van.
         if ($baseUnit === 'ml' && $density !== null) {
             return [$baseQty * $density, 'g'];
+        }
+
+        $pieceWeight = $this->ingredientPieceWeightG($name);
+        if ($baseUnit === 'db' && $pieceWeight !== null) {
+            return [$baseQty * $pieceWeight, 'g'];
         }
 
         return [$baseQty, $baseUnit];
@@ -244,12 +332,16 @@ class RecipeController extends Controller
 
     private function hasEnoughIngredient(int $hid, string $name, float $needQty, ?string $needUnit): bool
     {
+        if ($this->isAlwaysAvailableIngredient($name)) return true;
+
         $rows = $this->inventoryRowsForIngredient($hid, $name);
         if (empty($rows)) return false;
 
         [$requiredQty, $requiredUnit] = $this->comparableAmount($name, $needQty, $needUnit);
         if ($requiredUnit === null || $requiredUnit === '') return true;
 
+        // Több azonos alapanyag-sor összeadódhat, például két félig megmaradt
+        // csomag rizs együtt elég lehet egy recepthez.
         $availableQty = 0.0;
         $sawComparable = false;
 
@@ -257,6 +349,7 @@ class RecipeController extends Controller
             [$rowQty, $rowUnit] = $this->comparableAmount($name, (float)$row->quantity, $row->unit ?? null);
 
             if ($rowUnit === null && $requiredUnit === 'db') {
+                // Régi vagy kézzel felvitt darabos tételeknél előfordulhat hiányzó unit.
                 $rowUnit = 'db';
             }
 
@@ -273,12 +366,22 @@ class RecipeController extends Controller
 
     private function storePackForIngredient(string $name, float $recipeQty, ?string $recipeUnit): array
     {
+        // Hiányzó alapanyagnál nem a recept pontos mennyiségét, hanem reális
+        // bolti csomagméretet teszünk a bevásárlólistára.
         $n = $this->normalizeForMatch($name);
         [$needQty, $needUnit] = $this->recipeAmountToBase($name, $recipeQty, $recipeUnit);
 
         $density = $this->ingredientDensityGPerMl($name);
         if ($needUnit === 'ml' && $density !== null) {
+            // Ha a recept térfogatot ad, de a terméket jellemzően tömegben vesszük,
+            // előbb átváltjuk grammra, majd arra kerekítünk csomagméretet.
             $needQty *= $density;
+            $needUnit = 'g';
+        }
+
+        $pieceWeight = $this->ingredientPieceWeightG($name);
+        if ($needUnit === 'db' && $pieceWeight !== null) {
+            $needQty *= $pieceWeight;
             $needUnit = 'g';
         }
 
@@ -311,6 +414,8 @@ class RecipeController extends Controller
 
     private function convertQty(float $qty, ?string $fromUnit, ?string $toUnit, string $name = ''): array
     {
+        // Főzéskor a receptben szereplő mennyiséget az inventory sor egységébe
+        // váltjuk, hogy pontosan annyit tudjunk levonni abból a sorból.
         $fu = $this->canonicalUnit($fromUnit);
         $tu = $this->canonicalUnit($toUnit);
 
@@ -333,6 +438,7 @@ class RecipeController extends Controller
         }
 
         if ($baseUnit === 'ml' && $density !== null && ($tu === 'g' || $tu === 'kg')) {
+            // Térfogat -> tömeg átváltás sűrűséggel, majd szükség esetén g/kg váltás.
             return $this->convertQty($baseQty * $density, 'g', $tu, $name);
         }
 
@@ -340,11 +446,22 @@ class RecipeController extends Controller
             return $this->convertQty($baseQty, 'g', $tu, $name);
         }
 
+        $pieceWeight = $this->ingredientPieceWeightG($name);
+        if ($baseUnit === 'db' && $pieceWeight !== null && ($tu === 'g' || $tu === 'kg')) {
+            return $this->convertQty($baseQty * $pieceWeight, 'g', $tu, $name);
+        }
+
+        if (($fu === 'g' || $fu === 'kg') && $tu === 'db' && $pieceWeight !== null) {
+            [$grams, $ok] = $this->convertQty($qty, $fu, 'g', $name);
+            if ($ok) return [$grams / $pieceWeight, true];
+        }
+
         return [$qty, false];
     }
 
     private function householdInventoryNameList(int $hid): array
     {
+        // Gyors névlista régi hiány-ellenőrző útvonalakhoz.
         $rows = DB::select("
             SELECT LOWER(TRIM(name)) AS n
             FROM inventory_items
@@ -359,6 +476,7 @@ class RecipeController extends Controller
 
     private function invContains(array $invNames, string $needle): bool
     {
+        // Részleges egyezés is elég: "tomato" és "tomato puree" egymásra talál.
         $needle = trim((string)$needle);
         if ($needle === '') return false;
 
@@ -378,6 +496,8 @@ class RecipeController extends Controller
 
     private function guessLocationForItem(string $name): string
     {
+        // Egyszerű kulcsszavas heurisztika, hogy a bevásárolt tétel alapból
+        // a legvalószínűbb tárolási helyre kerüljön.
         $n = $this->normalizeForMatch($name);
 
         $freezer = [
@@ -401,17 +521,35 @@ class RecipeController extends Controller
         return 'pantry';
     }
 
+    private function ingredientSearchTerms(string $ingredientEn): array
+    {
+        // Egyes alapanyagoknál a recept konkrét típust kér, de a készletben
+        // általánosabb név szerepelhet. Ilyenkor kiegészítő keresőszavakat adunk.
+        $needle = $this->normalizeForMatch($ingredientEn);
+        $terms = [$needle];
+
+        if (str_contains($needle, 'rice') || str_contains($needle, 'rizs')) {
+            $terms[] = 'rice';
+            $terms[] = 'rizs';
+        }
+
+        return array_values(array_unique(array_filter($terms, fn($term) => trim($term) !== '')));
+    }
+
     private function inventoryRowsForIngredient(int $hid, string $ingredientEn): array
     {
+        // Az alapanyaghoz illő készletsorokat lejárati sorrendben adjuk vissza,
+        // hogy főzéskor először a leghamarabb lejáró tételből vonjunk le.
         $ingredientEn = trim((string)$ingredientEn);
         if ($ingredientEn === '') return [];
-
-        $enNeedle = $this->normalizeForMatch($ingredientEn);
 
         $likes = [];
         $params = [$hid];
 
-        if ($enNeedle !== '') { $likes[] = "LOWER(name) LIKE ?"; $params[] = '%'.$enNeedle.'%'; }
+        foreach ($this->ingredientSearchTerms($ingredientEn) as $term) {
+            $likes[] = "LOWER(name) LIKE ?";
+            $params[] = '%'.$term.'%';
+        }
 
         if (empty($likes)) return [];
 
@@ -426,8 +564,58 @@ class RecipeController extends Controller
         return DB::select($sql, $params);
     }
 
+    private function parseOwnIngredientLine(string $line): array
+    {
+        $raw = trim($line);
+        $name = $raw;
+        $measure = '';
+
+        // A saját receptek hozzávalói "Név (2 cup)" formában vannak mentve,
+        // ezért a zárójeles részt visszabontjuk receptmértékké.
+        if (preg_match('/^(.*?)\s*\((.*?)\)\s*$/u', $raw, $m)) {
+            $name = trim((string)$m[1]);
+            $measure = trim((string)$m[2]);
+        }
+
+        [$qty, $unit] = $this->parseMeasureToQtyUnit($measure);
+
+        return [
+            'raw' => $raw,
+            'name' => $name !== '' ? $name : $raw,
+            'measure' => $measure,
+            'qty' => (float)($qty > 0 ? $qty : 1.0),
+            'unit' => $unit,
+        ];
+    }
+
+    private function ownRecipeIngredientsWithStock(int $hid, array $rows): array
+    {
+        $checked = [];
+        $missingCount = 0;
+
+        foreach ($rows as $idx => $row) {
+            $parsed = $this->parseOwnIngredientLine((string)($row->ingredient ?? ''));
+            if (trim($parsed['name']) === '') continue;
+
+            $has = $this->hasEnoughIngredient($hid, $parsed['name'], (float)$parsed['qty'], $parsed['unit']);
+            if (!$has) $missingCount++;
+
+            $checked[] = [
+                'idx' => $idx,
+                'raw' => $parsed['raw'],
+                'name' => $parsed['name'],
+                'measure' => $parsed['measure'],
+                'qty' => $parsed['qty'],
+                'unit' => $parsed['unit'],
+                'has' => $has,
+            ];
+        }
+
+        return [$checked, $missingCount];
+    }
+
     /* =========================
-       Pages
+       Oldalak és receptműveletek
        ========================= */
     public function index(Request $request)
     {
@@ -483,6 +671,8 @@ class RecipeController extends Controller
             return redirect()->route('recipes.index', ['hid' => $hid])->withErrors(['Recipe not found.']);
         }
 
+        // TheMealDB fixen strIngredient1..20 és strMeasure1..20 mezőket ad.
+        // Ezeket előbb egységes tömbbé alakítjuk, hogy a view és az ellenőrzés egyszerűbb legyen.
         $ingredients = [];
         for ($i = 1; $i <= 20; $i++) {
             $ingNameEn = trim((string)($meal["strIngredient{$i}"] ?? ''));
@@ -505,6 +695,8 @@ class RecipeController extends Controller
             [$needQty, $needUnit] = $this->parseMeasureToQtyUnit((string)$ing['measure']);
             $has = $this->hasEnoughIngredient($hid, $nameEn, (float)($needQty > 0 ? $needQty : 1.0), $needUnit);
 
+            // A view már kész, eldöntött állapotot kap: minden sorhoz megmondjuk,
+            // hogy elérhető-e, és közben számoljuk a hiányzó tételeket.
             if (!$has) $missingCount++;
 
             $ingredientsChecked[] = [
@@ -524,6 +716,7 @@ class RecipeController extends Controller
         $instructionsHu = $instructionsEn;
         $instructionText = trim(preg_replace('/\s+/u', ' ', $instructionsHu) ?? '');
         $instructionSentenceCount = preg_match_all('/[.!?](\s|$)/u', $instructionText);
+        // Ha a külső recept túl rövid instrukciót ad, a view kiegészítő checklistet jelenít meg.
         $needsMoreInstructions = mb_strlen($instructionText, 'UTF-8') < 450 || $instructionSentenceCount < 4;
 
         return view('recipes.show', [
@@ -562,6 +755,7 @@ class RecipeController extends Controller
 
         $recipeTitleHu = (string)($meal['strMeal'] ?? 'Recipe');
         $missing = [];
+        // Újraszámoljuk a hiányt szerveroldalon, nem bízunk a böngészőből érkező checkbox állapotban.
         for ($i = 1; $i <= 20; $i++) {
             $ingName = trim((string)($meal["strIngredient{$i}"] ?? ''));
             $measure = trim((string)($meal["strMeasure{$i}"] ?? ''));
@@ -571,6 +765,7 @@ class RecipeController extends Controller
             $has = $this->hasEnoughIngredient($hid, $ingName, (float)($qty > 0 ? $qty : 1.0), $unit);
             if ($has) continue;
 
+            // A bevásárlólistára bolti csomagméret kerül, a note megőrzi az eredeti receptmértéket.
             [$storeQty, $storeUnit] = $this->storePackForIngredient($ingName, (float)($qty > 0 ? $qty : 1.0), $unit);
 
             $missing[] = [
@@ -622,10 +817,13 @@ class RecipeController extends Controller
         }
 
         $ings = [];
+        // Főzés előtt ugyanúgy parse-oljuk a recept hozzávalóit, mint a készletellenőrzésnél,
+        // hogy a levonás ugyanazzal a mennyiségértelmezéssel dolgozzon.
         for ($i=1; $i<=20; $i++) {
             $ingName = trim((string)($meal["strIngredient{$i}"] ?? ''));
             $measure = trim((string)($meal["strMeasure{$i}"] ?? ''));
             if ($ingName === '') continue;
+            if ($this->isAlwaysAvailableIngredient($ingName)) continue;
 
             [$qty, $unit] = $this->parseMeasureToQtyUnit($measure);
 
@@ -644,7 +842,11 @@ class RecipeController extends Controller
         try {
             DB::beginTransaction();
 
+            // Első körben csak azt nézzük meg, hogy minden hozzávalóhoz van-e készletsor.
+            // Ha valamelyik teljesen hiányzik, nem kezdünk részleges levonásba.
             foreach ($ings as $ing) {
+                if ($this->isAlwaysAvailableIngredient((string)$ing['name'])) continue;
+
                 $rows = $this->inventoryRowsForIngredient($hid, $ing['name']);
                 if (empty($rows)) {
                     DB::rollBack();
@@ -657,7 +859,11 @@ class RecipeController extends Controller
                 }
             }
 
+            // Második körben ténylegesen levonjuk a mennyiségeket. A sorokat lejárati sorrendben
+            // kaptuk, ezért a régebbi/hamarabb lejáró készlet fogy először.
             foreach ($ings as $ing) {
+                if ($this->isAlwaysAvailableIngredient((string)$ing['name'])) continue;
+
                 $rows = $this->inventoryRowsForIngredient($hid, $ing['name']);
 
                 $remainingNeed = (float)$ing['qty'];
@@ -669,13 +875,14 @@ class RecipeController extends Controller
                     $invUnit = $row->unit ?? null;
 
                     [$needInInvUnit, $ok] = $this->convertQty($remainingNeed, $ing['unit'], $invUnit, $ing['name']);
-                    if (!$ok) $needInInvUnit = $remainingNeed;
+                    if (!$ok) continue;
 
                     if ($invQty <= 0) continue;
 
                     if ($invQty >= $needInInvUnit) {
                         $newQty = $invQty - $needInInvUnit;
 
+                        // Ha a sor gyakorlatilag elfogyott, töröljük; különben csak csökkentjük.
                         if ($newQty <= 0.00001) {
                             DB::delete("DELETE FROM inventory_items WHERE id = ? AND household_id = ?", [$invId, $hid]);
                         } else {
@@ -685,7 +892,12 @@ class RecipeController extends Controller
                         $remainingNeed = 0.0;
                         break;
                     } else {
-                        $remainingNeed = $remainingNeed - $invQty;
+                        // Ha egy sor nem elég, teljesen elfogyasztjuk és a maradék igényt
+                        // továbbvisszük a következő készletsorra.
+                        [$consumedInRecipeUnit, $backOk] = $this->convertQty($invQty, $invUnit, $ing['unit'], $ing['name']);
+                        if (!$backOk) continue;
+
+                        $remainingNeed = $remainingNeed - $consumedInRecipeUnit;
                         DB::delete("DELETE FROM inventory_items WHERE id = ? AND household_id = ?", [$invId, $hid]);
 
                         if ($remainingNeed <= 0.00001) {
@@ -696,6 +908,8 @@ class RecipeController extends Controller
                 }
 
                 if ($remainingNeed > 0.00001) {
+                    // Bármilyen hiány esetén rollback: vagy minden hozzávaló levonódik,
+                    // vagy semmi sem változik.
                     DB::rollBack();
                     return redirect()->route('recipes.show', [
                         'id' => $id,
@@ -716,7 +930,7 @@ class RecipeController extends Controller
     }
 
     /* =========================
-       Own recipes
+       Saját receptek
        ========================= */
     public function createOwn(Request $request)
     {
@@ -756,6 +970,8 @@ class RecipeController extends Controller
             $amount = trim((string)($amountsRaw[$idx] ?? ''));
             $unit   = trim((string)($unitsRaw[$idx]   ?? ''));
 
+            // A saját recepteknél az alapanyag neve mellé zárójelbe mentjük az opcionális
+            // mennyiséget/egységet, így egyetlen recipe_ingredients szövegmező is elég.
             if ($amount !== '' || $unit !== '') {
                 $stored = $ingredient . ' (' . ltrim($amount . ' ' . $unit) . ')';
             } else {
@@ -772,6 +988,8 @@ class RecipeController extends Controller
         try {
             $hasInstructionsColumn = false;
             try {
+                // Régebbi adatbázis-dumpokban nem mindig volt instructions oszlop,
+                // ezért mentés előtt futásidőben ellenőrizzük.
                 $hasInstructionsColumn = DB::getSchemaBuilder()->hasColumn('recipes', 'instructions');
             } catch (\Throwable $e) {
                 $hasInstructionsColumn = false;
@@ -814,15 +1032,180 @@ class RecipeController extends Controller
         $r = DB::selectOne("SELECT * FROM recipes WHERE id = ? AND user_id = ? LIMIT 1", [$id, $userId]);
         if (!$r) return redirect()->route('recipes.index')->withErrors(['Own recipe not found.']);
 
-        $ings = DB::select("SELECT ingredient FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC", [$id]);
+        $households = $this->householdsForUser($userId);
+        if (empty($households)) {
+            return redirect()->route('households.index')->withErrors(['Join a household first.']);
+        }
 
         $hid = (int) $request->query('hid', 0);
+        if ($hid <= 0) $hid = (int)$households[0]->household_id;
+
+        $this->assertMember($userId, $hid);
+
+        $ings = DB::select("SELECT ingredient FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC", [$id]);
+        [$ingredientsChecked, $missingCount] = $this->ownRecipeIngredientsWithStock($hid, $ings);
 
         return view('recipes.own_show', [
             'hid' => $hid,
+            'households' => array_map(fn($h) => ['household_id' => (int)$h->household_id, 'name' => (string)$h->name], $households),
             'recipe' => $r,
-            'ingredients' => $ings,
+            'ingredients' => $ingredientsChecked,
+            'missingCount' => $missingCount,
+            'cook' => (string)$request->query('cook', ''),
+            'msg' => (string)$request->query('msg', ''),
         ]);
+    }
+
+    public function addMissingOwnToShopping(Request $request, int $id)
+    {
+        $userId = (int) session('user_id');
+
+        $request->validate([
+            'hid' => 'required|integer',
+        ]);
+
+        $hid = (int)$request->input('hid');
+        $this->assertMember($userId, $hid);
+
+        $r = DB::selectOne("SELECT * FROM recipes WHERE id = ? AND user_id = ? LIMIT 1", [$id, $userId]);
+        if (!$r) {
+            return redirect()->route('recipes.index', ['hid' => $hid])->withErrors(['Own recipe not found.']);
+        }
+
+        $rows = DB::select("SELECT ingredient FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC", [$id]);
+
+        $added = 0;
+        foreach ($rows as $row) {
+            $ing = $this->parseOwnIngredientLine((string)($row->ingredient ?? ''));
+            if (trim($ing['name']) === '') continue;
+            if ($this->hasEnoughIngredient($hid, $ing['name'], (float)$ing['qty'], $ing['unit'])) continue;
+
+            [$storeQty, $storeUnit] = $this->storePackForIngredient($ing['name'], (float)$ing['qty'], $ing['unit']);
+
+            DB::table('shopping_list_items')->insert([
+                'household_id' => $hid,
+                'name' => $ing['name'],
+                'quantity' => (float)$storeQty,
+                'unit' => $storeUnit,
+                'note' => 'Own recipe: ' . (string)$r->title . ($ing['measure'] !== '' ? ' | Needed for recipe: ' . $ing['measure'] : ''),
+                'is_bought' => 0,
+                'created_by' => $userId,
+                'location' => $this->guessLocationForItem((string)$ing['name']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $added++;
+        }
+
+        if ($added === 0) {
+            return redirect()->route('recipes.own.show', ['id' => $id, 'hid' => $hid])
+                ->with('success', 'All ingredients are available in stock.');
+        }
+
+        return redirect()->route('shopping.index', ['hid' => $hid])
+            ->with('success', 'Missing ingredients added to the shopping list.');
+    }
+
+    public function consumeOwn(Request $request, int $id)
+    {
+        $userId = (int) session('user_id');
+
+        $request->validate([
+            'hid' => 'required|integer',
+        ]);
+
+        $hid = (int)$request->input('hid');
+        $this->assertMember($userId, $hid);
+
+        $r = DB::selectOne("SELECT * FROM recipes WHERE id = ? AND user_id = ? LIMIT 1", [$id, $userId]);
+        if (!$r) {
+            return redirect()->route('recipes.index', ['hid' => $hid])->withErrors(['Own recipe not found.']);
+        }
+
+        $rows = DB::select("SELECT ingredient FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC", [$id]);
+        $ings = [];
+        foreach ($rows as $row) {
+            $ing = $this->parseOwnIngredientLine((string)($row->ingredient ?? ''));
+            if (trim($ing['name']) === '') continue;
+            if ($this->isAlwaysAvailableIngredient($ing['name'])) continue;
+            $ings[] = $ing;
+        }
+
+        if (empty($ings)) {
+            return redirect()->route('recipes.own.show', ['id' => $id, 'hid' => $hid, 'cook' => 'err', 'msg' => 'No ingredients in this recipe.']);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($ings as $ing) {
+                if (!$this->hasEnoughIngredient($hid, $ing['name'], (float)$ing['qty'], $ing['unit'])) {
+                    DB::rollBack();
+                    return redirect()->route('recipes.own.show', [
+                        'id' => $id,
+                        'hid' => $hid,
+                        'cook' => 'err',
+                        'msg' => 'Not enough in stock: '.$ing['name'].($ing['measure'] !== '' ? ' ('.$ing['measure'].')' : ''),
+                    ]);
+                }
+            }
+
+            foreach ($ings as $ing) {
+                $rows = $this->inventoryRowsForIngredient($hid, $ing['name']);
+                $remainingNeed = (float)$ing['qty'];
+                if ($remainingNeed <= 0) $remainingNeed = 1.0;
+
+                foreach ($rows as $row) {
+                    $invId = (int)$row->id;
+                    $invQty = (float)$row->quantity;
+                    $invUnit = $row->unit ?? null;
+
+                    [$needInInvUnit, $ok] = $this->convertQty($remainingNeed, $ing['unit'], $invUnit, $ing['name']);
+                    if (!$ok) continue;
+                    if ($invQty <= 0) continue;
+
+                    if ($invQty + 0.00001 >= $needInInvUnit) {
+                        $newQty = $invQty - $needInInvUnit;
+
+                        if ($newQty <= 0.00001) {
+                            DB::delete("DELETE FROM inventory_items WHERE id = ? AND household_id = ?", [$invId, $hid]);
+                        } else {
+                            DB::update("UPDATE inventory_items SET quantity = ? WHERE id = ? AND household_id = ?", [$newQty, $invId, $hid]);
+                        }
+
+                        $remainingNeed = 0.0;
+                        break;
+                    }
+
+                    [$consumedInRecipeUnit, $backOk] = $this->convertQty($invQty, $invUnit, $ing['unit'], $ing['name']);
+                    if (!$backOk) continue;
+
+                    DB::delete("DELETE FROM inventory_items WHERE id = ? AND household_id = ?", [$invId, $hid]);
+                    $remainingNeed -= $consumedInRecipeUnit;
+
+                    if ($remainingNeed <= 0.00001) {
+                        $remainingNeed = 0.0;
+                        break;
+                    }
+                }
+
+                if ($remainingNeed > 0.00001) {
+                    DB::rollBack();
+                    return redirect()->route('recipes.own.show', [
+                        'id' => $id,
+                        'hid' => $hid,
+                        'cook' => 'err',
+                        'msg' => 'Not enough in stock: '.$ing['name'].($ing['measure'] !== '' ? ' ('.$ing['measure'].')' : ''),
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('recipes.own.show', ['id' => $id, 'hid' => $hid, 'cook' => 'ok']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('recipes.own.show', ['id' => $id, 'hid' => $hid, 'cook' => 'err', 'msg' => 'Error: '.$e->getMessage()]);
+        }
     }
 
     public function deleteOwn(Request $request, int $id)
@@ -831,6 +1214,8 @@ class RecipeController extends Controller
 
         DB::beginTransaction();
         try {
+            // Először a gyermek hozzávalókat töröljük, utána magát a receptet,
+            // hogy ne maradjanak árva recipe_ingredients sorok.
             DB::delete("DELETE FROM recipe_ingredients WHERE recipe_id = ?", [$id]);
             DB::delete("DELETE FROM recipes WHERE id = ? AND user_id = ?", [$id, $userId]);
             DB::commit();
