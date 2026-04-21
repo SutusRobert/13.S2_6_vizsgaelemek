@@ -264,6 +264,26 @@
     .create-mid{ min-width: 0; max-width: 100%; }
     .two-col{ grid-template-columns: 1fr; }
   }
+
+  @media (max-width: 620px){
+    .create-row{ padding: 12px; gap: 14px; }
+    .ing-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .ing-row .ing-name{
+      grid-column: 1 / -1;
+    }
+    .ing-row .ing-amount,
+    .ing-row .ing-unit{
+      width: 100%;
+      flex-basis: auto;
+    }
+    .ing-remove{
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
 </style>
 
 <script>

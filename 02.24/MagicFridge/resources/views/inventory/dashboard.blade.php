@@ -12,6 +12,7 @@
     z-index: 0;
   }
   .navbar, .dash-row { position: relative; z-index: 2; }
+  .dash-side .side-stack > .note:nth-of-type(2){ display: none; }
 
   .dash-row{
     max-width: 1750px;
@@ -37,6 +38,47 @@
   }
 
   .main-wrapper{ margin: 0; width: 100%; }
+
+  @media (max-width: 1280px){
+    .dash-row{
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dash-left,
+    .dash-side{
+      width: min(420px, 100%);
+      flex: 1 1 360px;
+    }
+
+    .dash-mid{
+      order: -1;
+      min-width: 0;
+      flex: 1 1 100%;
+      max-width: 980px;
+    }
+  }
+
+  @media (max-width: 760px){
+    .dash-row{
+      display: block;
+      padding: 14px 12px 28px;
+    }
+
+    .dash-left,
+    .dash-mid,
+    .dash-side{
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin-bottom: 14px;
+    }
+
+    .fridge-card,
+    .side-card{
+      width: 100%;
+    }
+  }
 </style>
 @endpush
 
@@ -105,37 +147,6 @@
             <div class="menu-go">Open →</div>
           </a>
 
-        </div>
-
-        <div class="dash-notify mt-4" aria-live="polite">
-          <div class="dn-head">
-            <div class="dn-left">
-              <span class="dn-ico">🔔</span>
-              <span class="dn-title">Recent notifications</span>
-            </div>
-            <div class="dn-badge {{ $unreadCount > 0 ? 'is-on' : '' }}">
-              {{ $unreadCount > 0 ? ($unreadCount . ' new') : 'No new' }}
-            </div>
-          </div>
-
-          @if($unreadCount > 0)
-            <div class="dn-list">
-              @foreach($unreadPreview as $m)
-                <div class="dn-item">
-                  <div class="dn-item-title">{{ $m->title ?? 'Notification' }}</div>
-                  <div class="dn-item-desc">
-                    {{ \Illuminate\Support\Str::limit(strip_tags($m->body ?? ''), 110, '…') }}
-                  </div>
-                  <div class="dn-item-meta">{{ $m->created_at ?? '' }}</div>
-                </div>
-              @endforeach
-            </div>
-            <div class="dn-foot">
-              <span class="dn-hint">If you handle it under Messages (mark as read / accept / decline), it will automatically disappear from here.</span>
-            </div>
-          @else
-            <div class="dn-empty">Everything’s fine — there are no new messages.</div>
-          @endif
         </div>
 
       </div>
