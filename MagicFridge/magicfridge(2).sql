@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: localhost
--- Létrehozás ideje: 2026. Már 27. 12:55
+-- Létrehozás ideje: 2026. Ápr 21. 09:55
 -- Kiszolgáló verziója: 8.0.45
 -- PHP verzió: 8.2.30
 
@@ -87,8 +87,10 @@ INSERT INTO `households` (`id`, `owner_id`, `name`, `created_at`) VALUES
 (13, 15, 'asd22 háztartása', '2026-02-06 13:03:05'),
 (14, 16, 'qwe1 háztartása', '2026-02-10 10:47:08'),
 (15, 14, 'aaa2 háztartása', '2026-02-10 12:11:05'),
-(16, 18, 'sutusrobert háztartása', '2026-02-19 22:55:40'),
-(17, 19, 'Srobby household', '2026-03-27 08:27:43');
+(17, 19, 'Srobby household', '2026-03-27 08:27:43'),
+(20, 45, 'Sutús Róbert household', '2026-03-28 11:47:30'),
+(21, 49, 'Sutús Róbert household', '2026-04-17 05:34:02'),
+(22, 49, 'Sutús Róbert household', '2026-04-20 14:17:12');
 
 -- --------------------------------------------------------
 
@@ -116,7 +118,8 @@ INSERT INTO `household_invites` (`id`, `household_id`, `invited_user_id`, `invit
 (3, 8, 1, 8, 'pending', '2026-01-21 07:42:01', NULL),
 (4, 11, 13, 14, 'accepted', '2026-02-06 10:52:21', NULL),
 (5, 14, 14, 16, 'accepted', '2026-02-10 11:16:30', NULL),
-(6, 16, 14, 18, 'accepted', '2026-02-19 22:56:21', NULL);
+(7, 20, 46, 45, 'accepted', '2026-03-28 11:54:47', NULL),
+(8, 20, 49, 45, 'accepted', '2026-04-17 05:34:37', NULL);
 
 -- --------------------------------------------------------
 
@@ -153,9 +156,11 @@ INSERT INTO `household_members` (`id`, `household_id`, `member_id`, `role`, `cre
 (14, 14, 16, 'tag', '2026-02-10 10:47:08'),
 (15, 15, 14, 'tag', '2026-02-10 12:11:05'),
 (16, 14, 14, 'tag', '2026-02-11 07:24:11'),
-(17, 16, 18, 'tag', '2026-02-19 22:55:40'),
-(18, 16, 14, 'tag', '2026-02-19 22:56:36'),
-(19, 17, 19, 'tag', '2026-03-27 08:27:43');
+(19, 17, 19, 'tag', '2026-03-27 08:27:43'),
+(22, 20, 45, 'tag', '2026-03-28 11:47:30'),
+(23, 20, 46, 'tag', '2026-03-28 11:55:15'),
+(24, 22, 49, 'tag', '2026-04-20 14:17:12'),
+(25, 20, 49, 'tag', '2026-04-20 14:18:56');
 
 -- --------------------------------------------------------
 
@@ -229,7 +234,42 @@ INSERT INTO `inventory_items` (`id`, `household_id`, `name`, `category`, `locati
 (99, 16, 'Garam masala', NULL, 'pantry', 1.00, 'tsp', NULL, 'Recept: Chicken Handi', '2026-02-19 22:56:00', '2026-02-19 22:56:00', 0),
 (100, 16, 'Salt', NULL, 'pantry', 1.00, NULL, NULL, 'Recept: Chicken Handi', '2026-02-19 22:56:00', '2026-02-19 22:56:00', 0),
 (101, 15, 'milk', NULL, 'fridge', 1.00, 'L', '2026-03-04', NULL, '2026-03-05 15:04:12', '2026-03-05 16:04:17', 1),
-(102, 15, 'milk', NULL, 'fridge', 1.00, 'L', '2026-03-04', NULL, '2026-03-05 15:06:52', '2026-03-05 16:06:56', 1);
+(102, 15, 'milk', NULL, 'fridge', 1.00, 'L', '2026-03-04', NULL, '2026-03-05 15:06:52', '2026-03-05 16:06:56', 1),
+(135, 19, 'milk', NULL, 'fridge', 1.00, 'l', '2026-03-27', NULL, '2026-03-27 19:10:29', '2026-03-27 20:10:44', 1),
+(314, 22, 'Chicken', NULL, 'fridge', 1273.20, 'g', '2026-04-23', 'Recipe: Chicken Handi | Needed for recipe: 1.2 kg', '2026-04-20 14:43:24', '2026-04-21 05:33:59', 1),
+(315, 22, 'Onion', NULL, 'pantry', 5.00, 'pcs', '2026-05-20', 'Recipe: Chicken Handi | Needed for recipe: 5 thinly sliced', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(316, 22, 'Tomatoes', NULL, 'fridge', 2.00, 'pcs', '2026-04-25', 'Recipe: Chicken Handi | Needed for recipe: 2 finely chopped', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(317, 22, 'Garlic', NULL, 'pantry', 8.00, 'pcs', '2026-05-20', 'Recipe: Chicken Handi | Needed for recipe: 8 cloves chopped', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(318, 22, 'Ginger paste', NULL, 'pantry', 245.00, 'ml', '2026-07-19', 'Recipe: Chicken Handi | Needed for recipe: 1 tbsp', '2026-04-20 14:43:24', '2026-04-20 15:06:18', 0),
+(319, 22, 'Vegetable oil', NULL, 'pantry', 1000.00, 'ml', '2027-04-20', 'Recipe: Chicken Handi | Needed for recipe: ¼ cup', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(320, 22, 'Cumin seeds', NULL, 'pantry', 50.00, 'g', '2027-04-20', 'Recipe: Chicken Handi | Needed for recipe: 2 tsp', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(321, 22, 'Coriander seeds', NULL, 'pantry', 43.30, 'g', '2026-07-19', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp', '2026-04-20 14:43:24', '2026-04-20 15:06:18', 0),
+(322, 22, 'Turmeric powder', NULL, 'pantry', 50.00, 'g', '2027-04-20', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(323, 22, 'Chilli powder', NULL, 'pantry', 100.00, 'g', '2026-07-19', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(324, 22, 'Green chilli', NULL, 'pantry', 1.00, 'pcs', '2026-07-19', 'Recipe: Chicken Handi | Needed for recipe: 2', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(325, 22, 'Yogurt', NULL, 'fridge', 300.00, 'g', '2026-05-04', 'Recipe: Chicken Handi | Needed for recipe: 1 cup', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(326, 22, 'Cream', NULL, 'fridge', 200.00, 'ml', '2026-04-30', 'Recipe: Chicken Handi | Needed for recipe: ¾ cup', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(327, 22, 'fenugreek', NULL, 'pantry', 250.00, 'ml', '2026-07-19', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp Dried', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(328, 22, 'Garam masala', NULL, 'pantry', 100.00, 'g', '2026-07-19', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', '2026-04-20 14:43:24', '2026-04-20 14:43:24', 0),
+(329, 22, 'Salt', NULL, 'pantry', 494.00, 'g', '2027-04-20', 'Recipe: Chicken Handi | Needed for recipe: To taste', '2026-04-20 14:43:24', '2026-04-20 15:15:28', 0),
+(330, 22, 'Pepper', NULL, 'fridge', 49.00, 'g', '2027-04-20', 'Recipe: Chicken Congee | Needed for recipe: pinch', '2026-04-20 15:06:11', '2026-04-20 15:06:18', 0),
+(331, 22, 'Ginger Cordial', NULL, 'pantry', 245.00, 'ml', '2026-07-19', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', '2026-04-20 15:06:11', '2026-04-20 15:06:18', 0),
+(332, 22, 'Spring Onions', NULL, 'pantry', 235.00, 'ml', '2026-05-20', 'Recipe: Chicken Congee | Needed for recipe: 1 tbs', '2026-04-20 15:06:11', '2026-04-20 15:06:18', 0),
+(333, 22, 'Rice', NULL, 'pantry', 398.00, 'g', '2027-04-20', 'Recipe: Chicken Congee | Needed for recipe: 1/2 cup', '2026-04-20 15:06:11', '2026-04-20 15:06:18', 0),
+(334, 22, 'Canned tuna', NULL, 'pantry', 40.00, 'g', '2026-07-19', 'Own recipe: Tuna Pasta | Needed for recipe: 160 g', '2026-04-20 15:15:20', '2026-04-20 15:15:28', 0),
+(335, 22, 'Pasta', NULL, 'pantry', 300.00, 'g', '2027-04-20', 'Own recipe: Tuna Pasta | Needed for recipe: 200 g', '2026-04-20 15:15:20', '2026-04-20 15:15:28', 0),
+(336, 22, 'Sour cream', NULL, 'fridge', 380.00, 'g', '2026-04-30', 'Own recipe: Tuna Pasta | Needed for recipe: 100 ml', '2026-04-20 15:15:20', '2026-04-20 15:15:28', 0),
+(337, 22, 'Lemon', NULL, 'pantry', 0.50, 'pcs', '2026-07-19', 'Own recipe: Tuna Pasta | Needed for recipe: 0.5 pcs', '2026-04-20 15:15:20', '2026-04-20 15:15:28', 0),
+(344, 20, 'Rice', NULL, 'pantry', 198.00, 'g', '2027-04-21', 'Own recipe: Vegetable Rice | Needed for recipe: 200 g', '2026-04-21 05:24:37', '2026-04-21 05:26:17', 0),
+(348, 20, 'Salt', NULL, 'pantry', 484.00, 'g', '2027-04-21', 'Own recipe: Vegetable Rice | Needed for recipe: 5 g', '2026-04-21 05:24:37', '2026-04-21 05:33:23', 0),
+(349, 20, 'Chicken', NULL, 'fridge', 273.20, 'g', '2026-04-24', 'Recipe: Chicken Congee | Needed for recipe: 8 oz', '2026-04-21 05:25:59', '2026-04-21 05:26:17', 0),
+(350, 20, 'Pepper', NULL, 'fridge', 43.00, 'g', '2027-04-21', 'Recipe: Chicken Congee | Needed for recipe: pinch', '2026-04-21 05:25:59', '2026-04-21 05:33:23', 0),
+(351, 20, 'Ginger Cordial', NULL, 'pantry', 240.00, 'ml', '2026-07-20', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', '2026-04-21 05:25:59', '2026-04-21 05:26:17', 0),
+(352, 20, 'Ginger', NULL, 'pantry', 250.00, 'ml', '2026-07-20', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', '2026-04-21 05:25:59', '2026-04-21 05:25:59', 0),
+(353, 20, 'Spring Onions', NULL, 'pantry', 235.00, 'ml', '2026-05-21', 'Recipe: Chicken Congee | Needed for recipe: 1 tbs', '2026-04-21 05:25:59', '2026-04-21 05:26:17', 0),
+(354, 20, 'Coriander', NULL, 'pantry', 43.30, 'g', '2026-07-20', 'Recipe: Chicken Congee | Needed for recipe: 2 oz', '2026-04-21 05:25:59', '2026-04-21 05:26:17', 0),
+(355, 20, 'Chicken breast', NULL, 'fridge', 100.00, 'g', '2026-04-24', 'Own recipe: Chicken Breast with Pasta | Needed for recipe: 200 g', '2026-04-21 05:33:14', '2026-04-21 05:33:23', 0),
+(356, 20, 'Pasta', NULL, 'pantry', 200.00, 'g', '2027-04-21', 'Own recipe: Chicken Breast with Pasta | Needed for recipe: 150 g', '2026-04-21 05:33:14', '2026-04-21 05:33:23', 0);
 
 -- --------------------------------------------------------
 
@@ -267,7 +307,12 @@ INSERT INTO `messages` (`id`, `household_id`, `user_id`, `type`, `title`, `body`
 (11, NULL, 10, 'info', 'Háztartás meghívó', 'asd123 meghívott a(z) \"asd123 háztartása\" háztartásba.', 'invite:2', 1, '2026-01-20 11:06:31'),
 (13, NULL, 1, 'info', 'Háztartás meghívó', 'asd123 meghívott a(z) \"asd123 háztartása\" háztartásba.', 'invite:3', 0, '2026-01-21 07:42:01'),
 (17, NULL, 13, 'info', 'Háztartás meghívó', 'aaa2 meghívott a(z) \"aaa2 háztartása\" háztartásba.', 'invite:4', 1, '2026-02-06 10:52:21'),
-(25, NULL, 14, 'info', 'Expired', 'Exipred: milk (date: 2026-03-04).', 'inventory:15', 0, '2026-03-05 15:06:56');
+(25, NULL, 14, 'info', 'Expired', 'Exipred: milk (date: 2026-03-04).', 'inventory:15', 0, '2026-03-05 15:06:56'),
+(30, NULL, 45, 'info', 'Expiration', 'Expiring/expired: Chicken Thighs (date: 2026-04-18).', 'inventory:20', 0, '2026-04-16 18:45:41'),
+(32, NULL, 49, 'info', 'Expiration', 'Expiring/expired: Chicken (date: 2026-04-20).', 'inventory:20', 0, '2026-04-20 12:18:56'),
+(33, NULL, 49, 'info', 'Expiration', 'Expiring/expired: baby plum tomatoes (date: 2026-04-21).', 'inventory:20', 0, '2026-04-20 12:18:56'),
+(34, NULL, 49, 'info', 'Expiration', 'Expiring/expired: Tomatoes (date: 2026-04-22).', 'inventory:20', 0, '2026-04-20 12:18:56'),
+(35, NULL, 49, 'info', 'Expiration', 'Expiring/expired: Chicken (date: 2026-04-23).', 'inventory:22', 0, '2026-04-21 03:33:59');
 
 -- --------------------------------------------------------
 
@@ -292,25 +337,29 @@ CREATE TABLE `recipes` (
   `user_id` int NOT NULL,
   `title` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `instructions` text
+  `instructions` text,
+  `image_path` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `recipes`
 --
 
-INSERT INTO `recipes` (`id`, `user_id`, `title`, `created_at`, `instructions`) VALUES
-(2, 1, 'csirkemájas', '2025-11-28 12:42:45', NULL),
-(7, 5, 'tejbegríz', '2025-12-12 07:25:08', NULL),
-(8, 6, 'Tejbegríz', '2025-12-12 07:38:56', NULL),
-(9, 7, 'faszpaprikás', '2026-01-06 07:26:06', NULL),
-(10, 8, 'akármi', '2026-01-20 08:29:28', NULL),
-(11, 8, 'Chicken Breast with Pasta', '2026-03-27 08:01:03', NULL),
-(12, 8, 'Chicken Breast with Pasta', '2026-03-27 08:02:48', NULL),
-(13, 19, 'Quick Bolognese', '2026-03-27 08:30:27', NULL),
-(17, 19, 'Scrambled Eggs with Cheese', '2026-03-27 11:15:26', NULL),
-(19, 19, 'Chicken Breast with Pasta', '2026-03-27 11:26:18', NULL),
-(20, 19, 'Quick Bolognese', '2026-03-27 11:29:09', NULL);
+INSERT INTO `recipes` (`id`, `user_id`, `title`, `created_at`, `instructions`, `image_path`) VALUES
+(2, 1, 'csirkemájas', '2025-11-28 12:42:45', NULL, NULL),
+(7, 5, 'tejbegríz', '2025-12-12 07:25:08', NULL, NULL),
+(8, 6, 'Tejbegríz', '2025-12-12 07:38:56', NULL, NULL),
+(9, 7, 'faszpaprikás', '2026-01-06 07:26:06', NULL, NULL),
+(10, 8, 'akármi', '2026-01-20 08:29:28', NULL, NULL),
+(11, 8, 'Chicken Breast with Pasta', '2026-03-27 08:01:03', NULL, NULL),
+(12, 8, 'Chicken Breast with Pasta', '2026-03-27 08:02:48', NULL, NULL),
+(13, 19, 'Quick Bolognese', '2026-03-27 08:30:27', NULL, NULL),
+(17, 19, 'Scrambled Eggs with Cheese', '2026-03-27 11:15:26', NULL, NULL),
+(19, 19, 'Chicken Breast with Pasta', '2026-03-27 11:26:18', NULL, NULL),
+(20, 19, 'Quick Bolognese', '2026-03-27 11:29:09', NULL, NULL),
+(31, 49, 'Vegetable Rice', '2026-04-20 16:31:12', '1) Cook rice in salted water, drain.\r\n2) Dice carrot and sauté in oil for 3 min.\r\n3) Add peas and corn, cook another 2 min.\r\n4) Mix vegetables into the rice.\r\n5) Season with salt and serve.', 'uploads/recipes/own-recipe-49-1776702672-hblyQMweEZ.jpg'),
+(32, 45, 'Vegetable Rice', '2026-04-21 05:24:23', '1) Cook rice in salted water, drain.\r\n2) Dice carrot and sauté in oil for 3 min.\r\n3) Add peas and corn, cook another 2 min.\r\n4) Mix vegetables into the rice.\r\n5) Season with salt and serve.', 'uploads/recipes/own-recipe-45-1776749063-Cmitv0jM5N.jpg'),
+(33, 49, 'Chicken Breast with Pasta', '2026-04-21 05:33:00', '1) Season chicken breast with salt and pepper.\r\n2) Pan-fry on both sides until golden.\r\n3) Cook pasta according to package. Drain.\r\n4) Add heavy cream to the pan, simmer 3 min.\r\n5) Mix pasta with sauce and serve.', 'uploads/recipes/own-recipe-49-1776749580-CUlEoxuWAG.jpg');
 
 -- --------------------------------------------------------
 
@@ -372,7 +421,22 @@ INSERT INTO `recipe_ingredients` (`id`, `recipe_id`, `ingredient`) VALUES
 (80, 20, 'Tomato sauce'),
 (81, 20, 'Pasta'),
 (82, 20, 'Onion'),
-(83, 20, 'Garlic');
+(83, 20, 'Garlic'),
+(134, 31, 'Rice (200 g)'),
+(135, 31, 'Peas (100 g)'),
+(136, 31, 'Carrot (1 pcs)'),
+(137, 31, 'Corn (100 g)'),
+(138, 31, 'Salt (5 g)'),
+(139, 32, 'Rice (200 g)'),
+(140, 32, 'Peas (100 g)'),
+(141, 32, 'Carrot (1 pcs)'),
+(142, 32, 'Corn (100 g)'),
+(143, 32, 'Salt (5 g)'),
+(144, 33, 'Chicken breast (200 g)'),
+(145, 33, 'Pasta (150 g)'),
+(146, 33, 'Heavy cream (100 ml)'),
+(147, 33, 'Salt (5 g)'),
+(148, 33, 'Pepper (3 g)');
 
 -- --------------------------------------------------------
 
@@ -463,7 +527,149 @@ INSERT INTO `shopping_list_items` (`id`, `household_id`, `name`, `quantity`, `un
 (118, 16, 'Cream', 1.00, NULL, 'Recept: Chicken Handi', 1, '2026-02-19 23:56:00', 18, 18, '2026-02-19 21:55:57', '2026-02-19 22:56:00', 'pantry'),
 (119, 16, 'fenugreek', 3.00, 'tsp', 'Recept: Chicken Handi', 1, '2026-02-19 23:56:00', 18, 18, '2026-02-19 21:55:57', '2026-02-19 22:56:00', 'pantry'),
 (120, 16, 'Garam masala', 1.00, 'tsp', 'Recept: Chicken Handi', 1, '2026-02-19 23:56:00', 18, 18, '2026-02-19 21:55:57', '2026-02-19 22:56:00', 'pantry'),
-(121, 16, 'Salt', 1.00, NULL, 'Recept: Chicken Handi', 1, '2026-02-19 23:56:00', 18, 18, '2026-02-19 21:55:57', '2026-02-19 22:56:00', 'pantry');
+(121, 16, 'Salt', 1.00, NULL, 'Recept: Chicken Handi', 1, '2026-02-19 23:56:00', 18, 18, '2026-02-19 21:55:57', '2026-02-19 22:56:00', 'pantry'),
+(122, 18, 'Chicken', 1.20, 'kg', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(123, 18, 'Onion', 5.00, 'thinly', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(124, 18, 'Tomatoes', 2.00, 'finely', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(125, 18, 'Garlic', 8.00, 'cloves', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(126, 18, 'Ginger paste', 1.00, 'tbsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(127, 18, 'Vegetable oil', 1.00, NULL, 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(128, 18, 'Cumin seeds', 2.00, 'tsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(129, 18, 'Coriander seeds', 3.00, 'tsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(130, 18, 'Turmeric powder', 1.00, 'tsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(131, 18, 'Chilli powder', 1.00, 'tsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(132, 18, 'Green chilli', 2.00, NULL, 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(133, 18, 'Yogurt', 1.00, 'cup', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(134, 18, 'Cream', 1.00, NULL, 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(135, 18, 'fenugreek', 3.00, 'tsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(136, 18, 'Garam masala', 1.00, 'tsp', 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(137, 18, 'Salt', 1.00, NULL, 'Recipe: Chicken Handi', 1, '2026-03-27 19:07:52', 43, 43, '2026-03-27 17:07:28', '2026-03-27 18:07:52', 'pantry'),
+(278, 22, 'Chicken Thighs', 500.00, 'g', 'Recipe: Chicken Fried Rice | Needed for recipe: 1 lb', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'fridge'),
+(279, 22, 'Salt', 500.00, 'g', 'Recipe: Chicken Fried Rice | Needed for recipe: 1 tsp', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(280, 22, 'Canola Oil', 1000.00, 'ml', 'Recipe: Chicken Fried Rice | Needed for recipe: 3  tablespoons', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(281, 22, 'Egg', 6.00, 'pcs', 'Recipe: Chicken Fried Rice | Needed for recipe: 3 Large', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'fridge'),
+(282, 22, 'Onion', 250.00, 'ml', 'Recipe: Chicken Fried Rice | Needed for recipe: 2/3 Cup', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(283, 22, 'Garlic', 2.00, 'pcs', 'Recipe: Chicken Fried Rice | Needed for recipe: 2 cloves minced', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(284, 22, 'Ground Ginger', 250.00, 'ml', 'Recipe: Chicken Fried Rice | Needed for recipe: 2 tsp', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(285, 22, 'Carrots', 1.00, 'pcs', 'Recipe: Chicken Fried Rice | Needed for recipe: 1 large', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(286, 22, 'Peas', 250.00, 'ml', 'Recipe: Chicken Fried Rice | Needed for recipe: 2/3 Cup', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(287, 22, 'Jasmine Rice', 1000.00, 'g', 'Recipe: Chicken Fried Rice | Needed for recipe: 4 cups', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(288, 22, 'Scallions', 1.00, 'pcs', 'Recipe: Chicken Fried Rice | Needed for recipe: 2 sliced', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(289, 22, 'Chinese five spice powder', 250.00, 'ml', 'Recipe: Chicken Fried Rice | Needed for recipe: 1/2 tsp', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(290, 22, 'Soy Sauce', 500.00, 'g', 'Recipe: Chicken Fried Rice | Needed for recipe: 2.5 tbsp', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(291, 22, 'Sesame Seed Oil', 1000.00, 'ml', 'Recipe: Chicken Fried Rice | Needed for recipe: 1 tsp', 1, '2026-04-20 16:19:46', 49, 49, '2026-04-20 12:19:40', '2026-04-20 14:19:46', 'pantry'),
+(292, 22, 'Chicken drumsticks', 500.00, 'g', 'Recipe: Sticky Chicken | Needed for recipe: 8', 1, '2026-04-20 16:20:57', 49, 49, '2026-04-20 12:20:51', '2026-04-20 14:20:57', 'fridge'),
+(293, 22, 'Honey', 500.00, 'g', 'Recipe: Sticky Chicken | Needed for recipe: 1 tablespoon', 1, '2026-04-20 16:20:57', 49, 49, '2026-04-20 12:20:52', '2026-04-20 14:20:57', 'pantry'),
+(294, 22, 'Olive Oil', 1000.00, 'ml', 'Recipe: Sticky Chicken | Needed for recipe: 1 tblsp', 1, '2026-04-20 16:20:57', 49, 49, '2026-04-20 12:20:52', '2026-04-20 14:20:57', 'pantry'),
+(295, 22, 'Tomato Puree', 250.00, 'ml', 'Recipe: Sticky Chicken | Needed for recipe: 1 teaspoon', 1, '2026-04-20 16:20:57', 49, 49, '2026-04-20 12:20:52', '2026-04-20 14:20:57', 'fridge'),
+(296, 22, 'Dijon Mustard', 250.00, 'ml', 'Recipe: Sticky Chicken | Needed for recipe: 1 tbsp', 1, '2026-04-20 16:20:57', 49, 49, '2026-04-20 12:20:52', '2026-04-20 14:20:57', 'pantry'),
+(297, 22, 'Chicken', 1500.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1.2 kg', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'fridge'),
+(298, 22, 'Onion', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 5 thinly sliced', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(299, 22, 'Tomatoes', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2 finely chopped', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'fridge'),
+(300, 22, 'Garlic', 8.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 8 cloves chopped', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(301, 22, 'Ginger paste', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 1 tbsp', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(302, 22, 'Vegetable oil', 1000.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: ¼ cup', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(303, 22, 'Cumin seeds', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 2 tsp', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(304, 22, 'Coriander seeds', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(305, 22, 'Turmeric powder', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(306, 22, 'Chilli powder', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(307, 22, 'Green chilli', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(308, 22, 'Yogurt', 300.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 cup', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'fridge'),
+(309, 22, 'Cream', 200.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: ¾ cup', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'fridge'),
+(310, 22, 'fenugreek', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp Dried', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(311, 22, 'Garam masala', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:21:23', 49, 49, '2026-04-20 12:21:19', '2026-04-20 14:21:23', 'pantry'),
+(312, 22, 'Onion', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 5 thinly sliced', 1, '2026-04-20 16:21:40', 49, 49, '2026-04-20 12:21:34', '2026-04-20 14:21:40', 'pantry'),
+(313, 22, 'Tomatoes', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2 finely chopped', 1, '2026-04-20 16:21:40', 49, 49, '2026-04-20 12:21:34', '2026-04-20 14:21:40', 'fridge'),
+(314, 22, 'Cumin seeds', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 2 tsp', 1, '2026-04-20 16:21:40', 49, 49, '2026-04-20 12:21:34', '2026-04-20 14:21:40', 'pantry'),
+(315, 22, 'Turmeric powder', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:21:40', 49, 49, '2026-04-20 12:21:34', '2026-04-20 14:21:40', 'pantry'),
+(316, 22, 'Yogurt', 300.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 cup', 1, '2026-04-20 16:21:40', 49, 49, '2026-04-20 12:21:34', '2026-04-20 14:21:40', 'fridge'),
+(317, 22, 'Basmati Rice', 500.00, 'g', 'Recipe: Chicken Mandi | Needed for recipe: 2 cups', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'pantry'),
+(318, 22, 'Water', 1000.00, 'ml', 'Recipe: Chicken Mandi | Needed for recipe: 4 cups', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'pantry'),
+(319, 22, 'Cardamom', 1.00, 'pcs', 'Recipe: Chicken Mandi | Needed for recipe: ½ tbsp', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'pantry'),
+(320, 22, 'Cloves', 1.00, 'pcs', 'Recipe: Chicken Mandi | Needed for recipe: ¼ teaspoon', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'pantry'),
+(321, 22, 'Cinnamon', 50.00, 'g', 'Recipe: Chicken Mandi | Needed for recipe: 1/2 tsp', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'pantry'),
+(322, 22, 'Pepper', 50.00, 'g', 'Recipe: Chicken Mandi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'fridge'),
+(323, 22, 'Bay Leaf', 1.00, 'pcs', 'Recipe: Chicken Mandi | Needed for recipe: 2', 1, '2026-04-20 16:27:45', 49, 49, '2026-04-20 12:27:41', '2026-04-20 14:27:45', 'pantry'),
+(324, 22, 'Basmati Rice', 500.00, 'g', 'Recipe: Chicken Mandi | Needed for recipe: 2 cups', 1, '2026-04-20 16:27:59', 49, 49, '2026-04-20 12:27:54', '2026-04-20 14:27:59', 'pantry'),
+(325, 22, 'Chicken', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 8 oz', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'fridge'),
+(326, 22, 'Salt', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: pinch', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(327, 22, 'Pepper', 50.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: pinch', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'fridge'),
+(328, 22, 'Ginger Cordial', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(329, 22, 'Ginger', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(330, 22, 'Spring Onions', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tbs', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(331, 22, 'Rice', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 1/2 cup', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(332, 22, 'Water', 2000.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 8 cups', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(333, 22, 'Coriander', 100.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 2 oz', 1, '2026-04-20 16:32:23', 49, 49, '2026-04-20 12:32:20', '2026-04-20 14:32:23', 'pantry'),
+(334, 22, 'Water', 2000.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 8 cups', 1, '2026-04-20 16:33:15', 49, 49, '2026-04-20 12:33:08', '2026-04-20 14:33:15', 'pantry'),
+(335, 22, 'Coriander', 100.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 2 oz', 1, '2026-04-20 16:33:15', 49, 49, '2026-04-20 12:33:08', '2026-04-20 14:33:15', 'pantry'),
+(336, 22, 'Chicken', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 8 oz', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'fridge'),
+(337, 22, 'Salt', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: pinch', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'pantry'),
+(338, 22, 'Pepper', 50.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: pinch', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'fridge'),
+(339, 22, 'Ginger Cordial', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'pantry'),
+(340, 22, 'Ginger', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'pantry'),
+(341, 22, 'Spring Onions', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tbs', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'pantry'),
+(342, 22, 'Rice', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 1/2 cup', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'pantry'),
+(343, 22, 'Coriander', 100.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 2 oz', 1, '2026-04-20 16:36:04', 49, 49, '2026-04-20 12:35:33', '2026-04-20 14:36:04', 'pantry'),
+(344, 20, 'Bread', 1.00, 'kg', NULL, 1, '2026-04-20 17:17:41', 49, 49, '2026-04-20 14:40:04', '2026-04-20 15:17:41', 'pantry'),
+(345, 20, 'Chicken', 1.00, 'kg', NULL, 1, '2026-04-20 17:17:41', 49, 49, '2026-04-20 14:40:15', '2026-04-20 15:17:41', 'fridge'),
+(346, 22, 'Chicken', 1500.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1.2 kg', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'fridge'),
+(347, 22, 'Onion', 5.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 5 thinly sliced', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(348, 22, 'Tomatoes', 2.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2 finely chopped', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'fridge'),
+(349, 22, 'Garlic', 8.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 8 cloves chopped', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(350, 22, 'Ginger paste', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 1 tbsp', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(351, 22, 'Vegetable oil', 1000.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: ¼ cup', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(352, 22, 'Cumin seeds', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 2 tsp', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(353, 22, 'Coriander seeds', 100.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(354, 22, 'Turmeric powder', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(355, 22, 'Chilli powder', 100.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(356, 22, 'Green chilli', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(357, 22, 'Yogurt', 300.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 cup', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'fridge'),
+(358, 22, 'Cream', 200.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: ¾ cup', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'fridge'),
+(359, 22, 'fenugreek', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp Dried', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(360, 22, 'Garam masala', 100.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:40:45', 49, 49, '2026-04-20 12:40:42', '2026-04-20 14:40:45', 'pantry'),
+(361, 22, 'Chicken', 1500.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1.2 kg', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'fridge'),
+(362, 22, 'Onion', 5.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 5 thinly sliced', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(363, 22, 'Tomatoes', 2.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2 finely chopped', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'fridge'),
+(364, 22, 'Garlic', 8.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 8 cloves chopped', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(365, 22, 'Ginger paste', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 1 tbsp', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(366, 22, 'Vegetable oil', 1000.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: ¼ cup', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(367, 22, 'Cumin seeds', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 2 tsp', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(368, 22, 'Coriander seeds', 100.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(369, 22, 'Turmeric powder', 50.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(370, 22, 'Chilli powder', 100.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(371, 22, 'Green chilli', 1.00, 'pcs', 'Recipe: Chicken Handi | Needed for recipe: 2', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(372, 22, 'Yogurt', 300.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 cup', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'fridge'),
+(373, 22, 'Cream', 200.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: ¾ cup', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'fridge'),
+(374, 22, 'fenugreek', 250.00, 'ml', 'Recipe: Chicken Handi | Needed for recipe: 3 tsp Dried', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(375, 22, 'Garam masala', 100.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: 1 tsp', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(376, 22, 'Salt', 500.00, 'g', 'Recipe: Chicken Handi | Needed for recipe: To taste', 1, '2026-04-20 16:43:24', 49, 49, '2026-04-20 12:43:19', '2026-04-20 14:43:24', 'pantry'),
+(377, 22, 'Pepper', 50.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: pinch', 1, '2026-04-20 17:06:11', 49, 49, '2026-04-20 13:06:07', '2026-04-20 15:06:11', 'fridge'),
+(378, 22, 'Ginger Cordial', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-20 17:06:11', 49, 49, '2026-04-20 13:06:07', '2026-04-20 15:06:11', 'pantry'),
+(379, 22, 'Spring Onions', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tbs', 1, '2026-04-20 17:06:11', 49, 49, '2026-04-20 13:06:07', '2026-04-20 15:06:11', 'pantry'),
+(380, 22, 'Rice', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 1/2 cup', 1, '2026-04-20 17:06:11', 49, 49, '2026-04-20 13:06:07', '2026-04-20 15:06:11', 'pantry'),
+(381, 22, 'Canned tuna', 200.00, 'g', 'Own recipe: Tuna Pasta | Needed for recipe: 160 g', 1, '2026-04-20 17:15:20', 49, 49, '2026-04-20 13:15:13', '2026-04-20 15:15:20', 'pantry'),
+(382, 22, 'Pasta', 500.00, 'g', 'Own recipe: Tuna Pasta | Needed for recipe: 200 g', 1, '2026-04-20 17:15:20', 49, 49, '2026-04-20 13:15:13', '2026-04-20 15:15:20', 'pantry'),
+(383, 22, 'Sour cream', 500.00, 'g', 'Own recipe: Tuna Pasta | Needed for recipe: 100 ml', 1, '2026-04-20 17:15:20', 49, 49, '2026-04-20 13:15:13', '2026-04-20 15:15:20', 'fridge'),
+(384, 22, 'Lemon', 1.00, 'pcs', 'Own recipe: Tuna Pasta | Needed for recipe: 0.5 pcs', 1, '2026-04-20 17:15:20', 49, 49, '2026-04-20 13:15:13', '2026-04-20 15:15:20', 'pantry'),
+(385, 20, 'Chicken drumsticks', 500.00, 'g', 'Recipe: Sticky Chicken | Needed for recipe: 8', 1, '2026-04-20 17:17:41', 49, 49, '2026-04-20 13:17:37', '2026-04-20 15:17:41', 'fridge'),
+(386, 20, 'Honey', 500.00, 'g', 'Recipe: Sticky Chicken | Needed for recipe: 1 tablespoon', 1, '2026-04-20 17:17:41', 49, 49, '2026-04-20 13:17:37', '2026-04-20 15:17:41', 'pantry'),
+(387, 20, 'Tomato Puree', 250.00, 'ml', 'Recipe: Sticky Chicken | Needed for recipe: 1 teaspoon', 1, '2026-04-20 17:17:41', 49, 49, '2026-04-20 13:17:37', '2026-04-20 15:17:41', 'fridge'),
+(388, 20, 'Dijon Mustard', 250.00, 'ml', 'Recipe: Sticky Chicken | Needed for recipe: 1 tbsp', 1, '2026-04-20 17:17:41', 49, 49, '2026-04-20 13:17:37', '2026-04-20 15:17:41', 'pantry'),
+(389, 20, 'Chicken drumsticks', 500.00, 'g', 'Recipe: Sticky Chicken | Needed for recipe: 8', 1, '2026-04-20 17:17:55', 49, 49, '2026-04-20 13:17:50', '2026-04-20 15:17:55', 'fridge'),
+(390, 20, 'Rice', 500.00, 'g', 'Own recipe: Vegetable Rice | Needed for recipe: 200 g', 1, '2026-04-21 07:24:37', 45, 45, '2026-04-21 03:24:32', '2026-04-21 05:24:37', 'pantry'),
+(391, 20, 'Peas', 100.00, 'g', 'Own recipe: Vegetable Rice | Needed for recipe: 100 g', 1, '2026-04-21 07:24:37', 45, 45, '2026-04-21 03:24:32', '2026-04-21 05:24:37', 'pantry'),
+(392, 20, 'Carrot', 1.00, 'pcs', 'Own recipe: Vegetable Rice | Needed for recipe: 1 pcs', 1, '2026-04-21 07:24:37', 45, 45, '2026-04-21 03:24:32', '2026-04-21 05:24:37', 'pantry'),
+(393, 20, 'Corn', 100.00, 'g', 'Own recipe: Vegetable Rice | Needed for recipe: 100 g', 1, '2026-04-21 07:24:37', 45, 45, '2026-04-21 03:24:32', '2026-04-21 05:24:37', 'pantry'),
+(394, 20, 'Salt', 500.00, 'g', 'Own recipe: Vegetable Rice | Needed for recipe: 5 g', 1, '2026-04-21 07:24:37', 45, 45, '2026-04-21 03:24:32', '2026-04-21 05:24:37', 'pantry'),
+(395, 20, 'Chicken', 500.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 8 oz', 1, '2026-04-21 07:25:59', 45, 45, '2026-04-21 03:25:54', '2026-04-21 05:25:59', 'fridge'),
+(396, 20, 'Pepper', 50.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: pinch', 1, '2026-04-21 07:25:59', 45, 45, '2026-04-21 03:25:54', '2026-04-21 05:25:59', 'fridge'),
+(397, 20, 'Ginger Cordial', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-21 07:25:59', 45, 45, '2026-04-21 03:25:54', '2026-04-21 05:25:59', 'pantry'),
+(398, 20, 'Ginger', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tsp', 1, '2026-04-21 07:25:59', 45, 45, '2026-04-21 03:25:54', '2026-04-21 05:25:59', 'pantry'),
+(399, 20, 'Spring Onions', 250.00, 'ml', 'Recipe: Chicken Congee | Needed for recipe: 1 tbs', 1, '2026-04-21 07:25:59', 45, 45, '2026-04-21 03:25:54', '2026-04-21 05:25:59', 'pantry'),
+(400, 20, 'Coriander', 100.00, 'g', 'Recipe: Chicken Congee | Needed for recipe: 2 oz', 1, '2026-04-21 07:25:59', 45, 45, '2026-04-21 03:25:54', '2026-04-21 05:25:59', 'pantry'),
+(401, 20, 'Chicken breast', 500.00, 'g', 'Own recipe: Chicken Breast with Pasta | Needed for recipe: 200 g', 1, '2026-04-21 07:33:14', 49, 49, '2026-04-21 03:33:04', '2026-04-21 05:33:14', 'fridge'),
+(402, 20, 'Pasta', 500.00, 'g', 'Own recipe: Chicken Breast with Pasta | Needed for recipe: 150 g', 1, '2026-04-21 07:33:14', 49, 49, '2026-04-21 03:33:04', '2026-04-21 05:33:14', 'pantry'),
+(403, 20, 'Heavy cream', 200.00, 'ml', 'Own recipe: Chicken Breast with Pasta | Needed for recipe: 100 ml', 1, '2026-04-21 07:33:14', 49, 49, '2026-04-21 03:33:04', '2026-04-21 05:33:14', 'fridge');
 
 -- --------------------------------------------------------
 
@@ -624,8 +830,12 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `created_at`, `emai
 (14, 'aaa2', 'aaa2@gmail.com', '$2y$12$osgMRrjwfb1KvRbFgWvezeCQrFmaZdCbsQaZ3aChwEDHN8Op5S6vi', '2026-02-06 10:13:44', NULL, NULL),
 (15, 'asd22', 'asd22@gmail.com', '$2y$12$NdYf/Wo28ijGlT7238yJyesAQLDVxCM9HQ0TiBTs0qFmAEa7diOGy', '2026-02-06 12:45:58', NULL, NULL),
 (16, 'qwe1', 'qwe1@gmail.com', '$2y$12$jiMR1hlbXywR9Gru8/8nS.9TghWPgKhKsj3TzjbSwuICwQPHMtm8a', '2026-02-10 10:02:46', NULL, NULL),
-(18, 'sutusrobert', 'sutus.robert@diak.szbi-pg.hu', '$2y$12$WoKsZVcCVZxca.fzj5nw6eLH6sy5WDd4ZLnuk1c3zT9GcR/3QTR.K', '2026-02-19 21:49:57', 'uIYONZ8UUyHt8CeDTjtQ7vnw9RAxWKDa5J8nzwYek6H7BNlx1MXe2lehp260s1gz', NULL),
-(19, 'Srobby', 'Srobby@gmail.com', '$2y$12$c66k4mLFRBC2NBHlSMRlTevchINDr1d6of.rW6ApWigwiyc9keoEi', '2026-03-27 07:27:14', 'BRet6XqQeLvv9CM4FNiubkBUcQjNeS1cCIA84JrtSLlhAFGa0vIkboKsdftGK1eO', NULL);
+(19, 'Srobby', 'Srobby@gmail.com', '$2y$12$c66k4mLFRBC2NBHlSMRlTevchINDr1d6of.rW6ApWigwiyc9keoEi', '2026-03-27 07:27:14', 'BRet6XqQeLvv9CM4FNiubkBUcQjNeS1cCIA84JrtSLlhAFGa0vIkboKsdftGK1eO', NULL),
+(45, 'Sutús Róbert', 'sutusrobert321@gmail.com', '$2y$12$6cYS3LyrDtjz89GjGz8bTOCnvuZNxOZQfoXic5zojs50SYsUoqpou', '2026-03-28 11:40:00', NULL, '2026-03-28 11:40:23'),
+(46, 'Sutús', 'sutusrobert910@gmail.com', '$2y$12$93eYucXS2s0zQhGj/Cn4b.A27wk5C0LzWfloKXq9KZLfk6iaBLBG.', '2026-03-28 11:53:23', NULL, '2026-03-28 11:54:00'),
+(47, 'Csató Tomi', 'csatotamas129@gmail.com', '$2y$12$BhoscrMwgrnPz57FfCdybukVMKHam/4ToViGXtrVIT0HTkP4o7W.W', '2026-03-30 07:08:16', 'wtESkfhDmUKWs0Jj2NU1srDkyMoK4LRmfr0uDFEOlpzdItV0G1bZTpkbDXTVPBZT', NULL),
+(48, 'Sutús Róbert', 'sutus.robert@diak.szbi-pg.hu', '$2y$12$6p.zJU6AF7yLkeqecHDLKeHuEmkuTqIvEubF/w5UwefFOQuLS8FVW', '2026-03-30 07:13:39', NULL, '2026-03-30 07:14:23'),
+(49, 'Sutús Róbert', 'srob69420@gmail.com', '$2y$12$csLqC4x0MgVweg8g1nm/6u0Kt7fjZrBdd1tt22aJlhdUdGuDmUcBu', '2026-04-17 05:33:30', NULL, '2026-04-17 05:33:53');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -738,31 +948,31 @@ ALTER TABLE `api_recipe_translations`
 -- AUTO_INCREMENT a táblához `households`
 --
 ALTER TABLE `households`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT a táblához `household_invites`
 --
 ALTER TABLE `household_invites`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT a táblához `household_members`
 --
 ALTER TABLE `household_members`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT a táblához `inventory_items`
 --
 ALTER TABLE `inventory_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=358;
 
 --
 -- AUTO_INCREMENT a táblához `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT a táblához `migrations`
@@ -774,19 +984,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT a táblához `recipes`
 --
 ALTER TABLE `recipes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT a táblához `recipe_ingredients`
 --
 ALTER TABLE `recipe_ingredients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=149;
 
 --
 -- AUTO_INCREMENT a táblához `shopping_list_items`
 --
 ALTER TABLE `shopping_list_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=404;
 
 --
 -- AUTO_INCREMENT a táblához `translations_cache`
@@ -798,7 +1008,7 @@ ALTER TABLE `translations_cache`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- Megkötések a kiírt táblákhoz

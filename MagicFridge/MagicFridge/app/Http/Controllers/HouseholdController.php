@@ -44,7 +44,7 @@ class HouseholdController extends Controller
             DB::table('household_members')->insert([
                 'household_id' => $householdId,
                 'member_id' => $userId,
-                'role' => 'member',
+                'role' => 'tag',
 
             ]);
 
@@ -158,7 +158,7 @@ class HouseholdController extends Controller
 
         // Csak a két támogatott szerep között váltunk, nem fogadunk el tetszőleges
         // role értéket a requestből.
-        $newRole = ($row->role === 'basic user') ? 'member' : 'basic user';
+        $newRole = ($row->role === 'alap felhasználó') ? 'tag' : 'alap felhasználó';
 
         DB::update("UPDATE household_members SET role = ? WHERE id = ?", [$newRole, $hmId]);
 
