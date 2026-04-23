@@ -20,10 +20,10 @@ class HouseholdController extends Controller
             $fullName = 'User';
         }
 
-        // 1) if there is an owner household
+        // A háztartás keresése szándékosan több lépcsős: először tulajdonosként,
+        // utána tagként keresünk, végül létrehozunk egy alap háztartást.
         $household = DB::selectOne("SELECT * FROM households WHERE owner_id = ? LIMIT 1", [$userId]);
 
-        // 2) if no owner household, search as member
         if (!$household) {
             $household = DB::selectOne("
                 SELECT h.*
@@ -34,7 +34,6 @@ class HouseholdController extends Controller
             ", [$userId]);
         }
 
-        // 3) if still missing: create one
         if (!$household) {
             DB::table('households')->insert([
                 'owner_id' => $userId,
@@ -75,7 +74,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['Enter an email address.']);
         }
 
-        // allow invites only from owner household (same as before)
+        // Meghívót ezen az útvonalon csak a háztartás tulajdonosa küldhet.
         $household = DB::selectOne("SELECT id, name FROM households WHERE owner_id = ? LIMIT 1", [$userId]);
         if (!$household) {
             return redirect()->route('households.index')->withErrors(['No household.']);
@@ -90,7 +89,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['You cannot invite yourself.']);
         }
 
-        // already a member?
+        // Meghívó előtt kizárjuk, hogy ugyanaz a felhasználó már tag legyen.
         $exists = DB::selectOne("
             SELECT id FROM household_members WHERE household_id = ? AND member_id = ? LIMIT 1
         ", [(int)$household->id, (int)$user->id]);
@@ -99,7 +98,7 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['This user is already a member.']);
         }
 
-        // pending invite?
+        // Egy célfelhasználónak egy háztartáshoz egyszerre csak egy függő meghívója lehet.
         $pending = DB::selectOne("
             SELECT id FROM household_invites
             WHERE household_id = ? AND invited_user_id = ? AND status = 'pending'
@@ -110,7 +109,8 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['There is already a pending invitation for this user.']);
         }
 
-        // create invite
+        // A household_invites sor tárolja az állapotot, az üzenet csak inbox értesítés,
+        // amely a link_url mezőben visszamutat a meghívóra.
         DB::table('household_invites')->insert([
             'household_id' => (int)$household->id,
             'invited_user_id' => (int)$user->id,
@@ -119,7 +119,6 @@ class HouseholdController extends Controller
         ]);
         $inviteId = (int) DB::getPdo()->lastInsertId();
 
-        // create message (same as before)
         $inviterName = (string) (session('full_name') ?? 'Someone');
         $title = "Household invitation";
         $body  = $inviterName . " invited you to the \"" . $household->name . "\" household.";
@@ -157,6 +156,8 @@ class HouseholdController extends Controller
             return redirect()->route('households.index')->withErrors(['No permission.']);
         }
 
+        // Csak a két támogatott szerep között váltunk, nem fogadunk el tetszőleges
+        // role értéket a requestből.
         $newRole = ($row->role === 'basic user') ? 'member' : 'basic user';
 
         DB::update("UPDATE household_members SET role = ? WHERE id = ?", [$newRole, $hmId]);

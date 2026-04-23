@@ -8,6 +8,8 @@ class InventoryController extends Controller
 {
     private function householdsForUser(int $userId): array
     {
+        // Csak azokat a háztartásokat adjuk vissza, ahol a felhasználó tag;
+        // az inventory minden későbbi lekérdezése erre a határra épül.
         return DB::select("
             SELECT h.id AS household_id, h.name
             FROM households h
@@ -19,6 +21,8 @@ class InventoryController extends Controller
 
     private function assertMember(int $userId, int $hid): void
     {
+        // Központi jogosultságellenőrzés inventory műveletekhez.
+        // A household_id szerinti szűrés védi más háztartásának készletét.
         $ok = DB::selectOne("
             SELECT id
             FROM household_members
@@ -30,15 +34,15 @@ class InventoryController extends Controller
     }
 
     /**
-    * If there is no household, create a default one and add the user as member.
-    * This prevents /inventory from redirecting to /households.
+    * Ha nincs háztartás, létrehozunk egy alapértelmezettet és tagként hozzáadjuk a felhasználót.
+    * Így az /inventory oldal nem akad el háztartás nélkül.
      */
     private function ensureDefaultHousehold(int $userId): void
     {
         $households = $this->householdsForUser($userId);
         if (!empty($households)) return;
 
-        // Name from session if available
+        // Először a sessionből próbálunk nevet olvasni, majd fallbackként a users táblából.
         $fullName = (string)(session('full_name') ?? session('user_name') ?? '');
 
         if ($fullName === '') {
@@ -67,7 +71,7 @@ class InventoryController extends Controller
     {
         $userId = (int) session('user_id');
 
-        // do not redirect to households: create one instead
+        // Nem irányítunk át háztartás oldalra: ha kell, itt hozzuk létre az alap háztartást.
         $this->ensureDefaultHousehold($userId);
 
         $households = $this->householdsForUser($userId);
@@ -77,6 +81,8 @@ class InventoryController extends Controller
 
         $this->assertMember($userId, $hid);
 
+        // A megjelenítendő háztartásnevet a már betöltött listából keressük ki,
+        // így nem kell külön adatbázis-lekérdezés.
         $householdName = '';
         foreach ($households as $h) {
             if ((int)$h->household_id === $hid) $householdName = (string)$h->name;
@@ -131,7 +137,7 @@ class InventoryController extends Controller
     {
         $userId = (int) session('user_id');
 
-        // do not redirect to households here either
+        // A listaoldal is önjavító: háztartás hiányában létrehozza az alapértelmezettet.
         $this->ensureDefaultHousehold($userId);
 
         $households = $this->householdsForUser($userId);
@@ -144,6 +150,8 @@ class InventoryController extends Controller
         $q = trim((string)$request->query('q', ''));
         $loc = trim((string)$request->query('loc', ''));
 
+        // A lista SQL-t lépésenként építjük fel, így a keresés és a hely szűrés
+        // bármilyen kombinációban működik külön SQL ágak ismétlése nélkül.
         $sql = "SELECT * FROM inventory_items WHERE household_id = ?";
         $params = [$hid];
 
@@ -192,6 +200,8 @@ class InventoryController extends Controller
         $redirectParams = ['hid' => $hid];
         $q = trim((string) $request->input('q', ''));
         $loc = trim((string) $request->input('loc', ''));
+        // Frissítés/törlés után megtartjuk az aktuális szűrőket, hogy a felhasználó
+        // ugyanabba a listanézetbe térjen vissza.
         if ($q !== '') $redirectParams['q'] = $q;
         if ($loc !== '') $redirectParams['loc'] = $loc;
 
@@ -221,6 +231,8 @@ class InventoryController extends Controller
                 'expires_at' => 'nullable|date',
             ]);
 
+            // Itt csak a gyorsan szerkeszthető készletmezőket módosítjuk.
+            // A név/egység átírását nem engedjük inline, mert az megváltoztatná a termék azonosságát.
             DB::update(
                 "UPDATE inventory_items
                  SET location = ?, quantity = ?, expires_at = ?, updated_at = ?

@@ -13,7 +13,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Ezeket a mezőket lehet tömegesen kitölteni Eloquent műveleteknél.
      *
      * @var list<string>
      */
@@ -24,7 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Ezek a mezők ne kerüljenek ki JSON/API jellegű szerializáláskor.
      *
      * @var list<string>
      */
@@ -34,7 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Típuskonverziók: a dátum objektummá alakul, a jelszó pedig hashként kezelődik.
      *
      * @return array<string, string>
      */

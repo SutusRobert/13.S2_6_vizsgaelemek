@@ -17,7 +17,8 @@ class VerifyEmail extends Mailable
     public $name;
 
     /**
-     * Create a new message instance.
+     * A verifikációs levélhez eltesszük a tokent és a nevet,
+     * mert a Blade email sablon ezekből építi fel a személyes linket.
      */
     public function __construct($token, $name)
     {
@@ -26,7 +27,7 @@ class VerifyEmail extends Mailable
     }
 
     /**
-     * Get the message envelope.
+     * Az envelope a levél külső adatait tartalmazza, például a tárgyat.
      */
     public function envelope(): Envelope
     {
@@ -36,7 +37,7 @@ class VerifyEmail extends Mailable
     }
 
     /**
-     * Get the message content definition.
+     * A content mondja meg, melyik email view renderelődjön és milyen adatokkal.
      */
     public function content(): Content
     {
@@ -50,7 +51,7 @@ class VerifyEmail extends Mailable
     }
 
     /**
-     * Get the attachments for the message.
+     * Ehhez a verifikációs levélhez nincs csatolmány.
      *
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */

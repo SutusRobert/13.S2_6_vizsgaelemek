@@ -11,7 +11,7 @@
     </div>
 
     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-      {{-- Household selector (GET) --}}
+      {{-- Háztartásválasztó GET-tel, hogy oldalváltáskor a kiválasztott háztartás URL-ben maradjon. --}}
       <form method="get" action="{{ route('shopping.index') }}" style="margin:0; display:flex; gap:10px; align-items:center;">
         <label class="small" style="opacity:.8;">Household</label>
         <select name="hid" onchange="this.form.submit()">
@@ -24,38 +24,35 @@
         </select>
       </form>
 
-      {{-- Right-side top button row --}}
+      {{-- Jobb felső műveletsor: nyomtatás, tömeges vásárlás és tömeges törlés. --}}
       <div class="sl-printbar">
         <button type="button" class="btn btn-secondary" onclick="window.print()">Print</button>
 
         <form method="post" action="{{ route('shopping.post') }}" style="margin:0;"
               onsubmit="return confirm('Are you sure you want to buy ALL items? This also adds them to inventory.');">
           @csrf
-          <input type="hidden" name="action" value="buy_all">
           <input type="hidden" name="hid" value="{{ (int)$householdId }}">
-          <button type="submit" class="btn btn-secondary">Buy all</button>
+          <button type="submit" name="action" value="buy_all" class="btn btn-secondary">Buy all</button>
         </form>
 
         <form method="post" action="{{ route('shopping.post') }}" style="margin:0;"
               onsubmit="return confirm('Are you sure you want to delete ALL items from the shopping list?');">
           @csrf
-          <input type="hidden" name="action" value="clear_all">
           <input type="hidden" name="hid" value="{{ (int)$householdId }}">
-          <button type="submit" class="btn btn-secondary">Delete all</button>
+          <button type="submit" name="action" value="clear_all" class="btn btn-secondary">Delete all</button>
         </form>
 
         <form method="post" action="{{ route('shopping.post') }}" style="margin:0;"
               onsubmit="return confirm('Do you want to delete all purchased items?');">
           @csrf
-          <input type="hidden" name="action" value="clear_bought">
           <input type="hidden" name="hid" value="{{ (int)$householdId }}">
-          <button type="submit" class="btn btn-secondary">Delete purchased items</button>
+          <button type="submit" name="action" value="clear_bought" class="btn btn-secondary">Delete purchased items</button>
         </form>
       </div>
     </div>
   </div>
 
-  {{-- Flash messages --}}
+  {{-- Visszajelző üzenetek sikeres vagy hibás műveletek után. --}}
   @if(session('success'))
     <div class="success mt-3">{{ session('success') }}</div>
   @endif

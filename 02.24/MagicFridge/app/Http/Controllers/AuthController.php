@@ -26,10 +26,12 @@ class AuthController extends Controller
             'password'  => ['required', 'string', 'min:4', 'max:40', 'confirmed'],
         ]);
 
+        // A verifikáció token alapú: a véletlen token bekerül az adatbázisba,
+        // majd az e-mailben kapott link alapján ezzel az értékkel azonosítjuk a felhasználót.
         $token = Str::random(64);
 
-        // ✅  Raw INSERT — avoids the "unknown column updated_at" error because
-        //    the users table was not created with that column.
+        // Nyers INSERT-et használunk, mert a users táblában nincs minden Laravel
+        // által elvárt timestamp oszlop, például updated_at.
         DB::insert(
             "INSERT INTO users (full_name, email, password, email_verify_token, created_at)
              VALUES (?, ?, ?, ?, NOW())",
@@ -41,11 +43,12 @@ class AuthController extends Controller
             ]
         );
 
-        // Send verification e-mail
+        // A regisztráció csak akkor lesz használható, ha az e-mail kiküldése sikerül,
+        // mert belépéskor az email_verified_at mező alapján tiltjuk a nem verifikált fiókokat.
         try {
             Mail::to(trim($validated['email']))->send(new VerifyEmail($token, trim($validated['full_name'])));
         } catch (\Throwable $e) {
-            // Useful for debugging: show the error in UI during development
+            // Fejlesztés közben hasznos, ha a levélküldési hiba a logban és a felületen is látszik.
             \Log::error('Verification mail failed: ' . $e->getMessage());
 
             return back()->withInput()->withErrors([
@@ -109,13 +112,16 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Invalid e-mail or password.'])->withInput();
         }
 
-        // Block login until e-mail is verified
+        // A nem verifikált fiókot meghagyjuk az adatbázisban, de nem engedjük be
+        // a védett oldalakra, amíg nincs email_verified_at értéke.
         if ($user->email_verified_at === null) {
             return back()->withErrors([
                 'email' => 'Please verify your e-mail address before logging in. Check your inbox.',
             ])->withInput();
         }
 
+        // Sikeres belépés után új session azonosítót kérünk, hogy ne lehessen
+        // korábban ismert session ID-val visszaélni.
         session()->regenerate();
         session(['user_id' => $user->id, 'user_name' => $user->full_name]);
 

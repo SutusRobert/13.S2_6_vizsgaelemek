@@ -21,10 +21,13 @@ class DashboardController extends Controller
         }
 
         $parts = preg_split('/\s+/', trim($fullName));
+        // A dashboard a teljes név utolsó szavával köszön. Ez illeszkedik ahhoz,
+        // hogy az adatokban a név gyakran "vezetéknév keresztnév" sorrendű.
         $firstName = $parts ? end($parts) : '';
         if (!$firstName) $firstName = 'User';
 
-        // Collect household IDs (same logic as old dashboard.php)
+        // Összegyűjtjük a felhasználóhoz tartozó háztartásokat, mert az üzenetek
+        // lehetnek háztartás szintűek és közvetlenül felhasználóhoz kötöttek is.
         $householdIds = [];
         $sessionHid = session('household_id');
 
@@ -44,12 +47,15 @@ class DashboardController extends Controller
             }
         }
 
-        // Unread message count + top3 (same SQL, via Laravel DB::select)
+        // Az olvasatlanságot LEFT JOIN-nal számoljuk: ha nincs message_reads sor
+        // ehhez a felhasználóhoz, akkor az üzenet még olvasatlan.
         $unreadCount = 0;
         $unreadPreview = [];
 
         try {
             if (!empty($householdIds)) {
+                // Dinamikus placeholder-listát készítünk, hogy az IN feltétel
+                // változó számú háztartással is paraméterezett maradjon.
                 $placeholders = implode(',', array_fill(0, count($householdIds), '?'));
 
                 $sqlCount = "

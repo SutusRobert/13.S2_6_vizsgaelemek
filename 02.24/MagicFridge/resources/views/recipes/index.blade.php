@@ -12,20 +12,11 @@
            <b>{{ $activeHouseholdName ?? '' }}</b>
         </div>
       </div>
-      
-
-      
-
-
-  
-      </a>
-
 
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        
       </div>
     </div>
-    
+
     @if(session('success'))
       <div class="success mt-3">{{ session('success') }}</div>
     @endif
@@ -39,53 +30,51 @@
     </div>
     @endif
 
+    {{-- Saját receptek listája --}}
+    <div id="own" class="mt-4">
+      <h3 style="margin:0;">Own recipes</h3>
 
-    {{-- My custom recipes --}}
-<div id="own" class="mt-4">
-  <h3 style="margin:0;">Own recipes</h3>
+      @if(empty($own) || count($own) === 0)
+        <div class="mt-2" style="opacity:.8;">You don't have a recipes</div>
+      @else
+        <div class="mt-2" style="display:flex; flex-direction:column; gap:10px;">
+          @foreach($own as $r)
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;
+                        border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06);
+                        border-radius: 16px; padding: 10px 12px;">
+              <div>
+                <div style="font-weight:900;">
+                  <a href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
+                     style="text-decoration:none;">
+                    {{ $r->title }}
+                  </a>
+                </div>
+                <div class="small" style="opacity:.75;">
+                  Saved: {{ $r->created_at }}
+                </div>
+              </div>
 
-  @if(empty($own) || count($own) === 0)
-    <div class="mt-2" style="opacity:.8;">You don't have a recipes</div>
-  @else
-    <div class="mt-2" style="display:flex; flex-direction:column; gap:10px;">
-      @foreach($own as $r)
-        <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;
-                    border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06);
-                    border-radius: 16px; padding: 10px 12px;">
-          <div>
-            <div style="font-weight:900;">
-              <a href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
-                 style="text-decoration:none;">
-                {{ $r->title }}
-              </a>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a class="btn btn-secondary"
+                   href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}">
+                  Open
+                </a>
+
+                <form method="post"
+                      action="{{ route('recipes.own.delete', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
+                      style="margin:0;"
+                      onsubmit="return confirm('Biztos törlöd?');">
+                  @csrf
+                  <button type="submit" class="btn btn-secondary">Delete</button>
+                </form>
+              </div>
             </div>
-            <div class="small" style="opacity:.75;">
-              Saved: {{ $r->created_at }}
-            </div>
-          </div>
-
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a class="btn btn-secondary"
-               href="{{ route('recipes.own.show', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}">
-              Open
-            </a>
-
-            <form method="post"
-                  action="{{ route('recipes.own.delete', ['id' => (int)$r->id, 'hid' => (int)($hid ?? 0)]) }}"
-                  style="margin:0;"
-                  onsubmit="return confirm('Biztos tĂ¶rlĂ¶d?');">
-              @csrf
-              <button type="submit" class="btn btn-secondary">Delete</button>
-            </form>
-          </div>
+          @endforeach
         </div>
-      @endforeach
+      @endif
     </div>
-  @endif
-</div>
 
-
-    {{-- Top row: household + search --}}
+    {{-- Felső sor: háztartásválasztó és receptkeresés --}}
     <div class="mt-3" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
       <div style="min-width:260px; flex:1;">
         <label class="small" style="opacity:.85;">Household</label>
@@ -115,26 +104,22 @@
 
       <div>
        <a class="btn btn-secondary" href="{{ route('recipes.own.create', ['hid'=> (int)($hid ?? 0)]) }}">+Add new recipes</a>
-        
       </div>
     </div>
 
     <hr class="mt-4 mb-3" style="opacity:.25;">
 
-   
     <h3 style="margin:0;">Recipes </h3>
 
     @php
-      // JAVĂŤTĂS:
-      // Controller already sends the list in $api (id, title, image)
-      // Previous names: $meals / $apiMeals
-      // Normalize for compatibility:
+      // Kompatibilitási normalizálás: az új controller $api néven küldi a listát,
+      // de régebbi nézetváltozatokban $meals vagy $apiMeals is előfordult.
       $apiMeals = $meals ?? $apiMeals ?? $api ?? [];
 
-      // if an object arrives by mistake
+      // Ha véletlenül objektum érkezik, tömbként kezeljük tovább.
       if (is_object($apiMeals)) $apiMeals = (array)$apiMeals;
 
-      // if an _error array arrives, do not treat it as results
+      // Hibaobjektum esetén ne próbáljuk receptlistaként kirajzolni.
       if (is_array($apiMeals) && isset($apiMeals['_error'])) {
         $apiMeals = [];
       }
@@ -150,9 +135,8 @@
       ">
         @foreach($apiMeals as $m)
           @php
-            // JAVĂŤTĂS:
-            // Support newer controller structure as well:
-            // id, title, image
+            // Több API/controller formátumot is elfogadunk, hogy a kártyák
+            // akkor is működjenek, ha idMeal/strMeal vagy id/title érkezik.
             $idMeal = (int)($m['idMeal'] ?? $m->idMeal ?? $m['id'] ?? $m->id ?? 0);
 
             $nameEn = (string)($m['strMeal'] ?? $m->strMeal ?? $m['title_en'] ?? $m->title_en ?? 'Recipe');
@@ -205,4 +189,3 @@
 }
 </style>
 @endsection
-

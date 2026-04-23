@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    {{-- CENTER: FORM --}}
+    {{-- Középső saját recept űrlap --}}
     <div class="create-mid">
       <div class="card" style="padding:22px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
@@ -146,7 +146,7 @@
 </div>
 
 <style>
-  /* layout - same feel as the old page, but within your card/button system */
+  /* A háromoszlopos szerkezet megtartja a régi oldal érzetét a közös kártya/gomb rendszerben. */
   .create-row{
     max-width: 1750px;
     margin: 0 auto;
@@ -172,7 +172,7 @@
     align-items:end;
   }
 
-  /* Ingredient rows with remove */
+  /* Hozzávaló sorok törlőgombbal. */
   .ing-row{
     display: flex;
     gap: 8px;
@@ -238,6 +238,7 @@
 
 <script>
   function escapeHtml(str){
+    // Az előnézet HTML-t épít, ezért a felhasználói szöveget escape-eljük XSS ellen.
     return String(str)
       .replaceAll('&','&amp;')
       .replaceAll('<','&lt;')
@@ -247,9 +248,10 @@
   }
 
   /* ------------------------------
-     Ingredient rows (add/remove)
+     Hozzávaló sorok létrehozása/törlése
      ------------------------------ */
   function createIngredientRow(value = '', amount = '', unit = 'g') {
+    // Egy sor három adatmezőből áll: név, mennyiség, egység. Minden változás frissíti az előnézetet.
     const row = document.createElement('div');
     row.className = 'ing-row';
 
@@ -292,6 +294,7 @@
       const cont = document.getElementById('ingredients');
       row.remove();
       const rows = cont.querySelectorAll('.ing-row');
+      // Legalább egy üres sor mindig maradjon, hogy az űrlap ne legyen teljesen csupasz.
       if (rows.length === 0) cont.appendChild(createIngredientRow(''));
       updatePreview();
     });
@@ -304,6 +307,7 @@
   }
 
   function addIngredient(value = '') {
+    // Új sor beszúrása után rögtön fókuszt adunk az első inputra.
     const cont = document.getElementById('ingredients');
     const row = createIngredientRow(value);
     cont.appendChild(row);
@@ -312,6 +316,7 @@
   }
 
   function clearIngredients() {
+    // Törlés után egy üres kezdősorral állítjuk vissza a hozzávaló blokkot.
     const cont = document.getElementById('ingredients');
     cont.innerHTML = '';
     cont.appendChild(createIngredientRow(''));
@@ -319,6 +324,7 @@
   }
 
   function validateIngredients(){
+    // Mentés előtt csak azt ellenőrizzük kliensoldalon, hogy legalább egy nem üres hozzávaló legyen.
     const inputs = Array.from(document.querySelectorAll('#ingredients input[name="ingredients[]"]'));
     const cleaned = inputs.map(i => (i.value || '').trim()).filter(v => v.length > 0);
     if (cleaned.length < 1){
@@ -329,9 +335,10 @@
   }
 
   /* ------------------------------
-     Live Preview (title + count + list)
+     Élő előnézet: cím, darabszámok és hozzávalólista
      ------------------------------ */
   function updatePreview(){
+    // Az előnézet mindig a DOM aktuális állapotából számol, nem külön állapotváltozóból.
     const title = document.getElementById('titleInput')?.value?.trim() || '';
 
     const titleOut = document.getElementById('previewTitle');
@@ -349,6 +356,7 @@
     filledOut.textContent = String(cleaned.length);
 
     const empties = vals.length - cleaned.length;
+    // Üres sorokra külön figyelmeztetünk, mert azok mentéskor kimaradnak.
     warnOut.textContent = cleaned.length === 0
       ? 'Add the first ingredient.'
       : (empties > 0 ? ('Pay attention: ' + empties + 'there is an empty row') : 'Okay, every field is filled in.');
@@ -365,6 +373,7 @@
     }
 
     cleaned.slice(0, 12).forEach((v, idx) => {
+      // Legfeljebb 12 sort mutatunk, hogy hosszú recepteknél se nőjön túl az előnézet.
       const row = document.createElement('div');
       row.className = 'preview-item';
       row.innerHTML =
@@ -383,7 +392,7 @@
   }
 
   /* ------------------------------
-     Quick sample fill (nem random, sorban)
+     Gyors minta kitöltés: nem random, hanem sorban léptetett minták
      ------------------------------ */
  const SAMPLE_RECIPES = [
   {
@@ -424,6 +433,7 @@
 ];
 
   function nextSampleRecipe(){
+    // localStorage-ben tároljuk, melyik minta következik, így frissítés után is folytatódik a kör.
     const raw = localStorage.getItem('mf_own_create_idx');
     let idx = raw ? parseInt(raw, 10) : 0;
     if (!Number.isFinite(idx) || idx < 0) idx = 0;
@@ -434,6 +444,7 @@
   }
 
   function quickFill(){
+    // A kiválasztott minta egyszerre tölti a címet, instrukciót és a hozzávaló sorokat.
     const recipe = nextSampleRecipe();
 
     const t = document.getElementById('titleInput');
@@ -455,6 +466,7 @@
   }
 
   function clearAll(){
+    // Teljes kliensoldali ürítés: cím + hozzávalók + előnézet.
     document.getElementById('titleInput').value = '';
     clearIngredients();
     updatePreview();
@@ -463,7 +475,7 @@
   window.addEventListener('DOMContentLoaded', () => {
     const cont = document.getElementById('ingredients');
 
-    // Reload old input: if validation fails and redirects back, repopulate old('ingredients') when present
+    // Ha szerveroldali validáció után visszajövünk, az old() értékekből építjük újra a sorokat.
     const oldIngredients = @json(old('ingredients', []));
     const oldAmounts = @json(old('amounts', []));
     const oldUnits   = @json(old('units', []));
@@ -475,7 +487,7 @@
         String(oldUnits[i]   ?? 'g')
       )));
     } else {
-      // induljon 6 sorral, hogy ne legyen “csupasz”
+      // Alapból 6 üres sort adunk, hogy gyorsabban lehessen több hozzávalót felvinni.
       cont.innerHTML = '';
       for (let i=0; i<6; i++) cont.appendChild(createIngredientRow(''));
     }

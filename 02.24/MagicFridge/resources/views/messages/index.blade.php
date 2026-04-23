@@ -54,7 +54,7 @@
             @endif
 
             <div class="mt-3" style="display:flex; gap:10px; flex-wrap:wrap;">
-              {{-- Accept / Decline invitation --}}
+              {{-- Meghívó elfogadása vagy elutasítása --}}
               @if($isInvite)
                 <form method="post" action="{{ route('messages.invite.respond') }}">
                   @csrf

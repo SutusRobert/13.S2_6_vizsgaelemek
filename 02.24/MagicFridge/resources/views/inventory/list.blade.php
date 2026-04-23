@@ -2,6 +2,7 @@
 @section('title','Inventory - MagicFridge')
 
 @php
+  // A lejárati badge-ekhez egyszer számoljuk ki a mai napot és a "hamarosan" határt.
   $today = new DateTime('today');
   $soon = (clone $today)->modify('+3 days');
 @endphp
@@ -59,12 +60,12 @@
   </div>
 </form>
 
-{{--Household selector (Warehouse) --}}
+{{-- Háztartásválasztó a készletlistához --}}
 <div style="min-width:260px;">
   <label class="small" style="opacity:.85;">Household</label>
 
   <form method="get" action="{{ route('inventory.list') }}">
-    {{-- keep filters when switching --}}
+    {{-- Háztartásváltáskor megtartjuk a keresési és helyszűrési feltételeket. --}}
     <input type="hidden" name="q" value="{{ (string)($q ?? '') }}">
     <input type="hidden" name="loc" value="{{ (string)($loc ?? '') }}">
 
@@ -100,6 +101,7 @@
           <tbody>
           @foreach($items as $it)
             @php
+              // Badge algoritmus: lejárt, 3 napon belül lejár, vagy rendben van.
               $badgeClass = 'badge-ok'; $badgeText = 'OK';
               if (!empty($it->expires_at)) {
                 $d = new DateTime($it->expires_at);
