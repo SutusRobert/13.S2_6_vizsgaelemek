@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.12.10 on win32)" generated="2026-04-25T17:05:56.699169" rpa="false" schemaversion="5">
+<suite id="s1" name="13.S2 6 vizsgaelemek" source="C:\Users\sutus\OneDrive\Dokumentumok\GitHub\13.S2_6_vizsgaelemek">
+<suite id="s1-s1" name="MagicFridge" source="C:\Users\sutus\OneDrive\Dokumentumok\GitHub\13.S2_6_vizsgaelemek\MagicFridge">
+<suite id="s1-s1-s1" name="MagicFridge" source="C:\Users\sutus\OneDrive\Dokumentumok\GitHub\13.S2_6_vizsgaelemek\MagicFridge\MagicFridge">
+<suite id="s1-s1-s1-s1" name="Tests" source="C:\Users\sutus\OneDrive\Dokumentumok\GitHub\13.S2_6_vizsgaelemek\MagicFridge\MagicFridge\tests">
+<suite id="s1-s1-s1-s1-s1" name="FrontEnd Test" source="C:\Users\sutus\OneDrive\Dokumentumok\GitHub\13.S2_6_vizsgaelemek\MagicFridge\MagicFridge\tests\FrontEnd_Test">
+<suite id="s1-s1-s1-s1-s1-s1" name="Recipes" source="C:\Users\sutus\OneDrive\Dokumentumok\GitHub\13.S2_6_vizsgaelemek\MagicFridge\MagicFridge\tests\FrontEnd_Test\Recipes.robot">
+<kw name="Open MagicFridge" owner="MagicFridge" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:05:56.981154" level="INFO">Opening browser 'Chrome' to base url 'http://127.0.0.1:8000'.</msg>
+<arg>${BASE_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:05:56.981154" elapsed="1.717471"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-04-25T17:05:58.698625" elapsed="0.038830"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>${SELENIUM_SPEED}</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-04-25T17:05:58.737455" elapsed="0.000999"/>
+</kw>
+<kw name="Set Selenium Timeout" owner="SeleniumLibrary">
+<arg>10s</arg>
+<doc>Sets the timeout that is used by various keywords.</doc>
+<status status="PASS" start="2026-04-25T17:05:58.738454" elapsed="0.001001"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:05:56.981154" elapsed="1.759301"/>
+</kw>
+<test id="s1-s1-s1-s1-s1-s1-t1" name="Recipes Page Shows Search And Own Recipes Area" line="9">
+<kw name="Log In With Test User" owner="MagicFridge" type="SETUP">
+<kw name="Require Test User" owner="MagicFridge">
+<kw name="Skip If" owner="BuiltIn">
+<arg>'${TEST_EMAIL}' == '' or '${TEST_PASSWORD}' == ''</arg>
+<arg>Protected frontend tests need TEST_EMAIL and TEST_PASSWORD variables.</arg>
+<doc>Skips the rest of the current test if the ``condition`` is True.</doc>
+<status status="PASS" start="2026-04-25T17:05:58.745927" elapsed="0.001039"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:05:58.745927" elapsed="0.001039"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:05:58.747970" level="INFO">Opening url 'http://127.0.0.1:8000/login'</msg>
+<arg>${BASE_URL}/login</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:05:58.747970" elapsed="0.369064"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>css:input[name="email"]</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:05:59.117034" elapsed="0.008432"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:05:59.130060" level="INFO">Typing text 'sutusrobert910@gmail.com' into text field 'css:input[name="email"]'.</msg>
+<arg>css:input[name="email"]</arg>
+<arg>${TEST_EMAIL}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:05:59.128993" elapsed="0.084730"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:05:59.214978" level="INFO">Typing password into text field 'css:input[name="password"]'.</msg>
+<msg time="2026-04-25T17:05:59.247050" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>css:input[name="password"]</arg>
+<arg>${TEST_PASSWORD}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:05:59.213723" elapsed="0.072602"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:05:59.287328" level="INFO">Clicking button 'Login'.</msg>
+<arg>Login</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:05:59.286325" elapsed="0.084406"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/dashboard</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-04-25T17:05:59.370731" elapsed="0.987138"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Choose a module</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:00.357869" elapsed="0.009980"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:05:58.744669" elapsed="1.623180"/>
+</kw>
+<kw name="Go To App Page" owner="MagicFridge">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:00.367849" level="INFO">Opening url 'http://127.0.0.1:8000/recipes'</msg>
+<arg>${BASE_URL}${path}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:06:00.367849" elapsed="1.113984"/>
+</kw>
+<arg>/recipes</arg>
+<status status="PASS" start="2026-04-25T17:06:00.367849" elapsed="1.114991"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Own recipes</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.482840" elapsed="0.013869"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:01.508308" level="INFO">Current page contains element 'css:input[name="q"]'.</msg>
+<arg>css:input[name="q"]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.497724" elapsed="0.011603"/>
+</kw>
+<kw name="Page Should Contain Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:01.541614" level="INFO">Current page contains button 'Search'.</msg>
+<arg>Search</arg>
+<doc>Verifies button ``locator`` is found from current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.509327" elapsed="0.032287"/>
+</kw>
+<kw name="Page Should Contain Link" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:01.557214" level="INFO">Current page contains link '+Add new recipes'.</msg>
+<arg>+Add new recipes</arg>
+<doc>Verifies link identified by ``locator`` is found from current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.541614" elapsed="0.015600"/>
+</kw>
+<kw name="Log Out If Logged In" owner="MagicFridge" type="TEARDOWN">
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Page Should Contain Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:01.586448" level="INFO">Current page contains button 'Log out'.</msg>
+<arg>Log out</arg>
+<doc>Verifies button ``locator`` is found from current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.559257" elapsed="0.027191"/>
+</kw>
+<msg time="2026-04-25T17:06:01.586448" level="INFO">${present} = True</msg>
+<var>${present}</var>
+<arg>Page Should Contain Button</arg>
+<arg>Log out</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.558233" elapsed="0.029226"/>
+</kw>
+<if>
+<branch type="IF" condition="${present}">
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:01.588478" level="INFO">Clicking button 'Log out'.</msg>
+<arg>Log out</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:01.587459" elapsed="1.178053"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/login</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-04-25T17:06:02.765512" elapsed="0.005045"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:01.587459" elapsed="1.183098"/>
+</branch>
+<status status="PASS" start="2026-04-25T17:06:01.587459" elapsed="1.183098"/>
+</if>
+<status status="PASS" start="2026-04-25T17:06:01.557214" elapsed="1.213343"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:05:58.740455" elapsed="4.031113"/>
+</test>
+<test id="s1-s1-s1-s1-s1-s1-t2" name="Own Recipe Form Can Be Filled With Fast Example" line="16">
+<kw name="Log In With Test User" owner="MagicFridge" type="SETUP">
+<kw name="Require Test User" owner="MagicFridge">
+<kw name="Skip If" owner="BuiltIn">
+<arg>'${TEST_EMAIL}' == '' or '${TEST_PASSWORD}' == ''</arg>
+<arg>Protected frontend tests need TEST_EMAIL and TEST_PASSWORD variables.</arg>
+<doc>Skips the rest of the current test if the ``condition`` is True.</doc>
+<status status="PASS" start="2026-04-25T17:06:02.788514" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:02.787499" elapsed="0.001015"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:02.789519" level="INFO">Opening url 'http://127.0.0.1:8000/login'</msg>
+<arg>${BASE_URL}/login</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:06:02.788514" elapsed="0.649371"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>css:input[name="email"]</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:03.437885" elapsed="0.007067"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:03.445956" level="INFO">Typing text 'sutusrobert910@gmail.com' into text field 'css:input[name="email"]'.</msg>
+<arg>css:input[name="email"]</arg>
+<arg>${TEST_EMAIL}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:03.445956" elapsed="0.066378"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:03.514953" level="INFO">Typing password into text field 'css:input[name="password"]'.</msg>
+<msg time="2026-04-25T17:06:03.530208" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>css:input[name="password"]</arg>
+<arg>${TEST_PASSWORD}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:03.513759" elapsed="0.050699"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:03.564458" level="INFO">Clicking button 'Login'.</msg>
+<arg>Login</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:03.564458" elapsed="0.064473"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/dashboard</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-04-25T17:06:03.628931" elapsed="1.426115"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Choose a module</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:05.055046" elapsed="0.008390"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:02.787499" elapsed="2.275937"/>
+</kw>
+<kw name="Go To App Page" owner="MagicFridge">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:05.065446" level="INFO">Opening url 'http://127.0.0.1:8000/recipes/own/create'</msg>
+<arg>${BASE_URL}${path}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:06:05.064441" elapsed="0.816043"/>
+</kw>
+<arg>/recipes/own/create</arg>
+<status status="PASS" start="2026-04-25T17:06:05.064441" elapsed="0.816043"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Own recipes</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:05.880484" elapsed="0.033052"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:05.914549" level="INFO">Clicking button 'xpath=//button[contains(normalize-space(.),'Fast Example')]'.</msg>
+<arg>xpath=//button[contains(normalize-space(.),'Fast Example')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:05.913536" elapsed="0.075308"/>
+</kw>
+<kw name="Get Value" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:06.133709" level="INFO">${title} = Chicken Breast with Pasta</msg>
+<var>${title}</var>
+<arg>css:input[name="title"]</arg>
+<doc>Returns the value attribute of the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:05.988844" elapsed="0.144865"/>
+</kw>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<msg time="2026-04-25T17:06:06.135001" level="INFO">Length is 25.</msg>
+<arg>${title}</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="PASS" start="2026-04-25T17:06:06.133709" elapsed="0.001292"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:06.148959" level="INFO">Current page contains text 'Live preview'.</msg>
+<arg>Live preview</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-04-25T17:06:06.136022" elapsed="0.012937"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:06.164458" level="INFO">Current page contains text 'Filled in:'.</msg>
+<arg>Filled in:</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-04-25T17:06:06.149972" elapsed="0.015486"/>
+</kw>
+<kw name="Log Out If Logged In" owner="MagicFridge" type="TEARDOWN">
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Page Should Contain Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:06.194076" level="INFO">Current page contains button 'Log out'.</msg>
+<arg>Log out</arg>
+<doc>Verifies button ``locator`` is found from current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:06.167458" elapsed="0.026618"/>
+</kw>
+<msg time="2026-04-25T17:06:06.194076" level="INFO">${present} = True</msg>
+<var>${present}</var>
+<arg>Page Should Contain Button</arg>
+<arg>Log out</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-04-25T17:06:06.166460" elapsed="0.028627"/>
+</kw>
+<if>
+<branch type="IF" condition="${present}">
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:06.196102" level="INFO">Clicking button 'Log out'.</msg>
+<arg>Log out</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:06.195087" elapsed="0.906384"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/login</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-04-25T17:06:07.101471" elapsed="0.003999"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:06.195087" elapsed="0.911683"/>
+</branch>
+<status status="PASS" start="2026-04-25T17:06:06.195087" elapsed="0.911683"/>
+</if>
+<status status="PASS" start="2026-04-25T17:06:06.165458" elapsed="0.941312"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:02.775626" elapsed="4.331144"/>
+</test>
+<test id="s1-s1-s1-s1-s1-s1-t3" name="Own Recipe Validation Requires Ingredient" line="25">
+<kw name="Log In With Test User" owner="MagicFridge" type="SETUP">
+<kw name="Require Test User" owner="MagicFridge">
+<kw name="Skip If" owner="BuiltIn">
+<arg>'${TEST_EMAIL}' == '' or '${TEST_PASSWORD}' == ''</arg>
+<arg>Protected frontend tests need TEST_EMAIL and TEST_PASSWORD variables.</arg>
+<doc>Skips the rest of the current test if the ``condition`` is True.</doc>
+<status status="PASS" start="2026-04-25T17:06:07.120111" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:07.119055" elapsed="0.001056"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:07.121139" level="INFO">Opening url 'http://127.0.0.1:8000/login'</msg>
+<arg>${BASE_URL}/login</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:06:07.121139" elapsed="0.784380"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>css:input[name="email"]</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:07.905519" elapsed="0.009301"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:07.915904" level="INFO">Typing text 'sutusrobert910@gmail.com' into text field 'css:input[name="email"]'.</msg>
+<arg>css:input[name="email"]</arg>
+<arg>${TEST_EMAIL}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:07.914820" elapsed="0.068560"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:07.983380" level="INFO">Typing password into text field 'css:input[name="password"]'.</msg>
+<msg time="2026-04-25T17:06:07.997526" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>css:input[name="password"]</arg>
+<arg>${TEST_PASSWORD}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:07.983380" elapsed="0.059886"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:08.043266" level="INFO">Clicking button 'Login'.</msg>
+<arg>Login</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:08.043266" elapsed="0.054318"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/dashboard</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-04-25T17:06:08.097584" elapsed="1.227036"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Choose a module</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:09.324620" elapsed="0.008559"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:07.118037" elapsed="2.215142"/>
+</kw>
+<kw name="Go To App Page" owner="MagicFridge">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:09.334196" level="INFO">Opening url 'http://127.0.0.1:8000/recipes/own/create'</msg>
+<arg>${BASE_URL}${path}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-04-25T17:06:09.334196" elapsed="0.671699"/>
+</kw>
+<arg>/recipes/own/create</arg>
+<status status="PASS" start="2026-04-25T17:06:09.333179" elapsed="0.672716"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Own recipes</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.005895" elapsed="0.011624"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:10.018524" level="INFO">Typing text 'Robot Empty Recipe' into text field 'css:input[name="title"]'.</msg>
+<arg>css:input[name="title"]</arg>
+<arg>Robot Empty Recipe</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.017519" elapsed="0.102983"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:10.120502" level="INFO">Clicking button 'xpath=//button[contains(normalize-space(.),'Clear ingredients')]'.</msg>
+<arg>xpath=//button[contains(normalize-space(.),'Clear ingredients')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.120502" elapsed="0.099709"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:10.220211" level="INFO">Clicking button 'Save'.</msg>
+<arg>Save</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.220211" elapsed="0.076157"/>
+</kw>
+<kw name="Handle Alert" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:10.296368" level="INFO">HANDLE::&lt;class 'NoneType'&gt;::None</msg>
+<arg>ACCEPT</arg>
+<doc>Handles the current alert and returns its message.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.296368" elapsed="0.015074"/>
+</kw>
+<kw name="Log Out If Logged In" owner="MagicFridge" type="TEARDOWN">
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Page Should Contain Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:10.339524" level="INFO">Current page contains button 'Log out'.</msg>
+<arg>Log out</arg>
+<doc>Verifies button ``locator`` is found from current page.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.313700" elapsed="0.026868"/>
+</kw>
+<msg time="2026-04-25T17:06:10.340568" level="INFO">${present} = True</msg>
+<var>${present}</var>
+<arg>Page Should Contain Button</arg>
+<arg>Log out</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.313700" elapsed="0.027463"/>
+</kw>
+<if>
+<branch type="IF" condition="${present}">
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-25T17:06:10.342256" level="INFO">Clicking button 'Log out'.</msg>
+<arg>Log out</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.341163" elapsed="0.067154"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/login</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-04-25T17:06:10.408317" elapsed="0.993714"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:10.341163" elapsed="1.061874"/>
+</branch>
+<status status="PASS" start="2026-04-25T17:06:10.341163" elapsed="1.061874"/>
+</if>
+<status status="PASS" start="2026-04-25T17:06:10.313135" elapsed="1.089902"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:07.110840" elapsed="4.292197"/>
+</test>
+<kw name="Close MagicFridge" owner="MagicFridge" type="TEARDOWN">
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-25T17:06:11.407484" elapsed="2.289123"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:06:11.407484" elapsed="2.290247"/>
+</kw>
+<status status="PASS" start="2026-04-25T17:05:56.770661" elapsed="16.927070"/>
+</suite>
+<status status="PASS" start="2026-04-25T17:05:56.758998" elapsed="16.943182"/>
+</suite>
+<status status="PASS" start="2026-04-25T17:05:56.754955" elapsed="16.947225"/>
+</suite>
+<status status="PASS" start="2026-04-25T17:05:56.745316" elapsed="16.956864"/>
+</suite>
+<status status="PASS" start="2026-04-25T17:05:56.740561" elapsed="16.972301"/>
+</suite>
+<status status="PASS" start="2026-04-25T17:05:56.705403" elapsed="17.011175"/>
+</suite>
+<statistics>
+<total>
+<stat pass="3" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="13.S2 6 vizsgaelemek" id="s1" pass="3" fail="0" skip="0">13.S2 6 vizsgaelemek</stat>
+<stat name="MagicFridge" id="s1-s1" pass="3" fail="0" skip="0">13.S2 6 vizsgaelemek.MagicFridge</stat>
+<stat name="MagicFridge" id="s1-s1-s1" pass="3" fail="0" skip="0">13.S2 6 vizsgaelemek.MagicFridge.MagicFridge</stat>
+<stat name="Tests" id="s1-s1-s1-s1" pass="3" fail="0" skip="0">13.S2 6 vizsgaelemek.MagicFridge.MagicFridge.Tests</stat>
+<stat name="FrontEnd Test" id="s1-s1-s1-s1-s1" pass="3" fail="0" skip="0">13.S2 6 vizsgaelemek.MagicFridge.MagicFridge.Tests.FrontEnd Test</stat>
+<stat name="Recipes" id="s1-s1-s1-s1-s1-s1" pass="3" fail="0" skip="0">13.S2 6 vizsgaelemek.MagicFridge.MagicFridge.Tests.FrontEnd Test.Recipes</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
